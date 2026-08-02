@@ -882,8 +882,6 @@ function locate(){
   .card:hover{border-color:var(--line)}
 }
 
-/* Demo marker. Small, dismissible, and above the tab bar so it
-   never covers a control. */
 .demo{position:fixed;left:var(--s4);bottom:calc(var(--tabh) + 12px);z-index:55;
   display:flex;align-items:center;gap:var(--s2);
   padding:8px 8px 8px var(--s3);border-radius:var(--pill);
@@ -2572,10 +2570,13 @@ function mark(name){
   document.querySelectorAll('#topnav a, #tabbar a').forEach(a=>{
     const target=a.getAttribute('href').slice(2).split('/')[0];
     const on = target===name
-      || (target==='discover' && ['event','brand','book','home'].includes(name))
+      /* the landing page is not a nav destination — nothing should
+         read as current while you are on it */
+      || (target==='discover' && ['event','brand','book'].includes(name))
       || (target==='mine' && name==='ticket')
-      || (target==='dashboard' && ['analytics','reach'].includes(name))
-      || (target==='profile' && name==='profile');
+      || (target==='search' && name==='map')
+      || (target==='dashboard' &&
+          ['analytics','reach','attendees','reviews','discounts','create'].includes(name));
     on ? a.setAttribute('aria-current','page') : a.removeAttribute('aria-current');
   });
 }
