@@ -399,6 +399,57 @@ textarea.input{min-height:96px;resize:vertical}
 .hero__alt:hover{color:var(--ink)}
 
 /* ============================================================
+   AMBIENT BACKGROUND
+   Two soft blooms drifting on long, mismatched cycles so the
+   loop never reads as a loop. Sits at z-index 0 — the hero scrim
+   at z-index 1 covers it wherever text lands, so measured
+   contrast is unchanged. Animates transform + opacity only:
+   both composite on the GPU, neither triggers layout.
+   ============================================================ */
+.amb{position:absolute;inset:-25%;z-index:0;pointer-events:none;overflow:hidden}
+.amb i{position:absolute;display:block;border-radius:50%;
+  filter:blur(90px);opacity:.42;will-change:transform;
+  animation:float var(--ad) ease-in-out var(--adl) infinite alternate}
+.amb i:nth-child(1){width:44vw;height:44vw;left:-6%;top:4%;
+  background:radial-gradient(circle,#7C3AED 0%,rgba(124,58,237,0) 68%);
+  --ad:19s;--adl:0s}
+.amb i:nth-child(2){width:38vw;height:38vw;right:-4%;top:38%;
+  background:radial-gradient(circle,#E879F9 0%,rgba(232,121,249,0) 68%);
+  --ad:24s;--adl:2.5s}
+.amb i:nth-child(3){width:34vw;height:34vw;left:34%;bottom:-10%;
+  background:radial-gradient(circle,#4C1D95 0%,rgba(76,29,149,0) 68%);
+  --ad:27s;--adl:5s}
+[data-theme=dark] .amb i{opacity:.34;filter:blur(110px)}
+@keyframes float{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to  {transform:translate3d(5vw,-4vh,0) scale(1.16)}
+}
+
+/* Grain. Static, tiny, and the reason the blooms read as texture
+   rather than as a 2021 gradient wallpaper. */
+.amb::after{content:'';position:absolute;inset:0;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E")}
+[data-theme=dark] .amb::after{opacity:.3}
+
+/* Motion is decoration. Off means off, not slower. */
+@media(prefers-reduced-motion:reduce){
+  .amb i{animation:none;opacity:.2}
+}
+/* Coarse pointers are phones: fewer layers, no blur churn */
+@media(max-width:600px){
+  .amb i{filter:blur(64px);opacity:.34}
+  .amb i:nth-child(3){display:none}
+}
+
+/* The closing block has no scrim, so its wash is far weaker and
+   a flat veil sits between the blooms and the type. */
+.close{position:relative;overflow:hidden;isolation:isolate}
+.close .amb i{opacity:.24}
+[data-theme=dark] .close .amb i{opacity:.2}
+.close::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:var(--paper);opacity:.72}
+
+/* ============================================================
    CITY PICKER — heading is the control. Region tabs, then a
    three-column grid of cities.
    ============================================================ */
@@ -474,7 +525,13 @@ textarea.input{min-height:96px;resize:vertical}
   border-top:1px solid var(--line)}
 .close h2{font-size:clamp(28px,4.4vw,46px);font-weight:800;letter-spacing:-.04em;
   line-height:1.02;margin:0 auto;max-width:16ch}
-.close .btn-row{justify-content:center;margin-top:var(--s5)}
+.close .btn-row{justify-content:center;margin-top:var(--s5);position:relative;z-index:2}
+/* the section CTAs resolve to brand on hover, not to an ink fill
+   that reads as white text in light mode */
+.close .btn[data-v=ink]:hover,
+.close .btn[data-v=outline]:hover{background:var(--brand);border-color:var(--brand);color:#fff}
+.close h2{position:relative;z-index:2;transition:color .3s var(--ez)}
+.close:hover h2{color:var(--brand-ink)}
 
 /* footer */
 .foot{width:100vw;margin-left:calc(50% - 50vw);max-width:100%;
@@ -910,7 +967,6 @@ function locate(){
     <a href="#/mine">My events</a>
     <a href="#/dashboard" data-host>Host</a>
     <a href="#/profile" data-auth>Account</a>
-    <a href="#/pricing">Pricing</a>
   </nav>
   <div style="display:flex;align-items:center;gap:var(--s2)" id="topright">
     <button class="theme" id="theme" aria-pressed="false"
@@ -1463,7 +1519,8 @@ views.home = () => {
     '<span class="sr">Good</span>';
 
   return '<div class="view">'+
-    '<section class="hero">'+tiles+
+    '<section class="hero">'+
+      '<div class="amb" aria-hidden="true"><i></i><i></i><i></i></div>'+tiles+
       '<div class="hero__c">'+
         '<p class="hero__mark">KREO</p>'+
         '<h1 class="hero__h">'+swap+' nights out<br>'+
@@ -1482,6 +1539,7 @@ views.home = () => {
     '</div>'+
 
     '<section class="close">'+
+      '<div class="amb" aria-hidden="true"><i></i><i></i><i></i></div>'+
       '<h2>The best thing you do this month is already listed.</h2>'+
       '<div class="btn-row">'+
         '<a class="btn" data-v="ink" data-size="lg" style="width:auto" href="#/discover">Discover events</a>'+
