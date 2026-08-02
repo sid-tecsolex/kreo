@@ -399,6 +399,76 @@ textarea.input{min-height:96px;resize:vertical}
 .hero__alt:hover{color:var(--ink)}
 
 /* ============================================================
+   EVENT PAGE — two columns. Left rail is identity (cover, host,
+   contact) and sticks; the right column is the decision (when,
+   where, register) then the detail.
+   ============================================================ */
+.ev{display:grid;grid-template-columns:340px 1fr;gap:var(--s7);align-items:start;
+  padding-top:var(--s3)}
+.ev__rail{position:sticky;top:88px;display:grid;gap:var(--s4)}
+.ev__cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--r3);
+  border:1px solid var(--line)}
+.ev__main{min-width:0;display:grid;gap:var(--s5)}
+@media(max-width:900px){
+  .ev{grid-template-columns:1fr;gap:var(--s5)}
+  .ev__rail{position:static}
+  .ev__cover{max-width:340px}
+}
+
+.ev__chips{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center}
+.ev__title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.04em;
+  line-height:1.04;margin:0}
+
+/* fact rows — icon block, label, value */
+.fact{display:flex;gap:var(--s4);align-items:flex-start}
+.fact+.fact{margin-top:var(--s4)}
+.fact__i{width:48px;height:48px;border-radius:var(--r2);flex:none;overflow:hidden;
+  border:1px solid var(--line);display:grid;background:var(--surface)}
+.fact__i b{background:var(--brand-soft);color:var(--brand-ink);font-family:var(--m);
+  font-size:9px;letter-spacing:.1em;text-align:center;padding:3px 0;font-weight:500}
+.fact__i span{display:grid;place-items:center;font-size:var(--t-lg);font-weight:800;
+  letter-spacing:-.02em}
+.fact__t{min-width:0}
+.fact__t b{display:block;font-size:var(--t-base);font-weight:600;letter-spacing:-.01em}
+.fact__t span{font-size:var(--t-sm);color:var(--grey)}
+
+/* registration card — the decision, boxed */
+.reg{border:1px solid var(--line);border-radius:var(--r3);overflow:hidden;
+  background:var(--surface)}
+.reg__h{padding:var(--s3) var(--s4);background:var(--brand-soft);
+  font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
+  letter-spacing:.14em;color:var(--brand-ink)}
+.reg__b{padding:var(--s5)}
+.reg__note{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3);
+  border:1px solid var(--line);border-radius:var(--r1);margin-bottom:var(--s4)}
+.reg__note span{font-size:var(--t-sm);color:var(--grey)}
+.reg__price{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s4)}
+.reg__price b{font-size:var(--t-2xl);font-weight:800;letter-spacing:-.03em}
+
+/* host card in the rail */
+.hostc{border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4);
+  background:var(--surface)}
+.hostc__h{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)}
+.hostc__l{display:grid;gap:var(--s2);margin-top:var(--s3);padding-top:var(--s3);
+  border-top:1px solid var(--line)}
+.hostc__l a{font-size:var(--t-sm);color:var(--grey)}
+.hostc__l a:hover{color:var(--brand-ink)}
+
+/* long-form description */
+.prose{font-size:var(--t-base);line-height:1.65;color:var(--ink)}
+.prose p{margin:0 0 var(--s4)}
+.prose h3{font-size:var(--t-lg);font-weight:700;letter-spacing:-.02em;
+  margin:var(--s5) 0 var(--s3)}
+.prose strong{font-weight:700}
+.prose hr{border:0;height:1px;background:var(--line);margin:var(--s5) 0}
+.prose ul{margin:0 0 var(--s4);padding-left:var(--s5);display:grid;gap:var(--s2)}
+
+#evmap{height:280px;border-radius:var(--r2);border:1px solid var(--line);z-index:1}
+
+/* mobile keeps a sticky action bar; desktop does not need one */
+@media(min-width:901px){ .ev-bar{display:none} }
+
+/* ============================================================
    AMBIENT BACKGROUND
    Two soft blooms drifting on long, mismatched cycles so the
    loop never reads as a loop. Sits at z-index 0 — the hero scrim
@@ -787,6 +857,29 @@ function initMap(){
     group.push([e.lat,e.lng]);
   });
   if(group.length) MAP.fitBounds(group,{padding:[40,40],maxZoom:12});
+}
+
+/* Single-marker map on the event page. Same provider as the main
+   map so there is one map implementation to swap, not two. */
+let EVMAP=null;
+function initEventMap(){
+  const el=document.getElementById('evmap');
+  if(!el) return;
+  if(typeof L==='undefined'){
+    el.innerHTML='<div class="empty" style="height:100%;display:grid;place-content:center">'+
+      '<p class="body">Map unavailable offline</p></div>';
+    return;
+  }
+  if(EVMAP){ EVMAP.remove(); EVMAP=null; }
+  const lat=+el.dataset.lat, lng=+el.dataset.lng;
+  EVMAP=L.map(el,{scrollWheelZoom:false,zoomControl:true}).setView([lat,lng],14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:18, attribution:'&copy; OpenStreetMap contributors'
+  }).addTo(EVMAP);
+  L.marker([lat,lng],{icon:L.divIcon({
+    html:'<div class="pin"><b>&#9678;</b></div>', className:'',
+    iconSize:[34,34], iconAnchor:[17,34]}),
+    title:el.dataset.label}).addTo(EVMAP);
 }
 
 /* Real geolocation, with a graceful decline path. Never blocks
@@ -1199,6 +1292,26 @@ const DB = {
      faces:['GF','VP'],friends:0}
   ],
   /* bookings the demo user already holds */
+  /* Long-form body + agenda. Real event pages are mostly prose;
+     a one-line summary leaves the main column empty. */
+  detail: {
+    e6:{lead:'Three hours at the wheel. No experience needed \u2014 most people arrive having never touched clay and leave with two pieces they made themselves.',
+        body:['We start with wedging and centring, the two things everyone gets wrong and nobody explains properly. Once the clay is behaving, you throw.',
+              'Everything is included: clay, tools, aprons, and firing. Come in clothes you do not mind ruining.'],
+        agenda:[['Centring and wedging','Forty minutes on the two fundamentals. Slow, repetitive, and the reason everything later works.'],
+                ['Throwing your first form','A cylinder, then a bowl. You will make several. Most will fail, which is the point.'],
+                ['Trimming and finishing','Cleaning the foot, signing the base, choosing a glaze from the studio range.'],
+                ['Firing and collection','We fire that week. Pieces are ready to collect roughly ten days later.']],
+        bring:['Clothes you can ruin','Short nails help','Hair tied back']},
+    e1:{lead:'Build a synth patch from scratch, then map it to geometry. No prior music theory needed.',
+        body:['Sound is shape. This session makes that literal \u2014 you build a patch, then watch its waveform drive a generative visual in real time.',
+              'Bring a laptop and headphones. Software is free and we send install instructions the day before.'],
+        agenda:[['Signal basics','Oscillators, envelopes, filters. What each knob actually does.'],
+                ['Patch building','You build one from nothing. It will sound terrible, then less terrible.'],
+                ['Mapping to geometry','Routing your audio into a visual system and watching it respond.']],
+        bring:['Laptop','Headphones','Curiosity about noise']}
+  },
+
   /* Multiple bookable slots per event — checkout picks one.
      Mirrors workshop_sessions in the schema. */
   sessions: {
@@ -1799,68 +1912,144 @@ views.event = (id) => {
   const e=event_(id); if(!e) return emptyState('Event not found');
   const b=brand(e.brand_id), st=F.state(e), d=F.day(e.start_at);
   const sold = st==='soldout';
+  const cat = DB.categories.find(c=>c.slug===e.category);
+  const city = DB.cities.find(c=>c.slug===e.city);
+  const det = DB.detail[e.id] || {lead:e.about, body:[], agenda:[], bring:[]};
+  const sessions = DB.sessions[e.id];
+  const approval = e.age_min >= 18;   /* stand-in for host approval */
+
+  /* --- left rail: identity ------------------------------------ */
+  const rail =
+    '<aside class="ev__rail">'+
+      '<div style="position:relative">'+
+        '<img class="ev__cover" src="'+IMG+e.cover+'?w=800&q=75" alt="">'+saveBtn(e.id)+
+      '</div>'+
+
+      '<div class="hostc">'+
+        '<p class="eyebrow">Presented by</p>'+
+        '<div class="hostc__h" style="margin-top:var(--s3)">'+
+          '<span class="mark" data-size="lg">'+esc(b.initials)+'</span>'+
+          '<div style="flex:1;min-width:0">'+
+            '<a href="#/brand/'+b.id+'"><p class="h3">'+esc(b.name)+
+              (b.verified?' &#10003;':'')+'</p></a>'+
+            '<p class="meta">'+b.followers.toLocaleString('en-GB')+' followers</p></div>'+
+        '</div>'+
+        '<button class="btn" data-v="'+(DB.follows.has(b.id)?'quiet':'outline')+'" '+
+          'data-follow="'+b.id+'" style="width:100%;justify-content:center">'+
+          (DB.follows.has(b.id)?'Following':'Follow')+'</button>'+
+        '<div class="hostc__l">'+
+          '<a href="#/reach" data-toast="Message sent through KREO">Contact the host</a>'+
+          '<a href="#/discover" data-toast="Report received">Report event</a>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="btn-row">'+
+        '<button class="btn" data-v="outline" style="flex:1" data-open-share="'+e.id+'">Share</button>'+
+        '<button class="btn" data-v="outline" style="flex:1" '+
+          'data-toast="Added to your calendar">Calendar</button>'+
+      '</div>'+
+    '</aside>';
+
+  /* --- registration card -------------------------------------- */
+  const reg =
+    '<div class="reg">'+
+      '<div class="reg__h">Registration</div>'+
+      '<div class="reg__b">'+
+        (approval
+          ? '<div class="reg__note"><span class="mark">!</span>'+
+            '<span><b style="color:var(--ink)">Approval required</b><br>'+
+            'Your booking is subject to host approval. You will hear back within 24 hours.</span></div>'
+          : '')+
+        '<div class="reg__price"><b class="'+(e.price_cents?'':'muted')+'">'+
+          F.money(e.price_cents,e.currency)+'</b>'+
+          '<span class="meta">'+(e.price_cents?'per seat':'no charge')+'</span></div>'+
+        '<p class="body" style="font-size:var(--t-sm);margin-bottom:var(--s4)">'+
+          (sold
+            ? 'This date is full. Join the waitlist and we will alert you the moment a seat frees up.'
+            : 'Welcome. '+F.left(e)+' of '+e.capacity+' seats remain'+
+              (sessions?' on the first date, and '+(sessions.length-1)+' more dates are open':'')+'.')+
+        '</p>'+
+        (sold
+          ? '<button class="btn" data-v="'+(DB.waitlist.has(e.id)?'quiet':'ink')+'" data-size="lg" '+
+            'data-wait="'+e.id+'">'+(DB.waitlist.has(e.id)?'On the waitlist':'Join waitlist')+'</button>'
+          : '<a class="btn" data-v="primary" data-size="lg" href="#/book/'+e.id+'">'+
+            (approval?'Request to join':'Get a seat')+'</a>')+
+        (e.price_cents?'<p class="hint" style="margin-top:var(--s3);text-align:center">'+
+          'Free cancellation up to 24 hours before</p>':'')+
+      '</div>'+
+    '</div>';
+
+  /* --- long-form body ----------------------------------------- */
+  const prose =
+    '<div><h2 class="h2" style="margin-bottom:var(--s4)">About this event</h2>'+
+      '<div class="prose">'+
+        '<p><strong>'+esc(det.lead)+'</strong></p>'+
+        det.body.map(x=>'<p>'+esc(x)+'</p>').join('')+
+        (det.agenda.length
+          ? '<hr><h3>What happens</h3>'+
+            det.agenda.map(a=>'<p><strong>'+esc(a[0])+'</strong><br>'+esc(a[1])+'</p>').join('')
+          : '')+
+        (det.bring.length
+          ? '<hr><h3>What to bring</h3><ul>'+
+            det.bring.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'
+          : '')+
+      '</div></div>';
+
   return '<div class="wrap view">'+
     '<button class="back" data-back>&larr; Back</button>'+
-    '<div style="position:relative">'+
-      '<img class="cover" src="'+IMG+e.cover+'?w=1200&q=75" alt="">'+saveBtn(e.id)+
-    '</div>'+
+    '<div class="ev">'+rail+
+      '<div class="ev__main">'+
 
-    '<div class="sec" style="padding-bottom:var(--s4)">'+
-      '<div class="card__tags">'+tagsFor(e).replace(/<\/?div[^>]*>/g,'')+
-        '<span class="tag" data-t="line">'+esc(b.name)+'</span>'+
-        (e.age_min?'<span class="tag" data-t="line">'+e.age_min+'+</span>':'')+'</div>'+
-      '<h1 class="d2" style="margin-top:var(--s3)">'+esc(e.title)+'</h1>'+
-      '<p class="body" style="margin-top:var(--s4);max-width:58ch">'+esc(e.about)+'</p>'+
-    '</div>'+
+        '<div class="ev__chips">'+
+          (cat?'<span class="tag" data-t="soft">'+esc(cat.label)+'</span>':'')+
+          (city?'<span class="tag" data-t="line">'+esc(city.label)+'</span>':'')+
+          (e.live_now?'<span class="live">Live now</span>':'')+
+          (st==='limited'?'<span class="tag" data-t="brand">'+F.left(e)+' left</span>':'')+
+          (e.age_min?'<span class="tag" data-t="line">'+e.age_min+'+</span>':'')+
+        '</div>'+
 
-    '<div class="panel stack" style="gap:var(--s4)">'+
-      '<div style="display:flex;gap:var(--s4);align-items:flex-start">'+
-        '<div class="mark" data-size="lg" style="background:var(--brand-soft);color:var(--brand-ink)">'+
-          '<div style="text-align:center;line-height:1"><div style="font-size:17px;font-weight:800">'+d.n+'</div>'+
-          '<div style="font-size:9px;letter-spacing:.1em">'+d.m.toUpperCase()+'</div></div></div>'+
-        '<div><p class="h3">'+d.long+'</p>'+
-        '<p class="meta">'+F.time(e.start_at)+' \u2014 '+F.dur(e.duration_min)+'</p></div>'+
+        '<h1 class="ev__title">'+esc(e.title)+'</h1>'+
+
+        '<div>'+
+          '<div class="fact"><span class="fact__i"><b>'+d.m.toUpperCase()+'</b>'+
+            '<span>'+d.n+'</span></span>'+
+            '<span class="fact__t"><b>'+d.long+'</b>'+
+            '<span>'+F.time(e.start_at)+' \u2014 '+F.dur(e.duration_min)+'</span></span></div>'+
+          '<div class="fact"><span class="fact__i"><span>&#9678;</span></span>'+
+            '<span class="fact__t"><b>'+esc(e.location_name)+'</b>'+
+            '<span>'+esc(e.address)+'</span></span></div>'+
+        '</div>'+
+
+        reg+
+        prose+
+
+        '<div><h2 class="h2" style="margin-bottom:var(--s4)">Who&rsquo;s going</h2>'+
+          '<div class="panel">'+going(e)+
+            '<p class="meta" style="margin-top:var(--s3)">'+e.booked_count+' of '+
+            e.capacity+' seats taken</p></div></div>'+
+
+        '<div><h2 class="h2" style="margin-bottom:var(--s4)">Location</h2>'+
+          '<p class="body" style="margin-bottom:var(--s3)">'+esc(e.location_name)+
+            ' &middot; '+esc(e.address)+'</p>'+
+          '<div id="evmap" data-lat="'+e.lat+'" data-lng="'+e.lng+'" '+
+            'data-label="'+esc(e.location_name)+'"></div>'+
+          '<button class="btn" data-v="quiet" style="padding-left:0;margin-top:var(--s2)" '+
+            'data-toast="Opening directions\u2026">Get directions &rarr;</button></div>'+
+
       '</div>'+
-      '<div style="display:flex;gap:var(--s4);align-items:flex-start">'+
-        '<div class="mark" data-size="lg">&#9678;</div>'+
-        '<div><p class="h3">'+esc(e.location_name)+'</p>'+
-        '<p class="meta">'+esc(e.address)+'</p>'+
-        '<button class="btn" data-v="quiet" style="padding-left:0" data-toast="Opening directions\u2026">Get directions</button></div>'+
-      '</div>'+
-    '</div>'+
-
-    '<div class="sec">'+
-      '<div class="sec__h"><h2 class="h2">Who\u2019s going</h2>'+
-        '<span class="meta">'+e.booked_count+' of '+e.capacity+'</span></div>'+
-      '<div class="panel">'+going(e)+
-        (F.left(e)<=5&&!sold?'<p class="note" style="margin-top:var(--s4)">Only '+F.left(e)+
-          ' seats left. Hosts release no-shows 30 minutes before the start.</p>':'')+
-      '</div>'+
-    '</div>'+
-
-    '<div class="sec" style="padding-top:0">'+
-      '<div class="sec__h"><h2 class="h2">Hosted by</h2></div>'+
-      '<a class="panel" href="#/brand/'+b.id+'" style="display:flex;gap:var(--s4);align-items:center">'+
-        '<span class="mark" data-size="lg">'+esc(b.initials)+'</span>'+
-        '<div style="flex:1"><p class="h3">'+esc(b.name)+(b.verified?' &#10003;':'')+'</p>'+
-        '<p class="meta">'+b.followers.toLocaleString('en-GB')+' followers</p></div>'+
-        '<span class="meta">&rarr;</span></a>'+
-    '</div>'+
-    '<div class="btn-row" style="margin-top:var(--s5)">'+
-      '<button class="btn" data-v="outline" data-open-share="'+e.id+'">Share event</button>'+
-      '<button class="btn" data-v="outline" data-toast="Added to your calendar">Add to calendar</button>'+
     '</div>'+
     '<div style="height:var(--s8)"></div>'+
 
-    '<div class="bar">'+
+    /* mobile only — desktop has the registration card in flow */
+    '<div class="bar ev-bar">'+
       '<div><p class="price" data-free="'+(e.price_cents===0)+'" style="font-size:var(--t-lg)">'+
         F.money(e.price_cents,e.currency)+'</p>'+
         '<p class="meta">'+(sold?'No seats left':F.left(e)+' seats left')+'</p></div>'+
       (sold
-        ? '<button class="btn" data-v="'+(DB.waitlist.has(e.id)?'quiet':'ink')+'" '+
-          'style="margin-left:auto" data-wait="'+e.id+'">'+
+        ? '<button class="btn" data-v="ink" style="margin-left:auto" data-wait="'+e.id+'">'+
           (DB.waitlist.has(e.id)?'On the waitlist':'Join waitlist')+'</button>'
-        : '<a class="btn" data-v="primary" style="margin-left:auto" href="#/book/'+e.id+'">Get a seat</a>')+
+        : '<a class="btn" data-v="primary" style="margin-left:auto" href="#/book/'+e.id+'">'+
+          (approval?'Request to join':'Get a seat')+'</a>')+
     '</div></div>';
 };
 
@@ -2593,6 +2782,7 @@ function route(){
   if(shown==='book') recalc();
   if(shown==='search') wireSearch();
   if(shown==='map') setTimeout(initMap,0);
+  if(shown==='event') setTimeout(initEventMap,0);
 }
 
 /* Nav reflects the session. "Host an event" is never hidden —
@@ -3033,6 +3223,29 @@ function initMap(){
     group.push([e.lat,e.lng]);
   });
   if(group.length) MAP.fitBounds(group,{padding:[40,40],maxZoom:12});
+}
+
+/* Single-marker map on the event page. Same provider as the main
+   map so there is one map implementation to swap, not two. */
+let EVMAP=null;
+function initEventMap(){
+  const el=document.getElementById('evmap');
+  if(!el) return;
+  if(typeof L==='undefined'){
+    el.innerHTML='<div class="empty" style="height:100%;display:grid;place-content:center">'+
+      '<p class="body">Map unavailable offline</p></div>';
+    return;
+  }
+  if(EVMAP){ EVMAP.remove(); EVMAP=null; }
+  const lat=+el.dataset.lat, lng=+el.dataset.lng;
+  EVMAP=L.map(el,{scrollWheelZoom:false,zoomControl:true}).setView([lat,lng],14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:18, attribution:'&copy; OpenStreetMap contributors'
+  }).addTo(EVMAP);
+  L.marker([lat,lng],{icon:L.divIcon({
+    html:'<div class="pin"><b>&#9678;</b></div>', className:'',
+    iconSize:[34,34], iconAnchor:[17,34]}),
+    title:el.dataset.label}).addTo(EVMAP);
 }
 
 /* Real geolocation, with a graceful decline path. Never blocks
