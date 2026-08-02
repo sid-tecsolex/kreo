@@ -1,0 +1,19 @@
+# Vercel
+.vercel
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Never commit these — no secrets exist in this prototype,
+# but production will have them and this repo may become it.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
