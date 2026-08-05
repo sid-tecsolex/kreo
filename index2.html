@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -23,14 +23,9 @@
 :root{
   --ink:#0F0E0C; --ink-2:#2A2723; --paper:#FAF8F4; --surface:#FFF;
   --line:#E4DFD5; --grey:#6B665E; --grey-2:#8E8880;
-  /* Signal lime. Luminance .78 — it is a FILL, never text on light.
-     --on-brand is the label colour that sits on a lime fill;
-     --brand-ink is the readable-as-text role. Both are roles,
-     not shades, so dark mode can invert them independently. */
-  --brand:#C7F464;      /* fill · ink label reads 15.21 on it */
-  --on-brand:#0F0E0C;   /* label colour ON a brand fill */
-  --brand-ink:#4A630D;  /* 6.42 on paper — lime as readable text */
-  --brand-soft:#F4FBDE; --brand-edge:#6E9314; --live:#C0180A; --good:#0E7A4F;
+  --brand:#6D28D9;      /* 6.70 on paper · white label 7.10 — fills AND text */
+  --brand-ink:#5B21B6;  /* 8.47 — small text, extra headroom */
+  --brand-soft:#F1EBFF; --live:#E01B00; --good:#0E7A4F;
 
   --f:'Archivo',system-ui,-apple-system,sans-serif;
   --m:'IBM Plex Mono',ui-monospace,monospace;
@@ -57,15 +52,14 @@
 [data-theme=dark]{
   --ink:#F4F1EB; --ink-2:#DCD6CB; --paper:#0D0C0B; --surface:#171614;
   --line:#2E2B26; --grey:#9C968C; --grey-2:#8E887C;
-  --brand:#C7F464; --on-brand:#0F0E0C; --brand-ink:#C7F464;
-  --brand-soft:#242D12; --brand-edge:#C7F464;
+  --brand:#7C3AED; --brand-ink:#A78BFA; --brand-soft:#241640;
   --live:#FF4B33; --good:#3FBF87;
   --sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
   --scrim:rgba(13,12,11,.85); --scrim-2:rgba(23,22,20,.94);
   --ok-bg:#12241B;
 }
 [data-theme=dark] .story__img,[data-theme=dark] .face{border-color:var(--surface)}
-[data-theme=dark] .btn[data-v=primary]:hover{background:#D6FA84}
+[data-theme=dark] .btn[data-v=primary]:hover{background:#8B5CF6}
 [data-theme=dark] img{filter:brightness(.94)}
 [data-theme=dark] .qr,[data-theme=dark] .qr i{filter:none}
 
@@ -82,7 +76,7 @@ button{font:inherit;color:inherit;background:none;border:0}
 a{color:inherit;text-decoration:none}
 input,select,textarea{font:inherit;color:inherit}
 :where(a,button,input,select,textarea,[tabindex]):focus-visible{
-  outline:2px solid var(--brand-ink);outline-offset:2px;border-radius:var(--r1)}
+  outline:2px solid var(--brand);outline-offset:2px;border-radius:var(--r1)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
 /* --- type ---------------------------------------------------- */
@@ -105,12 +99,8 @@ input,select,textarea{font:inherit;color:inherit}
   font-size:var(--t-sm);font-weight:600;cursor:pointer;
   transition:transform .12s var(--ez),background-color .15s var(--ez),color .15s var(--ez)}
 .btn:active{transform:translateY(1px) scale(.99)}
-/* Lime on cream has no visible edge (1.20:1). The border supplies
-   the component boundary WCAG 1.4.11 requires; dark mode does not
-   need it, where lime reads 15.40:1 against the page. */
-.btn[data-v=primary]{background:var(--brand);color:var(--on-brand);
-  border-color:var(--brand-edge)}
-.btn[data-v=primary]:hover{background:#B4E24A}
+.btn[data-v=primary]{background:var(--brand);color:#fff}
+.btn[data-v=primary]:hover{background:#5B21B6}
 .btn[data-v=ink]{background:var(--ink);color:var(--paper)}
 .btn[data-v=ink]:hover{background:var(--ink-2)}
 .btn[data-v=outline]{border-color:var(--ink)}
@@ -127,11 +117,11 @@ input,select,textarea{font:inherit;color:inherit}
   font-family:var(--m);font-size:var(--t-xs);cursor:pointer;white-space:nowrap;
   transition:background-color .15s var(--ez),border-color .15s var(--ez)}
 .chip:hover{border-color:var(--ink)}
-.chip[aria-pressed=true]{background:var(--brand);border-color:var(--brand-edge);color:var(--on-brand)}
+.chip[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff}
 .tag{display:inline-block;padding:3px 7px;font-family:var(--m);font-size:var(--t-2xs);
   text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--ink);border-radius:var(--r1)}
 .tag[data-t=ink]{background:var(--ink);color:var(--paper)}
-.tag[data-t=brand]{background:var(--brand);color:var(--on-brand);border-color:var(--brand-edge)}
+.tag[data-t=brand]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .tag[data-t=soft]{background:var(--brand-soft);color:var(--brand-ink);border-color:transparent}
 .tag[data-t=line]{background:transparent;color:var(--grey);border-color:var(--line)}
 
@@ -163,7 +153,7 @@ input,select,textarea{font:inherit;color:inherit}
   background:rgba(15,14,12,.5);color:#fff;backdrop-filter:blur(8px);
   transition:transform .18s var(--ez),background-color .18s var(--ez)}
 .save:hover{background:rgba(15,14,12,.78)}
-.save[aria-pressed=true]{background:var(--brand);color:var(--on-brand);box-shadow:0 0 0 1px var(--brand-edge)}
+.save[aria-pressed=true]{background:var(--brand)}
 .save:active{transform:scale(.86)}
 
 /* --- category tiles: label + live count (counts are information,
@@ -176,7 +166,7 @@ input,select,textarea{font:inherit;color:inherit}
 .cat__i{width:40px;height:40px;border-radius:var(--r1);object-fit:cover;flex:none}
 .cat__l{font-weight:600;font-size:var(--t-sm);line-height:1.2}
 .cat__n{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey)}
-.cat[aria-pressed=true]{border-color:var(--brand-edge);background:var(--brand-soft)}
+.cat[aria-pressed=true]{border-color:var(--brand);background:var(--brand-soft)}
 .cat[aria-pressed=true] .cat__n{color:var(--brand-ink)}
 .cat-grid{display:grid;gap:var(--s3);grid-template-columns:repeat(auto-fill,minmax(186px,1fr))}
 .cat-grid .cat{width:auto}
@@ -221,14 +211,7 @@ input,select,textarea{font:inherit;color:inherit}
 .card__f{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);min-width:0}
 .card__f .meta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .card__f .price{flex:none}
-.card__t{margin:0 0 var(--s2)}
-.card__when{margin:0 0 2px}
-.card__where{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* status left, price right — price never gets squeezed by a long
-   status label, because it is the number people scan for */
-.card__s{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);min-width:0}
-.card__s .price{margin-left:auto;flex:none}
-.card__s .tag,.card__s .live{flex:none}
+.card__t{margin:0 0 var(--s1)}
 
 .card[data-v=row]{display:grid;grid-template-columns:1fr 108px;gap:var(--s4);padding:var(--s4);align-items:start}
 .card[data-v=row] .card__img{width:108px;height:108px;border-radius:var(--r1);object-fit:cover}
@@ -269,9 +252,9 @@ textarea.input{min-height:96px;resize:vertical}
   position:relative;transition:background-color .18s var(--ez);flex:none}
 .track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;
   border-radius:50%;background:#fff;transition:transform .18s var(--ez)}
-.toggle input:checked+.track{background:var(--brand-edge)}
+.toggle input:checked+.track{background:var(--brand)}
 .toggle input:checked+.track::after{transform:translateX(18px)}
-.toggle input:focus-visible+.track{outline:2px solid var(--brand-ink);outline-offset:2px}
+.toggle input:focus-visible+.track{outline:2px solid var(--brand);outline-offset:2px}
 
 .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:var(--r1)}
 .stepper button{width:46px;height:46px;font-size:19px;cursor:pointer}
@@ -315,7 +298,7 @@ textarea.input{min-height:96px;resize:vertical}
 .tabs button[aria-selected=true]{background:var(--ink);color:var(--paper)}
 .plan{display:grid;gap:var(--s3);padding:var(--s5);border-radius:var(--r2);
   border:1px solid var(--line);background:var(--surface)}
-.plan[data-hot=true]{border-color:var(--brand-edge);border-width:2px}
+.plan[data-hot=true]{border-color:var(--brand);border-width:2px}
 .plan ul{margin:0;padding-left:var(--s4);display:grid;gap:var(--s2);
   font-size:var(--t-sm);color:var(--grey)}
 .note{background:var(--brand-soft);border-radius:var(--r1);padding:var(--s3);
@@ -351,7 +334,7 @@ textarea.input{min-height:96px;resize:vertical}
   font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
   letter-spacing:.05em;color:var(--grey)}
 .tabbar a[aria-current=page]{color:var(--brand-ink)}
-.tabbar a[aria-current=page] .g{background:var(--brand);color:var(--on-brand)}
+.tabbar a[aria-current=page] .g{background:var(--brand);color:#fff}
 .g{width:30px;height:30px;display:grid;place-items:center;border-radius:var(--r1);font-size:15px}
 
 .bar{position:fixed;left:0;right:0;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:25;
@@ -401,9 +384,9 @@ textarea.input{min-height:96px;resize:vertical}
 .hero__h{font-size:clamp(40px,7.6vw,82px);font-weight:800;line-height:.94;
   letter-spacing:-.05em;color:var(--ink);margin:0}
 /* KREO's ramp: deep violet -> signal -> fuchsia */
-.hero__g{background:linear-gradient(98deg,#2F4A0A 0%,#4A630D 46%,#6E9314 100%);
+.hero__g{background:linear-gradient(98deg,#4C1D95 0%,#7C3AED 44%,#E879F9 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent}
-[data-theme=dark] .hero__g{background:linear-gradient(98deg,#9BE15D 0%,#C7F464 44%,#E9FFAE 100%);
+[data-theme=dark] .hero__g{background:linear-gradient(98deg,#A78BFA 0%,#C084FC 44%,#F0ABFC 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .hero__s{color:var(--grey);font-size:var(--t-lg);
   margin:var(--s5) auto 0;max-width:34ch;line-height:1.45}
@@ -414,39 +397,6 @@ textarea.input{min-height:96px;resize:vertical}
 .hero__alt{display:inline-flex;align-items:center;gap:6px;margin-top:var(--s4);
   color:var(--grey);font-size:var(--t-sm)}
 .hero__alt:hover{color:var(--ink)}
-
-/* ============================================================
-   FAQ — accordion. One open at a time is a false constraint;
-   people compare answers, so several can be open at once.
-   ============================================================ */
-.faq{border:1px solid var(--line);border-radius:var(--r2);overflow:hidden;
-  background:var(--surface)}
-.faq__q{width:100%;display:flex;align-items:flex-start;gap:var(--s3);
-  padding:var(--s4);text-align:left;cursor:pointer;font-size:var(--t-base);
-  font-weight:600;letter-spacing:-.01em;line-height:1.35;
-  border-bottom:1px solid var(--line)}
-.faq__q:hover{background:var(--brand-soft)}
-.faq__q:last-child{border-bottom:0}
-.faq__m{width:20px;flex:none;font-family:var(--m);font-size:var(--t-lg);
-  line-height:1.2;color:var(--brand-ink);transition:transform .2s var(--ez)}
-.faq__q[aria-expanded=true] .faq__m{transform:rotate(45deg)}
-.faq__a{padding:0 var(--s4) var(--s5) calc(var(--s4) + 20px + var(--s3));
-  border-bottom:1px solid var(--line);display:none}
-.faq__a[data-open=true]{display:block;animation:rise .2s var(--ez)}
-.faq__a p{margin:0 0 var(--s3);font-size:var(--t-sm);color:var(--grey);line-height:1.6}
-.faq__a p:last-child{margin-bottom:0}
-.faq__a strong{color:var(--ink);font-weight:600}
-.faq__a ul{margin:0 0 var(--s3);padding-left:var(--s4);display:grid;gap:6px;
-  font-size:var(--t-sm);color:var(--grey)}
-.faq__a a{color:var(--brand-ink);text-decoration:underline}
-
-.faq-nav{display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s5)}
-.faq-nav button{padding:9px var(--s4);border:1px solid var(--line);border-radius:var(--pill);
-  background:var(--surface);font-size:var(--t-sm);font-weight:600;cursor:pointer;
-  min-height:44px}
-.faq-nav button:hover{border-color:var(--ink)}
-.faq-nav button[aria-pressed=true]{background:var(--brand);border-color:var(--brand-edge);
-  color:var(--on-brand)}
 
 /* ============================================================
    EVENT PAGE — two columns. Left rail is identity (cover, host,
@@ -531,13 +481,13 @@ textarea.input{min-height:96px;resize:vertical}
   filter:blur(90px);opacity:.42;will-change:transform;
   animation:float var(--ad) ease-in-out var(--adl) infinite alternate}
 .amb i:nth-child(1){width:44vw;height:44vw;left:-6%;top:4%;
-  background:radial-gradient(circle,#C7F464 0%,rgba(199,244,100,0) 68%);
+  background:radial-gradient(circle,#7C3AED 0%,rgba(124,58,237,0) 68%);
   --ad:19s;--adl:0s}
 .amb i:nth-child(2){width:38vw;height:38vw;right:-4%;top:38%;
-  background:radial-gradient(circle,#8FD14F 0%,rgba(143,209,79,0) 68%);
+  background:radial-gradient(circle,#E879F9 0%,rgba(232,121,249,0) 68%);
   --ad:24s;--adl:2.5s}
 .amb i:nth-child(3){width:34vw;height:34vw;left:34%;bottom:-10%;
-  background:radial-gradient(circle,#3E7A4E 0%,rgba(62,122,78,0) 68%);
+  background:radial-gradient(circle,#4C1D95 0%,rgba(76,29,149,0) 68%);
   --ad:27s;--adl:5s}
 [data-theme=dark] .amb i{opacity:.34;filter:blur(110px)}
 @keyframes float{
@@ -649,7 +599,7 @@ textarea.input{min-height:96px;resize:vertical}
 /* the section CTAs resolve to brand on hover, not to an ink fill
    that reads as white text in light mode */
 .close .btn[data-v=ink]:hover,
-.close .btn[data-v=outline]:hover{background:var(--brand);border-color:var(--brand-edge);color:var(--on-brand)}
+.close .btn[data-v=outline]:hover{background:var(--brand);border-color:var(--brand);color:#fff}
 .close h2{position:relative;z-index:2;transition:color .3s var(--ez)}
 .close:hover h2{color:var(--brand-ink)}
 
@@ -741,7 +691,7 @@ textarea.input{min-height:96px;resize:vertical}
   width:100%;text-align:left;transition:border-color .15s var(--ez),background-color .15s var(--ez)}
 .opt+.opt{margin-top:var(--s2)}
 .opt:hover{border-color:var(--ink)}
-.opt[aria-pressed=true]{border-color:var(--brand-edge);background:var(--brand-soft);border-width:2px;
+.opt[aria-pressed=true]{border-color:var(--brand);background:var(--brand-soft);border-width:2px;
   padding:calc(var(--s3) - 1px) calc(var(--s4) - 1px)}
 .opt__i{width:40px;height:28px;border-radius:4px;display:grid;place-items:center;flex:none;
   background:var(--ink);color:var(--paper);font-family:var(--m);font-size:9px;letter-spacing:.04em}
@@ -749,13 +699,13 @@ textarea.input{min-height:96px;resize:vertical}
 .opt__t b{display:block;font-size:var(--t-sm);font-weight:600}
 .opt__t span{font-size:var(--t-xs);color:var(--grey)}
 .opt__r{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex:none}
-.opt[aria-pressed=true] .opt__r{border-color:var(--brand-edge);border-width:6px}
+.opt[aria-pressed=true] .opt__r{border-color:var(--brand);border-width:6px}
 .opt[disabled]{opacity:.45;cursor:not-allowed}
 
 .slot{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s2)}
 .slot button{padding:var(--s3);border:1px solid var(--line);border-radius:var(--r1);
   background:var(--surface);cursor:pointer;text-align:left}
-.slot button[aria-pressed=true]{border-color:var(--brand-edge);background:var(--brand-soft);border-width:2px}
+.slot button[aria-pressed=true]{border-color:var(--brand);background:var(--brand-soft);border-width:2px}
 .slot b{display:block;font-size:var(--t-sm)}
 .slot span{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey)}
 .slot button[disabled]{opacity:.4;cursor:not-allowed}
@@ -780,7 +730,7 @@ textarea.input{min-height:96px;resize:vertical}
 .note-r[data-read=false]{background:var(--brand-soft)}
 .note-r__i{width:34px;height:34px;border-radius:var(--r1);display:grid;place-items:center;
   background:var(--ink);color:var(--paper);font-size:14px}
-.note-r[data-read=false] .note-r__i{background:var(--brand);color:var(--on-brand)}
+.note-r[data-read=false] .note-r__i{background:var(--brand)}
 .note-r b{font-size:var(--t-sm)}
 .note-r p{margin:2px 0 0;font-size:var(--t-sm);color:var(--grey)}
 
@@ -792,7 +742,7 @@ textarea.input{min-height:96px;resize:vertical}
 .rev__h{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s3)}
 .stars{font-family:var(--m);font-size:var(--t-sm);color:var(--brand-ink);letter-spacing:.1em}
 .rev__reply{margin-top:var(--s3);padding:var(--s3);background:var(--brand-soft);
-  border-radius:var(--r1);border-left:3px solid var(--brand-edge)}
+  border-radius:var(--r1);border-left:3px solid var(--brand)}
 
 /* discount codes */
 .code-r{display:grid;grid-template-columns:1fr auto auto;gap:var(--s3);align-items:center;
@@ -804,7 +754,7 @@ textarea.input{min-height:96px;resize:vertical}
 /* media uploader */
 .drop{border:1px dashed var(--line);border-radius:var(--r2);padding:var(--s6) var(--s4);
   text-align:center;background:var(--surface);cursor:pointer}
-.drop:hover{border-color:var(--brand-edge)}
+.drop:hover{border-color:var(--brand)}
 .thumbs{display:flex;gap:var(--s2);margin-top:var(--s3);flex-wrap:wrap}
 .thumbs img{width:72px;height:72px;object-fit:cover;border-radius:var(--r1);border:1px solid var(--line)}
 
@@ -815,7 +765,7 @@ textarea.input{min-height:96px;resize:vertical}
 @media(max-width:560px){.rail-x>*{flex:0 0 78%}}
 .why{display:inline-flex;align-items:center;gap:5px;font-family:var(--m);
   font-size:var(--t-2xs);color:var(--brand-ink);margin-bottom:var(--s2)}
-.why::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--brand-edge)}
+.why::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--brand)}
 
 /* map */
 #map{height:460px;border-radius:var(--r2);border:1px solid var(--line);z-index:1}
@@ -823,8 +773,7 @@ textarea.input{min-height:96px;resize:vertical}
 .leaflet-container{background:var(--paper)!important;font-family:var(--f)!important}
 [data-theme=dark] .leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.88)}
 .pin{display:grid;place-items:center;width:34px;height:34px;border-radius:50% 50% 50% 2px;
-  transform:rotate(45deg);background:var(--brand);color:var(--on-brand);
-  outline:1px solid var(--brand-edge);
+  transform:rotate(45deg);background:var(--brand);color:#fff;
   box-shadow:0 4px 12px -3px rgba(0,0,0,.5);border:2px solid var(--surface)}
 .pin b{transform:rotate(-45deg);font-family:var(--m);font-size:10px}
 .pin[data-free=true]{background:var(--ink)}
@@ -986,11 +935,11 @@ function locate(){
 /* ============================================================
    CREDITS / ANALYTICS / COMPOSER
    ============================================================ */
-.credit{background:linear-gradient(135deg,#C7F464 0%,#8FD14F 100%);
-  color:var(--on-brand);border-radius:var(--r2);padding:var(--s5);display:grid;gap:var(--s2)}
+.credit{background:linear-gradient(135deg,var(--brand) 0%,#4C1D95 100%);
+  color:#fff;border-radius:var(--r2);padding:var(--s5);display:grid;gap:var(--s2)}
 .credit__n{font-size:var(--t-3xl);font-weight:800;letter-spacing:-.04em;line-height:1}
 .credit__l{font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
-  letter-spacing:.14em;color:rgba(15,14,12,.62)}
+  letter-spacing:.14em;color:rgba(255,255,255,.75)}
 .code{display:flex;align-items:center;gap:var(--s3);padding:var(--s3);
   border:1px dashed var(--line);border-radius:var(--r1);background:var(--surface)}
 .code b{font-family:var(--m);font-size:var(--t-lg);letter-spacing:.12em;flex:1;min-width:0}
@@ -1007,7 +956,7 @@ function locate(){
 .chart{display:flex;align-items:flex-end;gap:var(--s2);height:130px;margin-top:var(--s4)}
 .chart__c{flex:1;display:grid;justify-items:center;gap:var(--s2);align-content:end;height:100%}
 .chart__b{width:100%;background:var(--brand-soft);border-radius:var(--r1) var(--r1) 0 0;
-  border-top:3px solid var(--brand-edge);min-height:4px;transition:height .4s var(--ez)}
+  border-top:3px solid var(--brand);min-height:4px;transition:height .4s var(--ez)}
 .chart__l{font-family:var(--m);font-size:9px;color:var(--grey);letter-spacing:.06em}
 
 .seg{display:flex;gap:var(--s1);background:var(--surface);border:1px solid var(--line);
@@ -1016,7 +965,7 @@ function locate(){
   font-family:var(--m);color:var(--grey);cursor:pointer;min-height:38px}
 .seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
 
-.boost{border:1px solid var(--brand-edge);background:var(--brand-soft);
+.boost{border:1px solid var(--brand);background:var(--brand-soft);
   border-radius:var(--r2);padding:var(--s5);display:grid;gap:var(--s3)}
 
 /* ============================================================
@@ -1184,8 +1133,7 @@ const DB = {
     {slug:'tech',      label:'Tech',      shot:'photo-1511920170033-f8396924c348'},
     {slug:'fitness',   label:'Fitness',   shot:'photo-1544367567-0f2fcb009e0b'},
     {slug:'business',  label:'Business',  shot:'photo-1600880292203-757bb62b4baf'},
-    {slug:'music',     label:'Music',     shot:'photo-1511379938547-c1f69419868d'},
-    {slug:'kids',      label:'Kids & family', shot:'photo-1503454537195-1dcabb73ffb9'}
+    {slug:'music',     label:'Music',     shot:'photo-1511379938547-c1f69419868d'}
   ],
 
   /* Live cities carry real supply. `soon` cities are shown but
@@ -1341,34 +1289,7 @@ const DB = {
      capacity:10,booked_count:9,price_cents:22000,currency:'AED',age_min:16,
      cover:'photo-1517245386807-bb43f82c33c4',live_now:false,
      about:'Three hours, one good knife. Julienne, brunoise, chiffonade \u2014 and how to keep it sharp.',
-     faces:['GF','VP'],friends:0},
-    {id:'e13',brand_id:'b4',title:'Little Potters: Ages 6\u201310',category:'kids',
-     tags:['Hands-on','Parent welcome'],start_at:'2026-08-08T10:00:00+04:00',duration_min:90,
-     location_name:'Studio Quoz',address:'Warehouse 12, Al Quoz 1, Dubai',
-     city:'dubai',lat:25.1402,lng:55.2331,created_at:'2026-07-28',views:1460,
-     capacity:10,booked_count:6,price_cents:12000,currency:'AED',age_min:6,age_max:10,
-     cover:'photo-1503454537195-1dcabb73ffb9',live_now:false,
-     about:'Ninety minutes of hand-building with clay. Aprons on, mess encouraged. '+
-       'One parent may stay at no charge.',
-     faces:['LA','SH','MN'],friends:1},
-    {id:'e14',brand_id:'b6',title:'Saturday Science Lab: Ages 8\u201312',category:'kids',
-     tags:['STEM','Drop-off'],start_at:'2026-08-08T14:00:00+04:00',duration_min:120,
-     location_name:'d3 Learning Studio',address:'Building 7, d3, Dubai',
-     city:'dubai',lat:25.1878,lng:55.2954,created_at:'2026-07-30',views:2240,
-     capacity:18,booked_count:15,price_cents:9000,currency:'AED',age_min:8,age_max:12,
-     cover:'photo-1567168544813-cc03465b4fa8',live_now:false,
-     about:'Circuits, slime and one small controlled explosion. Drop-off session with '+
-       'two qualified instructors; parents collect at four.',
-     faces:['RK','TA'],friends:0},
-    {id:'e15',brand_id:'b1',title:'Family Print Morning',category:'kids',
-     tags:['All ages','Parent and child'],start_at:'2026-08-09T09:30:00+04:00',duration_min:100,
-     location_name:'Alserkal Avenue',address:'Concrete, Alserkal Avenue, Al Quoz 1',
-     city:'dubai',lat:25.1443,lng:55.2265,created_at:'2026-07-31',views:980,
-     capacity:24,booked_count:9,price_cents:0,currency:'AED',age_min:4,age_max:12,
-     cover:'photo-1499195333224-3ce974eecb47',live_now:false,
-     about:'Screen-printing for pairs. Every child needs one adult with them \u2014 you make '+
-       'a tote together and take it home wet.',
-     faces:['BW','CD','EF'],friends:2}
+     faces:['GF','VP'],friends:0}
   ],
   /* bookings the demo user already holds */
   /* Long-form body + agenda. Real event pages are mostly prose;
@@ -1491,13 +1412,6 @@ const F = {
   money(c,cur){ return c===0 ? 'Free' : cur+' '+(c/100).toFixed(0); },
   time(iso){ return new Date(iso).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',...TZ}); },
   dur(m){ return m>=60 ? (m/60)+' hr'+(m>=120?'s':'') : m+' min'; },
-  /* A kids' session has a window, not a floor. "6+" on an event
-     that stops at 10 sends the wrong parent. */
-  age(e){
-    if(e.age_max) return 'Ages '+e.age_min+'\u2013'+e.age_max;
-    if(e.age_min) return e.age_min+'+';
-    return 'All ages';
-  },
   day(iso){
     const d=new Date(iso);
     return {n:d.toLocaleDateString('en-GB',{day:'numeric',...TZ}),
@@ -1610,6 +1524,15 @@ function qr(seed,n=21){
 /* ============================================================
    COMPONENTS
    ============================================================ */
+function tagsFor(e){
+  const st=F.state(e), out=[];
+  if(e.live_now) out.push('<span class="live">Live now</span>');
+  if(st==='soldout') out.push('<span class="tag" data-t="ink">Sold out</span>');
+  else if(st==='limited') out.push('<span class="tag" data-t="brand">'+F.left(e)+' left</span>');
+  if(e.price_cents===0) out.push('<span class="tag" data-t="soft">Free</span>');
+  return out.length?'<div class="card__tags">'+out.join('')+'</div>':'';
+}
+
 /* Attendance, Luma's compact form: a few faces then +N.
    Never renders when nobody is going — an empty card says nothing. */
 function going(e){
@@ -1629,32 +1552,18 @@ function saveBtn(id){
          'aria-label="Save event">'+(on?'&#9829;':'&#9825;')+'</button>';
 }
 
-/* Title, date, location, status, price.
-   Date is omitted in the `row` variant because those sit under a
-   date rail that already states the day — repeating it is noise.
-   Status and price share one line: both answer "can I go, and
-   what does it cost", so they belong together at the bottom. */
-function statusTag(e){
-  const st=F.state(e);
-  if(e.live_now)        return '<span class="live">Live now</span>';
-  if(st==='soldout')    return '<span class="tag" data-t="ink">Sold out</span>';
-  if(st==='limited')    return '<span class="tag" data-t="brand">'+F.left(e)+' left</span>';
-  return '';
-}
-
 function card(e,v){
-  const st=F.state(e), d=F.day(e.start_at);
+  const b=brand(e.brand_id), st=F.state(e);
   const img='<img class="card__img" src="'+IMG+e.cover+'?w=800&q=70" alt="" loading="lazy">';
-  const when = v==='row'
-    ? F.time(e.start_at)
-    : d.w+' '+d.n+' '+d.m+' \u00b7 '+F.time(e.start_at);
   const body=
-    '<div class="card__b">'+
+    '<div class="card__b">'+tagsFor(e)+
       '<p class="'+(v==='hero'?'h1':'h3')+' card__t">'+esc(e.title)+'</p>'+
-      '<p class="meta card__when">'+when+'</p>'+
-      '<p class="meta card__where">'+esc(e.location_name)+'</p>'+
-      '<div class="card__s">'+statusTag(e)+
-        '<span class="price" data-free="'+(e.price_cents===0)+'">'+
+      '<p class="meta" style="margin-bottom:var(--s3)">'+F.time(e.start_at)+' &middot; '+
+        F.dur(e.duration_min)+' &middot; '+esc(e.location_name)+'</p>'+
+      going(e)+
+      '<div class="card__f"><span class="mark">'+esc(b.initials)+'</span>'+
+        '<span class="meta">'+esc(b.name)+'</span>'+
+        '<span class="price" data-free="'+(e.price_cents===0)+'" style="margin-left:auto">'+
           F.money(e.price_cents,e.currency)+'</span></div>'+
     '</div>';
   const inner = v==='row' ? body+img : img+saveBtn(e.id)+body;
@@ -1715,24 +1624,22 @@ views.home = () => {
       ' style="--x:'+t.x+';--y:'+t.y+';--w:'+t.w+';--r:'+t.r+';--d:'+t.d+';--dl:'+t.dl+'">'+
       '<img alt="" loading="lazy" src="'+IMG+t.img+'?w=400&q=65"></div>').join('');
 
-  /* The rotating word is now the NOUN. Swapping the adjective sold
-     a mood; swapping the subject shows the range — which is the
-     actual problem when one audience books pottery for a seven
-     year old and another books a midnight walk. */
-  const words=['workshops','weekends','days out','Saturdays'];
+  /* One word rotates, the sentence holds. Screen readers get the
+     first variant only — four headlines read aloud is noise. */
+  const words=['Good','Rare','Loud','Slow'];
   const swap='<span class="swap" aria-hidden="true">'+
     words.map(w=>'<span>'+w+'</span>').join('')+'</span>'+
-    '<span class="sr">workshops</span>';
+    '<span class="sr">Good</span>';
 
   return '<div class="view">'+
     '<section class="hero">'+
       '<div class="amb" aria-hidden="true"><i></i><i></i><i></i></div>'+tiles+
       '<div class="hero__c">'+
         '<p class="hero__mark">KREO</p>'+
-        '<h1 class="hero__h">Good '+swap+'<br>'+
+        '<h1 class="hero__h">'+swap+' nights out<br>'+
           '<span class="hero__g">start here.</span></h1>'+
-        '<p class="hero__s">Pottery for seven year olds, film labs for grown-ups, and '+
-          'everything in between \u2014 across Al Quoz, d3 and DIFC.</p>'+
+        '<p class="hero__s">From wheel-throwing in Al Quoz to midnight walks through '+
+          'DIFC. Find something worth leaving the house for.</p>'+
         '<div><a class="hero__cta" href="#/discover">Browse Dubai</a></div>'+
         '<div><a class="hero__alt" href="#/create">Host an event &rarr;</a></div>'+
       '</div>'+
@@ -1746,7 +1653,7 @@ views.home = () => {
 
     '<section class="close">'+
       '<div class="amb" aria-hidden="true"><i></i><i></i><i></i></div>'+
-      '<h2>The best thing your family does this month is already listed.</h2>'+
+      '<h2>The best thing you do this month is already listed.</h2>'+
       '<div class="btn-row">'+
         '<a class="btn" data-v="ink" data-size="lg" style="width:auto" href="#/discover">Discover events</a>'+
         '<a class="btn" data-v="outline" data-size="lg" style="width:auto" href="#/pricing">Host for free</a>'+
@@ -1823,7 +1730,6 @@ function footer(){
         '<a href="#/discover">Discover</a>'+
         '<a href="#/search">Search</a>'+
         '<a href="#/pricing">Pricing</a>'+
-        '<a href="#/faq">FAQ</a>'+
         '<a href="#/gate">Host</a>'+
         '<a href="#/login">Sign in</a>'+
       '</nav>'+
@@ -2010,9 +1916,7 @@ views.event = (id) => {
   const city = DB.cities.find(c=>c.slug===e.city);
   const det = DB.detail[e.id] || {lead:e.about, body:[], agenda:[], bring:[]};
   const sessions = DB.sessions[e.id];
-  /* Adults-only events require approval. Age-capped children's
-     sessions never do — a max age means the opposite of gated. */
-  const approval = e.age_min >= 18 && !e.age_max;
+  const approval = e.age_min >= 18;   /* stand-in for host approval */
 
   /* --- left rail: identity ------------------------------------ */
   const rail =
@@ -2101,7 +2005,7 @@ views.event = (id) => {
           (city?'<span class="tag" data-t="line">'+esc(city.label)+'</span>':'')+
           (e.live_now?'<span class="live">Live now</span>':'')+
           (st==='limited'?'<span class="tag" data-t="brand">'+F.left(e)+' left</span>':'')+
-          '<span class="tag" data-t="line">'+F.age(e)+'</span>'+
+          (e.age_min?'<span class="tag" data-t="line">'+e.age_min+'+</span>':'')+
         '</div>'+
 
         '<h1 class="ev__title">'+esc(e.title)+'</h1>'+
@@ -2155,7 +2059,7 @@ views.brand = (id) => {
   return '<div class="wrap view">'+
     '<button class="back" data-back>&larr; Back</button>'+
     '<div class="ink-panel" style="display:flex;gap:var(--s4);align-items:center;flex-wrap:wrap">'+
-      '<span class="mark" data-size="lg" style="background:var(--brand);color:var(--on-brand)">'+esc(b.initials)+'</span>'+
+      '<span class="mark" data-size="lg" style="background:var(--brand);color:#fff">'+esc(b.initials)+'</span>'+
       '<div style="flex:1;min-width:200px"><h1 class="h1">'+esc(b.name)+(b.verified?' &#10003;':'')+'</h1>'+
       '<p class="meta">'+b.followers.toLocaleString('en-GB')+' followers &middot; '+list.length+' upcoming</p></div>'+
       '<button class="btn" data-v="primary" data-toast="Following '+esc(b.name)+'">Follow</button>'+
@@ -2827,120 +2731,6 @@ views.discounts = () => {
     '<div style="height:var(--s7)"></div></div>';
 };
 
-/* Answers here are the public statement of decisions made
-   elsewhere in the product — fees, refund window, credits, data.
-   If one changes in the app it must change here too. */
-const FAQ = [
-  {group:'Booking', items:[
-    {q:'Do I need an account to browse?',
-     a:['No. Discover, search, the map and every event page are open to anyone. '+
-        'You only need an account to book, save an event or follow a host.']},
-    {q:'How do I get my ticket?',
-     a:['The moment your booking is confirmed the ticket appears under <strong>My events</strong> '+
-        'with a QR code, and a copy is emailed to you.',
-        'You can add it to Apple Wallet or Google Wallet, download a PDF, or add the '+
-        'event to your calendar. At the door the host scans the QR.']},
-    {q:'Can I book for a group?',
-     a:['Up to <strong>10 seats</strong> in one booking, subject to what the session has left. '+
-        'One QR covers the whole group — you do not need a code per person.']},
-    {q:'What happens when an event is full?',
-     a:['Join the waitlist. If someone cancels we alert everyone on it at once and the '+
-        'seat goes to whoever books first. We do not hold it for you.',
-        'Hosts also release no-shows about 30 minutes before the start, so it is worth '+
-        'checking again close to the time.']},
-    {q:'Does the host see my email address?',
-     a:['<strong>No.</strong> Hosts see your name, seat count and booking reference on their '+
-        'door list — nothing else.',
-        'If a host wants to message you, it goes through KREO and only if you follow them '+
-        'or opt in. Your contact details are never handed over.']}
-  ]},
-  {group:'Payments', items:[
-    {q:'How do I pay?',
-     a:['Credit or debit card, Apple Pay, Google Pay, or KREO credits. Payments are processed '+
-        'by <strong>Stripe</strong>, which is PCI-DSS Level 1 certified.',
-        'KREO never sees or stores your card number.']},
-    {q:'What is the cancellation policy?',
-     a:['Cancel more than <strong>24 hours</strong> before the start and you get a full refund. '+
-        'Inside 24 hours the seat stays yours and a refund is at the host\u2019s discretion.',
-        'Hosts can set a stricter policy on their own events; it is stated on the event page '+
-        'before you book.',
-        'Refunds land back on your card in 5\u201310 business days.']},
-    {q:'What are KREO credits, and can I top them up?',
-     a:['Credits are <strong>earned, never bought</strong>. You get them from referrals and '+
-        'occasional promotions, and they come off your total automatically at checkout.',
-        'There is no way to load money onto KREO. That is deliberate: holding customer '+
-        'balances would make us a stored-value operator under UAE regulation, and we are not one.',
-        'Credits do not expire and have no cash value.']},
-    {q:'How does the referral bonus work?',
-     a:['Share your code from your profile. When a friend completes their first booking, '+
-        'you both receive AED 15 in credits.']}
-  ]},
-  {group:'Hosting', items:[
-    {q:'What does it cost to list an event?',
-     a:['Listing is free. On the free plan KREO takes a <strong>5% platform fee</strong> on paid '+
-        'events; free events cost you nothing at all.',
-        'On <strong>KREO Plus</strong> at AED 249 a month the platform fee is 0%. Stripe\u2019s own '+
-        'card processing applies on both plans.']},
-    {q:'When do I get paid?',
-     a:['Stripe transfers your takings <strong>three days after the event</strong>, minus the '+
-        'platform fee and card processing. Every transfer is itemised under Payouts &amp; analytics.']},
-    {q:'How long does approval take?',
-     a:['New hosts are reviewed within <strong>24 to 48 hours</strong>. We check the trade licence '+
-        'and that the listing is what it says it is.',
-        'Once you are verified your later events go live without waiting.']},
-    {q:'Can I message people who came to my events?',
-     a:['Yes, through KREO. You can reach your followers and past attendees who opted in, and '+
-        'you see audience counts rather than addresses.',
-        'We do not sell or share attendee contact details with anyone.']},
-    {q:'Can more than one person manage our listings?',
-     a:['Yes. A brand can have several members with different roles — owner, manager, or '+
-        'check-in only for door staff on the night.']}
-  ]},
-  {group:'Account', items:[
-    {q:'What data do you keep about me?',
-     a:['Your name, email, city, the events you booked and the interests you chose. Payment '+
-        'details live with Stripe, not with us.',
-        'We do not sell personal data.']},
-    {q:'How do I delete my account?',
-     a:['Ask from your profile and we remove your account. Past bookings are financial records '+
-        'so the transactions stay, but they are detached from your identity.']},
-    {q:'Which cities is KREO in?',
-     a:['Dubai, Abu Dhabi and Sharjah today. Other Emirates and Gulf cities appear in the city '+
-        'picker marked <strong>soon</strong> — they are not open yet, and we would rather say so '+
-        'than show you an empty city.']}
-  ]}
-];
-
-let FAQGROUP='Booking';
-
-views.faq = () => {
-  const g=FAQ.find(x=>x.group===FAQGROUP)||FAQ[0];
-  return '<div class="wrap view"><div class="sec">'+
-    '<h1 class="d2">Questions</h1>'+
-    '<p class="body" style="margin:var(--s3) 0 var(--s6);max-width:52ch">'+
-      'How booking, money and hosting work on KREO. If something is not here, '+
-      '<a href="#/reach" style="text-decoration:underline">ask us</a>.</p>'+
-
-    '<div class="faq-nav">'+FAQ.map(x=>
-      '<button data-faqgroup="'+esc(x.group)+'" aria-pressed="'+(x.group===FAQGROUP)+'">'+
-      esc(x.group)+'</button>').join('')+'</div>'+
-
-    '<div class="faq">'+g.items.map((it,i)=>
-      '<button class="faq__q" data-faq="'+i+'" aria-expanded="false" aria-controls="fa'+i+'">'+
-        '<span class="faq__m">+</span><span>'+esc(it.q)+'</span></button>'+
-      '<div class="faq__a" id="fa'+i+'" data-open="false">'+
-        it.a.map(x=>'<p>'+x+'</p>').join('')+'</div>').join('')+
-    '</div>'+
-
-    '<div class="panel" style="margin-top:var(--s6);display:flex;gap:var(--s4);'+
-      'align-items:center;flex-wrap:wrap">'+
-      '<div style="flex:1;min-width:220px"><p class="h3">Still stuck?</p>'+
-        '<p class="body" style="font-size:var(--t-sm)">We answer within one working day.</p></div>'+
-      '<button class="btn" data-v="primary" data-toast="Opening support\u2026">Contact support</button>'+
-    '</div>'+
-    '<div style="height:var(--s7)"></div></div></div>';
-};
-
 views.pricing = () => {
   return '<div class="wrap view"><div class="sec">'+
     '<h1 class="d2">Pricing</h1>'+
@@ -2964,8 +2754,7 @@ views.pricing = () => {
         '<button class="btn" data-v="primary" style="margin-top:var(--s3)" data-toast="Plus starts after your first event">Upgrade</button>'+
       '</div>'+
     '</div>'+
-    '<p class="meta" style="margin-top:var(--s5)">Enterprise plans and API access on request. '+
-      '<a href="#/faq" style="text-decoration:underline">Read the FAQ</a>.</p>'+
+    '<p class="meta" style="margin-top:var(--s5)">Enterprise plans and API access on request.</p>'+
     '<div style="height:var(--s7)"></div></div></div>';
 };
 
@@ -3177,19 +2966,6 @@ document.addEventListener('click',ev=>{
     }
     return;
   }
-
-  /* FAQ */
-  const fq=ev.target.closest('[data-faq]');
-  if(fq){
-    const open=fq.getAttribute('aria-expanded')!=='true';
-    fq.setAttribute('aria-expanded',String(open));
-    fq.querySelector('.faq__m').textContent = open ? '+' : '+';
-    const a=document.getElementById(fq.getAttribute('aria-controls'));
-    if(a) a.dataset.open=String(open);
-    return;
-  }
-  const fg=ev.target.closest('[data-faqgroup]');
-  if(fg){ FAQGROUP=fg.dataset.faqgroup; route(); return; }
 
   /* city picker */
   const pb=ev.target.closest('#pickbtn');
