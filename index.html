@@ -31,6 +31,11 @@
   --on-brand:#0F0E0C;   /* label colour ON a brand fill */
   --brand-ink:#4A630D;  /* 6.42 on paper — lime as readable text */
   --brand-soft:#F4FBDE; --brand-edge:#6E9314; --live:#C0180A; --good:#0E7A4F;
+  /* Hero sits on lime in both themes, so its text colours are fixed
+     rather than theme-derived — cream ink on lime would vanish. */
+  --hero-ink:#14401F; --hero-accent:#0A2A12; --hero-btn:#14401F;
+  --close-end:#D9F58C; --close-sub:#3F5F45;
+  --trail-c:#6E9314;
 
   --f:'Archivo',system-ui,-apple-system,sans-serif;
   --m:'IBM Plex Mono',ui-monospace,monospace;
@@ -43,12 +48,17 @@
 
   --r1:6px; --r2:14px; --r3:20px; --pill:999px;
   --sh:0 1px 2px rgba(15,14,12,.05),0 10px 30px -18px rgba(15,14,12,.25);
+  /* Button lift. Four values, scaled to weight: a quiet button that
+     casts the same shadow as a primary is no longer quiet. */
+  --btn-sh:0 1px 2px rgba(15,14,12,.08),0 2px 6px -1px rgba(15,14,12,.14);
+  --btn-sh-h:0 2px 4px rgba(15,14,12,.10),0 8px 18px -4px rgba(15,14,12,.22);
+  --btn-sh-a:0 1px 1px rgba(15,14,12,.14);
+  --btn-sh-soft:0 1px 2px rgba(15,14,12,.06);
   --scrim:rgba(250,248,244,.88);   /* sticky bars */
   --scrim-2:rgba(255,255,255,.94);
   --on-media:#FAF8F4;              /* text over photos — never flips */
   --ok-bg:#F2FAF6;
   --ez:cubic-bezier(.2,.7,.3,1);
-  --tabh:76px;
 }
 
 /* Dark. ink/paper are a *pair* — flipping both keeps every
@@ -57,15 +67,23 @@
 [data-theme=dark]{
   --ink:#F4F1EB; --ink-2:#DCD6CB; --paper:#0D0C0B; --surface:#171614;
   --line:#2E2B26; --grey:#9C968C; --grey-2:#8E887C;
+  --trail-c:#C7F464;
+  --close-end:#AFDD5C; --close-sub:#2F4A18;
   --brand:#C7F464; --on-brand:#0F0E0C; --brand-ink:#C7F464;
   --brand-soft:#242D12; --brand-edge:#C7F464;
   --live:#FF4B33; --good:#3FBF87;
   --sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
+  /* On near-black a cast shadow is invisible, so depth comes from a
+     rim highlight above plus a deeper shadow below. */
+  --btn-sh:0 1px 0 rgba(255,255,255,.08) inset,0 2px 8px -2px rgba(0,0,0,.75);
+  --btn-sh-h:0 1px 0 rgba(255,255,255,.12) inset,0 10px 22px -6px rgba(0,0,0,.9);
+  --btn-sh-a:0 1px 2px rgba(0,0,0,.6);
+  --btn-sh-soft:0 1px 4px -1px rgba(0,0,0,.6);
   --scrim:rgba(13,12,11,.85); --scrim-2:rgba(23,22,20,.94);
   --ok-bg:#12241B;
 }
 [data-theme=dark] .story__img,[data-theme=dark] .face{border-color:var(--surface)}
-[data-theme=dark] .btn[data-v=primary]:hover{background:#D6FA84}
+[data-theme=dark] .btn[data-v=primary]:hover{background:#D6FA84;box-shadow:var(--btn-sh-h)}
 [data-theme=dark] img{filter:brightness(.94)}
 [data-theme=dark] .qr,[data-theme=dark] .qr i{filter:none}
 
@@ -75,7 +93,7 @@ body{
   margin:0;background:var(--paper);color:var(--ink);
   font-family:var(--f);font-size:var(--t-base);line-height:1.5;
   -webkit-font-smoothing:antialiased;
-  padding-bottom:calc(var(--tabh) + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
 }
 img{display:block;max-width:100%}
 button{font:inherit;color:inherit;background:none;border:0}
@@ -103,22 +121,27 @@ input,select,textarea{font:inherit;color:inherit}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
   padding:11px var(--s4);border:1px solid transparent;border-radius:var(--r1);
   font-size:var(--t-sm);font-weight:600;cursor:pointer;
-  transition:transform .12s var(--ez),background-color .15s var(--ez),color .15s var(--ez)}
-.btn:active{transform:translateY(1px) scale(.99)}
+  transition:transform .12s var(--ez),background-color .15s var(--ez),
+             color .15s var(--ez),box-shadow .15s var(--ez)}
+/* Pressing flattens the shadow as the button travels down. Without
+   it the lift reads as a sticker rather than a control. */
+.btn:active{transform:translateY(1px) scale(.99);box-shadow:var(--btn-sh-a)}
 /* Lime on cream has no visible edge (1.20:1). The border supplies
    the component boundary WCAG 1.4.11 requires; dark mode does not
    need it, where lime reads 15.40:1 against the page. */
 .btn[data-v=primary]{background:var(--brand);color:var(--on-brand);
-  border-color:var(--brand-edge)}
-.btn[data-v=primary]:hover{background:#B4E24A}
-.btn[data-v=ink]{background:var(--ink);color:var(--paper)}
-.btn[data-v=ink]:hover{background:var(--ink-2)}
-.btn[data-v=outline]{border-color:var(--ink)}
-.btn[data-v=outline]:hover{background:var(--ink);color:var(--paper)}
+  border-color:var(--brand-edge);box-shadow:var(--btn-sh)}
+.btn[data-v=primary]:hover{background:#B4E24A;box-shadow:var(--btn-sh-h)}
+.btn[data-v=ink]{background:var(--ink);color:var(--paper);box-shadow:var(--btn-sh)}
+.btn[data-v=ink]:hover{background:var(--ink-2);box-shadow:var(--btn-sh-h)}
+.btn[data-v=outline]{border-color:var(--ink);box-shadow:var(--btn-sh-soft)}
+.btn[data-v=outline]:hover{background:var(--ink);color:var(--paper);box-shadow:var(--btn-sh-h)}
+/* quiet stays flat until touched — that is what makes it quiet */
 .btn[data-v=quiet]{color:var(--grey)}
-.btn[data-v=quiet]:hover{color:var(--ink);background:var(--brand-soft)}
+.btn[data-v=quiet]:hover{color:var(--ink);background:var(--brand-soft);box-shadow:var(--btn-sh-soft)}
 .btn[data-size=lg]{padding:15px var(--s5);font-size:var(--t-base);width:100%}
-.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn[disabled]:hover{box-shadow:none}
 .btn-row{display:flex;gap:var(--s2);flex-wrap:wrap}
 
 /* --- chips / tags --------------------------------------------- */
@@ -159,12 +182,29 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* --- save ------------------------------------------------------ */
 .save{position:absolute;top:var(--s3);right:var(--s3);z-index:2;width:44px;height:44px;
-  display:grid;place-items:center;border-radius:50%;cursor:pointer;font-size:18px;
-  background:rgba(15,14,12,.5);color:#fff;backdrop-filter:blur(8px);
-  transition:transform .18s var(--ez),background-color .18s var(--ez)}
-.save:hover{background:rgba(15,14,12,.78)}
-.save[aria-pressed=true]{background:var(--brand);color:var(--on-brand);box-shadow:0 0 0 1px var(--brand-edge)}
+  display:grid;place-items:center;cursor:pointer;background:none;
+  transition:transform .18s var(--ez)}
+.save:hover svg{transform:scale(1.12)}
 .save:active{transform:scale(.86)}
+
+/* SVG rather than the heart glyphs: outline and filled hearts sit
+   on different baselines in most system fonts, so the icon jumped
+   on toggle. One path, fill swaps. */
+.save svg{width:23px;height:23px;display:block;overflow:visible}
+.save svg{filter:drop-shadow(0 1px 2px rgba(15,14,12,.55))
+                 drop-shadow(0 0 6px rgba(15,14,12,.45));
+  transition:transform .18s var(--ez)}
+.save svg path{
+  fill:rgba(15,14,12,.28);stroke:#fff;stroke-width:2;stroke-linejoin:round;
+  transition:fill .2s var(--ez),stroke .2s var(--ez)}
+.save[aria-pressed=true] svg path{fill:var(--brand);stroke:#fff}
+
+/* The fill pops once on save. Confirmation you can feel. */
+@keyframes savepop{
+  0%{transform:scale(1)} 40%{transform:scale(1.28)} 100%{transform:scale(1)}
+}
+.save[aria-pressed=true] svg{animation:savepop .32s var(--ez)}
+@media(prefers-reduced-motion:reduce){.save[aria-pressed=true] svg{animation:none}}
 
 /* --- category tiles: label + live count (counts are information,
        circles were decoration) --------------------------------- */
@@ -227,7 +267,13 @@ input,select,textarea{font:inherit;color:inherit}
 /* status left, price right — price never gets squeezed by a long
    status label, because it is the number people scan for */
 .card__s{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);min-width:0}
-.card__s .price{margin-left:auto;flex:none}
+.card__s .price,.card__s .price-gate{margin-left:auto;flex:none}
+/* Reads as a deliberate lock, not as a loading state */
+.price-gate{display:inline-flex;align-items:center;gap:6px;flex:none;
+  font-family:var(--m);font-size:var(--t-xs);color:var(--grey-2)}
+.price-gate b{font-weight:600;color:var(--brand-ink);
+  text-decoration:underline;text-underline-offset:2px}
+.price-gate span[aria-hidden]{letter-spacing:-1px;font-size:9px;opacity:.6}
 .card__s .tag,.card__s .live{flex:none}
 
 .card[data-v=row]{display:grid;grid-template-columns:1fr 108px;gap:var(--s4);padding:var(--s4);align-items:start}
@@ -341,20 +387,30 @@ textarea.input{min-height:96px;resize:vertical}
   letter-spacing:.1em;color:var(--grey);padding-bottom:2px;border-bottom:1px solid transparent}
 .top__nav a:hover{color:var(--ink)}
 .top__nav a[aria-current=page]{color:var(--ink);border-bottom-color:var(--brand)}
-@media(max-width:720px){.top__nav{display:none}}
+/* The top bar is now the only navigation, so it scrolls
+   horizontally on narrow screens rather than disappearing. */
+@media(max-width:720px){
+  .top__nav{gap:var(--s4);overflow-x:auto;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;flex:1;min-width:0}
+  .top__nav::-webkit-scrollbar{display:none}
+  .top__nav a{white-space:nowrap;padding-bottom:4px}
+  .top{gap:var(--s3);padding:var(--s3) var(--s4)}
+  .brand{font-size:var(--t-lg)}
+}
+@media(max-width:520px){
+  .top .btn[data-v=ink]{padding:9px var(--s3);font-size:var(--t-2xs)}
+  .theme{width:36px;height:36px}
+}
+/* At 320px the nav strip is left with ~40px. The wordmark is the
+   least useful thing in the bar once you are inside the app. */
+@media(max-width:340px){
+  .brand{font-size:0}
+  .brand::after{content:'K';font-size:var(--t-lg)}
+  .top{gap:var(--s2);padding:var(--s3) var(--s3)}
+  .theme{width:32px;height:32px}
+}
 
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
-  display:grid;grid-template-columns:repeat(5,1fr);gap:var(--s1);
-  padding:var(--s2) var(--s3) calc(var(--s2) + env(safe-area-inset-bottom));
-  background:var(--scrim-2);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
-.tabbar a{display:grid;justify-items:center;gap:3px;padding:var(--s2) 0;border-radius:var(--r1);
-  font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
-  letter-spacing:.05em;color:var(--grey)}
-.tabbar a[aria-current=page]{color:var(--brand-ink)}
-.tabbar a[aria-current=page] .g{background:var(--brand);color:var(--on-brand)}
-.g{width:30px;height:30px;display:grid;place-items:center;border-radius:var(--r1);font-size:15px}
-
-.bar{position:fixed;left:0;right:0;bottom:calc(var(--tabh) + env(safe-area-inset-bottom));z-index:25;
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;
   display:flex;align-items:center;gap:var(--s4);padding:var(--s3) var(--s5);
   background:var(--scrim-2);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
 .bar .btn{flex:none;min-width:150px}
@@ -363,6 +419,11 @@ textarea.input{min-height:96px;resize:vertical}
   border:1px solid var(--line);cursor:pointer;font-size:15px;flex:none;
   transition:background-color .15s var(--ez),border-color .15s var(--ez)}
 .theme:hover{border-color:var(--ink);background:var(--brand-soft)}
+#searchbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round}
+/* current page: the icon fills so you can tell you are already there */
+#searchbtn[aria-current=page]{background:var(--brand);border-color:var(--brand-edge);
+  color:var(--on-brand)}
 
 .back{display:inline-flex;align-items:center;gap:6px;font-family:var(--m);
   font-size:var(--t-xs);color:var(--grey);padding:var(--s4) var(--s2) var(--s4) 0;
@@ -381,39 +442,48 @@ textarea.input{min-height:96px;resize:vertical}
    the viewport edge, not by a card. That clipping is what makes
    the field read as a stage rather than a panel. */
 .hero{position:relative;overflow:hidden;isolation:isolate;
-  background:var(--paper);
+  background:var(--brand);
   /* 100vw includes the scrollbar; without this guard the page
      gains a horizontal scrollbar on Windows/Linux. */
   width:100vw;margin-left:calc(50% - 50vw);max-width:100%;
-  min-height:760px;display:grid;place-items:center;padding:var(--s8) var(--s5)}
-.hero::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse 52% 56% at 50% 48%,
-    var(--paper) 0%, color-mix(in srgb, var(--paper) 88%, transparent) 44%,
-    transparent 78%)}
-/* color-mix fallback for older engines */
-@supports not (background: color-mix(in srgb, red 50%, blue)){
-  .hero::after{background:radial-gradient(ellipse 52% 56% at 50% 48%,
-    var(--paper) 0%, var(--paper) 40%, transparent 78%);opacity:.94}
-}
-.hero__c{position:relative;z-index:2;text-align:center;max-width:640px}
+  min-height:660px;display:grid;align-items:center;padding:var(--s8) var(--s6)}
+
+/* Two columns: the copy owns the left, the image field owns the
+   right. Tiles are positioned inside the field, so their
+   percentages resolve against that box rather than the viewport
+   and the composition survives any screen width. */
+.hero__in{position:relative;z-index:2;width:100%;max-width:1160px;margin:0 auto;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.04fr);
+  gap:var(--s7);align-items:center}
+
+.hero__c{position:relative;z-index:3;text-align:left;max-width:560px}
 .hero__mark{font-size:var(--t-lg);font-weight:800;letter-spacing:-.05em;
-  color:var(--brand-ink);margin:0 0 var(--s5)}
-.hero__h{font-size:clamp(40px,7.6vw,82px);font-weight:800;line-height:.94;
-  letter-spacing:-.05em;color:var(--ink);margin:0}
-/* KREO's ramp: deep violet -> signal -> fuchsia */
-.hero__g{background:linear-gradient(98deg,#2F4A0A 0%,#4A630D 46%,#6E9314 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-[data-theme=dark] .hero__g{background:linear-gradient(98deg,#9BE15D 0%,#C7F464 44%,#E9FFAE 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.hero__s{color:var(--grey);font-size:var(--t-lg);
-  margin:var(--s5) auto 0;max-width:34ch;line-height:1.45}
-.hero__cta{display:inline-flex;background:var(--ink);color:var(--paper);
+  color:var(--hero-ink);opacity:.72;margin:0 0 var(--s5)}
+.hero__h{font-size:clamp(36px,5.4vw,64px);font-weight:800;line-height:.98;
+  letter-spacing:-.045em;color:var(--hero-ink);margin:0}
+/* Flat accent, not a gradient. Clipped-text gradients on a
+   coloured canvas band visibly at large sizes. */
+/* Black, not the green accent — --on-brand is the fixed
+   label colour for anything sitting on a lime fill. */
+.hero__g{color:var(--on-brand)}
+.hero__s{color:var(--hero-ink);opacity:.8;font-size:var(--t-lg);
+  margin:var(--s5) 0 0;max-width:36ch;line-height:1.45}
+.hero__cta{display:inline-flex;background:var(--hero-btn);color:var(--brand);
   padding:15px var(--s6);border-radius:var(--pill);font-weight:600;
-  margin-top:var(--s6);transition:transform .15s var(--ez)}
-.hero__cta:hover{transform:translateY(-2px)}
+  margin-top:var(--s6);box-shadow:var(--btn-sh);
+  transition:transform .15s var(--ez),box-shadow .15s var(--ez)}
+.hero__cta:hover{transform:translateY(-2px);box-shadow:var(--btn-sh-h)}
+.hero__cta:active{transform:translateY(0);box-shadow:var(--btn-sh-a)}
 .hero__alt{display:inline-flex;align-items:center;gap:6px;margin-top:var(--s4);
-  color:var(--grey);font-size:var(--t-sm)}
-.hero__alt:hover{color:var(--ink)}
+  color:var(--hero-ink);opacity:.82;font-weight:600;font-size:var(--t-sm)}
+.hero__alt:hover{opacity:1}
+
+/* Fixed ratio so the field has height before the images load and
+   the layout does not jump. */
+.hero__field{position:relative;aspect-ratio:1/.94;min-height:420px}
+/* No veil on the field edge. Any gradient over a flat colour
+   renders as a visible seam — spacing keeps the tiles clear of
+   the headline instead. */
 
 /* ============================================================
    FAQ — accordion. One open at a time is a false constraint;
@@ -494,6 +564,14 @@ textarea.input{min-height:96px;resize:vertical}
 .reg__note span{font-size:var(--t-sm);color:var(--grey)}
 .reg__price{display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s4)}
 .reg__price b{font-size:var(--t-2xl);font-weight:800;letter-spacing:-.03em}
+.reg__locked{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4);
+  padding:var(--s3) var(--s4);border:1px dashed var(--line);border-radius:var(--r1);
+  background:var(--brand-soft);transition:border-color .15s var(--ez)}
+.reg__locked:hover{border-color:var(--brand-edge)}
+.reg__locked b{display:block;font-size:var(--t-sm);color:var(--brand-ink)}
+.reg__locked span{min-width:0}
+.reg__locked-i{font-family:var(--m);font-size:12px;letter-spacing:-1px;
+  color:var(--grey-2);flex:none}
 
 /* host card in the rail */
 .hostc{border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4);
@@ -561,16 +639,142 @@ textarea.input{min-height:96px;resize:vertical}
   .amb i:nth-child(3){display:none}
 }
 
-/* The closing block has no scrim, so its wash is far weaker and
-   a flat veil sits between the blooms and the type. */
-.close{position:relative;overflow:hidden;isolation:isolate}
-.close .amb i{opacity:.24}
-[data-theme=dark] .close .amb i{opacity:.2}
-.close::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:var(--paper);opacity:.72}
+/* ============================================================
+   CREATE EVENT — two columns, sized to fit a laptop viewport
+   without scrolling. Below 1000px it stacks and scrolls, which is
+   correct: twelve fields cannot fit a phone screen honestly.
+
+   Everything here is a deliberate step down from the global scale.
+   The page is a form to complete, not a page to read, so density
+   beats comfort — but only inside .cx, so the rest of the app is
+   untouched.
+   ============================================================ */
+.cx{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4);align-items:start}
+.cx__col{display:grid;gap:var(--s2);align-content:start}
+.cx .field{margin-bottom:0}
+.cx .panel{padding:var(--s3)}
+.cx .label{font-size:9px;letter-spacing:.1em;line-height:1.3}
+.cx .input{padding:7px 10px;font-size:var(--t-sm)}
+.cx textarea.input{min-height:52px}
+.cx .two{gap:var(--s2)}
+.cx .toggle{padding:6px 0}
+.cx .h3{font-size:var(--t-sm)}
+.cx .hint{font-size:9px;line-height:1.3}
+.cx .drop{padding:var(--s3)}
+.cx .drop .h3{font-size:var(--t-sm)}
+@media(max-width:1000px){.cx{grid-template-columns:1fr}}
+
+/* Calendar inside the form: fixed row height instead of square
+   cells. At 458px wide, aspect-ratio:1 made each day 59px and the
+   grid alone 400px tall — the single reason the page scrolled. */
+.cx .cal{padding:var(--s2)}
+.cx .cal__d{aspect-ratio:auto;height:24px;font-size:11px}
+.cx .cal__g{gap:1px}
+.cx .cal__h{margin-bottom:4px}
+.cx .cal__h button{width:26px;height:26px;font-size:13px}
+.cx .cal__sel{margin-top:var(--s2);padding-top:var(--s2);min-height:22px}
+@media(hover:none),(pointer:coarse){
+  .cx .cal__d{height:34px}
+  .cx .cal__h button{width:40px;height:40px}
+}
+
+/* --- calendar ------------------------------------------------ */
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);
+  padding:var(--s3)}
+.cal__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s2)}
+.cal__h b{font-size:var(--t-sm);font-weight:700;letter-spacing:-.01em}
+.cal__h button{width:32px;height:32px;border-radius:var(--r1);cursor:pointer;
+  display:grid;place-items:center;color:var(--grey)}
+@media(hover:none),(pointer:coarse){
+  .cal__h button{width:44px;height:44px}
+  .seg button{min-height:44px}
+  .cal__d{min-height:38px}
+}
+.cal__h button:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.cal__g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal__w{font-family:var(--m);font-size:9px;color:var(--grey-2);text-align:center;
+  padding-bottom:2px;letter-spacing:.06em}
+.cal__d{aspect-ratio:1;display:grid;place-items:center;border-radius:var(--r1);
+  font-size:var(--t-xs);font-family:var(--m);cursor:pointer;border:1px solid transparent;
+  transition:background-color .12s var(--ez)}
+.cal__d:hover{background:var(--brand-soft)}
+.cal__d[data-sel=true]{background:var(--brand);color:var(--on-brand);
+  border-color:var(--brand-edge);font-weight:600}
+.cal__d[data-today=true]{border-color:var(--brand-edge)}
+.cal__d[disabled]{opacity:.28;cursor:not-allowed;background:none}
+.cal__d[data-pad=true]{visibility:hidden}
+.cal__sel{display:flex;gap:4px;flex-wrap:wrap;margin-top:var(--s3);
+  padding-top:var(--s3);border-top:1px solid var(--line);min-height:26px}
+.cal__chip{display:inline-flex;align-items:center;gap:5px;padding:3px 6px;
+  border-radius:var(--r1);background:var(--brand-soft);color:var(--brand-ink);
+  font-family:var(--m);font-size:9px;letter-spacing:.04em}
+.cal__chip button{cursor:pointer;color:inherit;opacity:.6;font-size:11px;line-height:1}
+.cal__chip button:hover{opacity:1}
+.cal__none{font-family:var(--m);font-size:9px;color:var(--grey-2)}
 
 /* ============================================================
-   CITY PICKER — heading is the control. Region tabs, then a
+   ADMIN PANEL
+   Deliberately plainer than the public site: this is a control
+   surface, not a shop window. Dense rows, no imagery, no motion.
+   ============================================================ */
+.adm{display:grid;grid-template-columns:190px 1fr;gap:var(--s5);align-items:start}
+.adm__rail{position:sticky;top:84px;display:grid;gap:2px}
+.adm__rail a{display:flex;align-items:center;gap:var(--s2);padding:9px var(--s3);
+  border-radius:var(--r1);font-size:var(--t-sm);color:var(--grey);
+  transition:background-color .12s var(--ez)}
+.adm__rail a:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.adm__rail a[aria-current=page]{background:var(--ink);color:var(--paper);font-weight:600}
+.adm__rail span{margin-left:auto;font-family:var(--m);font-size:9px;
+  padding:1px 5px;border-radius:var(--pill);background:var(--live);color:#fff}
+.adm__main{min-width:0;display:grid;gap:var(--s4)}
+@media(max-width:860px){
+  .adm{grid-template-columns:1fr}
+  .adm__rail{position:static;grid-auto-flow:column;overflow-x:auto;gap:var(--s1)}
+  .adm__rail a{white-space:nowrap}
+}
+
+.akpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:var(--s3)}
+.akpi__c{padding:var(--s3);border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--surface)}
+.akpi__c b{display:block;font-size:var(--t-2xl);font-weight:800;letter-spacing:-.03em;
+  line-height:1.05}
+.akpi__c span{font-family:var(--m);font-size:9px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--grey)}
+
+.arow{display:grid;grid-template-columns:34px 1fr auto auto;gap:var(--s3);align-items:center;
+  padding:var(--s3);border:1px solid var(--line);border-radius:var(--r1);
+  background:var(--surface)}
+.arow+.arow{margin-top:var(--s2)}
+.arow p{margin:0}
+.arow__t{font-weight:600;font-size:var(--t-sm)}
+.arow[data-state=pending]{border-left:3px solid var(--brand-edge)}
+.arow[data-state=suspended]{border-left:3px solid var(--live);opacity:.72}
+@media(max-width:640px){
+  .arow{grid-template-columns:34px 1fr;row-gap:var(--s2)}
+  .arow .btn-row{grid-column:1/-1}
+}
+
+.alog{display:grid}
+.alog__r{display:grid;grid-template-columns:110px 1fr auto;gap:var(--s3);
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:var(--t-sm);align-items:baseline}
+.alog__r:last-child{border-bottom:0}
+.alog__r time{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey-2)}
+@media(max-width:560px){.alog__r{grid-template-columns:1fr;gap:2px}}
+
+.swatch{display:flex;align-items:center;gap:var(--s3)}
+.swatch input[type=color]{width:52px;height:38px;padding:2px;border:1px solid var(--line);
+  border-radius:var(--r1);background:var(--surface);cursor:pointer}
+.swatch code{font-family:var(--m);font-size:var(--t-sm)}
+
+.words{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--s2)}
+.words__c{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;
+  border-radius:var(--pill);background:var(--brand-soft);color:var(--brand-ink);
+  font-size:var(--t-xs);font-weight:600}
+.words__c button{cursor:pointer;color:inherit;opacity:.6;line-height:1}
+.words__c button:hover{opacity:1}
+
+/* ============================================================
+   HUB PICKER — heading is the control. A grid of Dubai hubs;
    three-column grid of cities.
    ============================================================ */
 .pick{position:relative;display:inline-block}
@@ -579,29 +783,71 @@ textarea.input{min-height:96px;resize:vertical}
   padding:0 2px;border-radius:var(--r1)}
 .pick__btn:hover{opacity:.8}
 .pick__btn i{font-style:normal;font-size:.6em;opacity:.75}
-.pick__p{position:absolute;left:0;top:calc(100% + 12px);z-index:50;width:min(700px,88vw);
+
+/* Hover bridge: an invisible strip spanning the gap between the
+   button and the panel, so moving the cursor down does not pass
+   through dead space and close the menu. */
+.pick::after{content:'';position:absolute;left:0;top:100%;width:100%;height:16px;
+  display:none}
+.pick[data-hot=true]::after{display:block}
+
+.pick__p{position:absolute;left:0;top:calc(100% + 14px);z-index:50;width:min(720px,90vw);
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r3);
-  box-shadow:var(--sh);padding:var(--s4);display:none}
+  box-shadow:0 4px 12px -4px rgba(15,14,12,.12),
+             0 24px 60px -18px rgba(15,14,12,.32);
+  padding:var(--s4);display:none}
 .pick__p[data-open=true]{display:block;animation:rise .18s var(--ez)}
+
 .pick__tabs{display:flex;gap:var(--s1);margin-bottom:var(--s4);flex-wrap:wrap}
-.pick__tabs button{padding:8px var(--s3);border-radius:var(--r1);font-size:var(--t-sm);
-  font-weight:600;color:var(--grey);cursor:pointer}
-.pick__tabs button[aria-pressed=true]{background:var(--brand-soft);color:var(--brand-ink)}
-.pick__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s1)}
-.pick__c{display:flex;align-items:center;gap:var(--s3);padding:10px var(--s3);
-  border-radius:var(--r1);cursor:pointer;text-align:left;width:100%;font-size:var(--t-sm)}
-.pick__c:hover{background:var(--brand-soft)}
-.pick__c[aria-pressed=true]{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
-.pick__c[disabled]{opacity:.4;cursor:not-allowed}
-.pick__i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
-  font-size:13px;flex:none;background:var(--brand-soft)}
-.pick__n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pick__k{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey-2)}
-@media(max-width:720px){
-  .pick__grid{grid-template-columns:repeat(2,1fr)}
-  .pick__p{width:min(94vw,700px);left:50%;transform:translateX(-50%)}
+.pick__tabs button{padding:8px var(--s3);border-radius:var(--pill);font-size:var(--t-sm);
+  font-weight:600;color:var(--grey);cursor:pointer;min-height:40px}
+.pick__tabs button:hover{background:var(--brand-soft)}
+.pick__tabs button[aria-pressed=true]{background:var(--brand);color:var(--on-brand);
+  border:1px solid var(--brand-edge)}
+
+.pick__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s3)}
+
+/* City card. The lime duotone comes from a multiply blend over a
+   desaturated photo — one treatment that works on any image, so a
+   new city never needs bespoke artwork. */
+.pick__c{position:relative;display:block;padding:0;width:100%;overflow:hidden;
+  border-radius:var(--r2);cursor:pointer;text-align:left;background:var(--brand);
+  border:1px solid var(--brand-edge);
+  transition:transform .15s var(--ez),box-shadow .2s var(--ez)}
+.pick__c img{width:100%;height:78px;object-fit:cover;display:block;
+  mix-blend-mode:multiply;filter:grayscale(1) contrast(.9) brightness(1.34)}
+/* A dark region of the photo drags the multiply result down to
+   ~4:1 behind the label. This band guarantees the top strip stays
+   light regardless of what the host uploaded. */
+.pick__c::before{content:'';position:absolute;inset:0 0 auto 0;height:42px;z-index:1;
+  background:linear-gradient(180deg,var(--brand) 0%,
+    color-mix(in srgb,var(--brand) 82%,transparent) 55%,transparent 100%)}
+@supports not (background: color-mix(in srgb, red 50%, blue)){
+  .pick__c::before{background:linear-gradient(180deg,var(--brand) 0%,transparent 100%)}
 }
-@media(max-width:460px){.pick__grid{grid-template-columns:1fr}}
+.pick__c:hover{transform:translateY(-2px);
+  box-shadow:0 10px 24px -10px rgba(15,14,12,.45)}
+.pick__c[aria-pressed=true]{outline:2px solid var(--ink);outline-offset:-2px}
+.pick__c[disabled]{cursor:not-allowed}
+.pick__c[disabled] img{filter:grayscale(1) brightness(1.3) opacity(.55)}
+
+.pick__n{position:absolute;left:10px;top:9px;z-index:2;
+  font-size:var(--t-sm);font-weight:700;letter-spacing:-.01em;color:var(--on-brand);
+  max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick__k{position:absolute;right:9px;bottom:8px;z-index:2;
+  font-family:var(--m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--on-brand);opacity:.6}
+
+@media(max-width:720px){
+  .pick__p{width:min(94vw,720px);left:50%;transform:translateX(-50%)}
+  .pick__c img{height:66px}
+}
+@media(max-width:460px){
+  .pick__grid{grid-template-columns:1fr}
+  .pick__c img{height:60px}
+}
+/* No hover on touch, so the bridge is pointless there */
+@media(hover:none),(pointer:coarse){ .pick::after{display:none!important} }
 
 /* ============================================================
    MAJOR EVENTS — multi-day, so a date range not a clock time
@@ -621,38 +867,63 @@ textarea.input{min-height:96px;resize:vertical}
 @media(max-width:560px){.major{grid-template-columns:1fr}}
 
 /* rotating adjective — one word swaps, sentence holds */
-.swap{display:inline-grid;vertical-align:top}
-.swap>span{grid-area:1/1;opacity:0;animation:swapcycle 12s infinite}
+.swap{display:inline-grid;vertical-align:top;justify-items:start}
+.swap>span{grid-area:1/1;opacity:0;animation:swapcycle 15s infinite;white-space:nowrap}
 .swap>span:nth-child(1){animation-delay:0s}
-.swap>span:nth-child(2){animation-delay:3s}
-.swap>span:nth-child(3){animation-delay:6s}
-.swap>span:nth-child(4){animation-delay:9s}
+.swap>span:nth-child(2){animation-delay:2.5s}
+.swap>span:nth-child(3){animation-delay:5s}
+.swap>span:nth-child(4){animation-delay:7.5s}
+.swap>span:nth-child(5){animation-delay:10s}
+.swap>span:nth-child(6){animation-delay:12.5s}
 @keyframes swapcycle{
-  0%   {opacity:0;transform:translateY(14px)}
-  4%   {opacity:1;transform:none}
-  25%  {opacity:1;transform:none}
-  29%  {opacity:0;transform:translateY(-14px)}
-  100% {opacity:0;transform:translateY(-14px)}
+  0%    {opacity:0;transform:translateY(14px)}
+  3%    {opacity:1;transform:none}
+  15.5% {opacity:1;transform:none}
+  18.5% {opacity:0;transform:translateY(-14px)}
+  100%  {opacity:0;transform:translateY(-14px)}
 }
 @media(prefers-reduced-motion:reduce){
   .swap>span{animation:none;opacity:0}
   .swap>span:first-child{opacity:1}
 }
 
-/* closing block */
-.close{text-align:center;padding:var(--s8) var(--s5);
+/* ============================================================
+   CLOSING BLOCK — lime fading into the page. The gradient is the
+   transition out of the brand and into the footer, so the section
+   needs no border to separate it.
+   ============================================================ */
+.close{position:relative;overflow:hidden;isolation:isolate;text-align:center;
+  padding:var(--s8) var(--s5) calc(var(--s8) + var(--s5));
   width:100vw;margin-left:calc(50% - 50vw);max-width:100%;
-  border-top:1px solid var(--line)}
-.close h2{font-size:clamp(28px,4.4vw,46px);font-weight:800;letter-spacing:-.04em;
-  line-height:1.02;margin:0 auto;max-width:16ch}
-.close .btn-row{justify-content:center;margin-top:var(--s5);position:relative;z-index:2}
-/* the section CTAs resolve to brand on hover, not to an ink fill
-   that reads as white text in light mode */
-.close .btn[data-v=ink]:hover,
-.close .btn[data-v=outline]:hover{background:var(--brand);border-color:var(--brand-edge);color:var(--on-brand)}
-.close h2{position:relative;z-index:2;transition:color .3s var(--ez)}
-.close:hover h2{color:var(--brand-ink)}
+  background:linear-gradient(180deg,var(--brand) 0%,
+    var(--brand) 84%, var(--close-end) 100%)}
+.close__in{position:relative;z-index:3;max-width:620px;margin:0 auto}
+.close h2{font-size:clamp(28px,4.2vw,44px);font-weight:800;letter-spacing:-.04em;
+  line-height:1.06;margin:0 auto;max-width:15ch;color:var(--hero-ink)}
+.close p{margin:var(--s4) auto 0;max-width:44ch;font-size:var(--t-sm);
+  line-height:1.5;color:var(--close-sub)}
+.close .btn-row{justify-content:center;margin-top:var(--s5);gap:var(--s3)}
 
+/* Pills, not the standard button shapes — this block is a sign-off,
+   not part of the working interface. */
+.close__a{display:inline-flex;align-items:center;justify-content:center;
+  padding:13px var(--s6);border-radius:var(--pill);font-weight:600;
+  font-size:var(--t-sm);box-shadow:var(--btn-sh);
+  transition:transform .15s var(--ez),box-shadow .15s var(--ez)}
+.close__a:hover{transform:translateY(-2px);box-shadow:var(--btn-sh-h)}
+.close__a:active{transform:translateY(0);box-shadow:var(--btn-sh-a)}
+.close__a[data-v="light"]{background:#fff;color:var(--hero-ink)}
+.close__a[data-v="dark"]{background:var(--hero-btn);color:#fff}
+
+/* Sparkles hug the edges so the centre column stays clean. */
+.close .spk{background:#fff;
+  filter:drop-shadow(0 0 3px rgba(20,64,31,.35))}
+@media(max-width:700px){
+  .close{padding:var(--s7) var(--s4)}
+  .close .spk[data-edge="in"]{display:none}
+  .close__a{width:100%;}
+  .close .btn-row{flex-direction:column}
+}
 /* footer */
 .foot{width:100vw;margin-left:calc(50% - 50vw);max-width:100%;
   border-top:1px solid var(--line);padding:var(--s6) var(--s5) var(--s8)}
@@ -676,6 +947,47 @@ textarea.input{min-height:96px;resize:vertical}
   .foot__nav{justify-content:center}
 }
 
+/* ============================================================
+   SPARKLES
+   Four-point stars via clip-path. Two systems share the shape:
+   a static field in the hero, and a cursor trail. Both animate
+   transform + opacity only, so neither touches layout.
+   ============================================================ */
+.spk{position:absolute;pointer-events:none;z-index:2;
+  width:var(--sw);height:var(--sw);left:var(--sx);top:var(--sy);
+  background:#fff;opacity:0;
+  clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%);
+  /* White on lime is 1.27:1 — the shadow is what makes the star
+     legible at all. Without it they dissolve into the canvas. */
+  filter:drop-shadow(0 0 3px rgba(20,64,31,.55)) drop-shadow(0 1px 2px rgba(20,64,31,.35));
+  animation:twinkle var(--sd) ease-in-out var(--sdl) infinite}
+@keyframes twinkle{
+  0%,100%{opacity:0;transform:scale(.3) rotate(0deg)}
+  40%    {opacity:var(--so);transform:scale(1) rotate(20deg)}
+  68%    {opacity:calc(var(--so) * .25);transform:scale(.65) rotate(32deg)}
+}
+
+/* Cursor trail. Fixed-position layer above everything, ignores
+   pointer events entirely so it can never block a click. */
+#trail{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden}
+.tspk{position:absolute;width:var(--tw);height:var(--tw);
+  margin:calc(var(--tw) / -2) 0 0 calc(var(--tw) / -2);
+  background:var(--trail-c);
+  clip-path:polygon(50% 0%,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0% 50%,40% 40%);
+  animation:tfade var(--tdur) ease-out forwards;will-change:transform,opacity}
+@keyframes tfade{
+  0%  {opacity:0;transform:translate(0,0) scale(.2) rotate(0deg)}
+  22% {opacity:.95;transform:translate(calc(var(--dx) * .3),calc(var(--dy) * .3)) scale(1) rotate(35deg)}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.25) rotate(120deg)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .spk{animation:none;opacity:.5;transform:scale(.9)}
+  #trail{display:none}
+}
+/* No cursor on touch, so no trail */
+@media(hover:none),(pointer:coarse){ #trail{display:none} }
+
 /* floating cover tiles */
 .tile{position:absolute;z-index:0;left:var(--x);top:var(--y);width:var(--w);
   aspect-ratio:1;
@@ -683,28 +995,31 @@ textarea.input{min-height:96px;resize:vertical}
   will-change:transform}
 /* depth lives on the <img>, not the box — a broken image then
    leaves nothing behind rather than an empty outlined rectangle */
+/* No cast shadow: at this size it painted a visible dark patch
+   behind every tile. A hairline gives the edge definition the
+   shadow was there for, without the smudge. */
 .tile img{width:100%;height:100%;object-fit:cover;border-radius:18px;
-  box-shadow:0 18px 40px -18px rgba(15,14,12,.45)}
-[data-theme=dark] .tile img{box-shadow:0 22px 50px -20px rgba(0,0,0,.85)}
+  border:1px solid rgba(15,14,12,.07)}
+[data-theme=dark] .tile img{border-color:rgba(255,255,255,.09)}
 @keyframes drift{
   from{transform:translate3d(0,-11px,0) rotate(calc(var(--r) - 1.4deg))}
   to  {transform:translate3d(0, 13px,0) rotate(calc(var(--r) + 1.4deg))}
 }
-@media(max-width:860px){
-  .hero{min-height:620px}
-  .tile{width:calc(var(--w) * .66)}
-  .tile img{border-radius:14px}
-  .tile[data-sm=hide]{display:none}
-}
-@media(max-width:600px){
-  .hero{min-height:520px;padding:var(--s7) var(--s4)}
-  .tile{width:calc(var(--w) * .5)}
-  .tile img{border-radius:11px}
-  .hero::after{background:radial-gradient(ellipse 82% 48% at 50% 46%,
-    var(--paper) 0%, color-mix(in srgb, var(--paper) 92%, transparent) 50%,
-    transparent 84%)}
+@media(max-width:880px){
+  .hero{min-height:auto;padding:var(--s7) var(--s4)}
+  .hero__in{grid-template-columns:1fr;gap:var(--s5)}
+  .hero__c{max-width:none}
+  /* image field drops below the copy — the headline should be the
+     first thing on a phone, not a photo collage */
+  .hero__field{order:2;aspect-ratio:1/.7;min-height:300px}
   .hero__s{font-size:var(--t-base);margin-top:var(--s4)}
+  .tile img{border-radius:12px}
+  .tile[data-sm=hide]{display:none}
   .hero__cta{margin-top:var(--s5);width:100%;justify-content:center}
+}
+@media(max-width:520px){
+  .hero__field{aspect-ratio:1/.8;min-height:250px}
+  .tile img{border-radius:10px}
 }
 
 /* ============================================================
@@ -782,6 +1097,10 @@ textarea.input{min-height:96px;resize:vertical}
   background:var(--ink);color:var(--paper);font-size:14px}
 .note-r[data-read=false] .note-r__i{background:var(--brand);color:var(--on-brand)}
 .note-r b{font-size:var(--t-sm)}
+@media(max-width:560px){
+  .note-r{grid-template-columns:34px 1fr;row-gap:4px;padding:var(--s3)}
+  .note-r>.meta{grid-column:2;justify-self:start}
+}
 .note-r p{margin:2px 0 0;font-size:var(--t-sm);color:var(--grey)}
 
 /* ============================================================
@@ -808,11 +1127,46 @@ textarea.input{min-height:96px;resize:vertical}
 .thumbs{display:flex;gap:var(--s2);margin-top:var(--s3);flex-wrap:wrap}
 .thumbs img{width:72px;height:72px;object-fit:cover;border-radius:var(--r1);border:1px solid var(--line)}
 
-/* horizontal collection rails */
-.rail-x{display:flex;gap:var(--s4);overflow-x:auto;padding:2px 2px var(--s3);
-  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.rail-x>*{flex:0 0 260px;scroll-snap-align:start}
-@media(max-width:560px){.rail-x>*{flex:0 0 78%}}
+/* ============================================================
+   COLLECTION RAIL — five visible, arrows on both edges, and the
+   cards themselves are draggable. Native scrollbar hidden: with
+   arrows and drag both present it is a third redundant affordance.
+   ============================================================ */
+.rail-x{position:relative}
+.rail-x__t{display:flex;gap:var(--s3);overflow-x:auto;padding:2px;margin:-2px;
+  scroll-behavior:smooth;scroll-snap-type:x proximity;
+  scrollbar-width:none;-ms-overflow-style:none;
+  cursor:grab;-webkit-user-select:none;user-select:none}
+.rail-x__t::-webkit-scrollbar{display:none}
+.rail-x__t>*{flex:0 0 calc((100% - (var(--s3) * 4)) / 5);scroll-snap-align:start;min-width:0}
+/* While dragging, snapping fights the pointer and images try to
+   ghost-drag, so both are suspended for the duration. */
+.rail-x__t[data-drag=true]{cursor:grabbing;scroll-behavior:auto;scroll-snap-type:none}
+.rail-x__t[data-drag=true] *{pointer-events:none}
+.rail-x__t img{-webkit-user-drag:none;user-drag:none}
+
+.rail-x__a{position:absolute;top:34%;z-index:6;width:40px;height:40px;
+  display:grid;place-items:center;border-radius:50%;cursor:pointer;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink);
+  box-shadow:var(--sh);font-size:15px;
+  transition:transform .15s var(--ez),opacity .15s var(--ez),background-color .15s var(--ez)}
+.rail-x__a:hover{background:var(--brand);border-color:var(--brand-edge);
+  color:var(--on-brand);transform:scale(1.08)}
+.rail-x__a[data-dir=prev]{left:-14px}
+.rail-x__a[data-dir=next]{right:-14px}
+/* Fading rather than hiding: a control that vanishes reads as a
+   broken row. */
+.rail-x__a[disabled]{opacity:.26;cursor:default;pointer-events:none}
+
+@media(max-width:1100px){.rail-x__t>*{flex:0 0 calc((100% - (var(--s3) * 3)) / 4)}}
+@media(max-width:900px){.rail-x__t>*{flex:0 0 calc((100% - (var(--s3) * 2)) / 3)}}
+@media(max-width:700px){
+  .rail-x__t>*{flex:0 0 46%}
+  .rail-x__a{display:none}          /* thumbs already do this better */
+  .rail-x__t{scroll-snap-type:x mandatory}
+}
+@media(max-width:480px){.rail-x__t>*{flex:0 0 76%}}
+
 .why{display:inline-flex;align-items:center;gap:5px;font-family:var(--m);
   font-size:var(--t-2xs);color:var(--brand-ink);margin-bottom:var(--s2)}
 .why::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--brand-edge)}
@@ -836,9 +1190,105 @@ textarea.input{min-height:96px;resize:vertical}
   font-size:var(--t-2xs);color:var(--grey)}
 .dot{width:10px;height:10px;border-radius:50%}
 
+/* Five across. Type steps down inside these tiles because a
+   1160px row split five ways leaves ~205px per card — the default
+   19px title wraps to three lines at that width. */
+.five{display:grid;gap:var(--s3);grid-template-columns:repeat(5,1fr)}
+.five .card__t{font-size:var(--t-base);line-height:1.25}
+.five .card__b{padding:var(--s3)}
+.five .meta{font-size:var(--t-2xs)}
+.five .price,.five .price-gate{font-size:var(--t-2xs)}
+.five .tag{font-size:9px;padding:2px 5px}
+.five .card__s{margin-top:var(--s2);gap:6px}
+@media(max-width:1080px){.five{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:880px){.five{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){
+  .five{grid-template-columns:repeat(2,1fr)}
+  .five .card__t{font-size:var(--t-sm)}
+}
+@media(max-width:400px){.five{grid-template-columns:1fr}}
+
+/* ============================================================
+   SEARCH — filters left, results right. The rail sticks so the
+   filters stay reachable while a long result list scrolls.
+   ============================================================ */
+.srch{display:grid;grid-template-columns:272px 1fr;gap:var(--s5);align-items:start}
+.srch__rail{position:sticky;top:84px;display:grid;gap:var(--s3)}
+.srch__main{min-width:0}
+@media(max-width:900px){
+  .srch{grid-template-columns:1fr}
+  .srch__rail{position:static}
+}
+
+.fset{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);
+  padding:var(--s4)}
+/* A date input will not render below ~140px in Chrome; the rail's
+   two-up grid gave it 115px, so the pair overflowed and collided.
+   Everything inside the rail stacks. */
+.fset .two{grid-template-columns:1fr;gap:var(--s2)}
+.fset .input,.fset select{width:100%;min-width:0;max-width:100%}
+.fset{min-width:0;overflow:hidden}
+.fset input[type=date]{min-height:40px}
+.fset__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s3)}
+.fset__h p{margin:0;font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
+  letter-spacing:.12em;color:var(--grey)}
+
+/* multi-select category chips */
+.fchips{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{padding:6px 10px;border:1px solid var(--line);border-radius:var(--pill);
+  background:var(--surface);font-size:var(--t-xs);cursor:pointer;
+  transition:background-color .15s var(--ez),border-color .15s var(--ez)}
+.fchip:hover{border-color:var(--ink)}
+.fchip[aria-pressed=true]{background:var(--brand);border-color:var(--brand-edge);
+  color:var(--on-brand);font-weight:600}
+
+/* ---- dual-handle price slider -------------------------------
+   Two overlaid range inputs. Only the thumbs receive pointer
+   events, so the lower track never swallows clicks meant for the
+   upper handle — the classic failure of this control. */
+.rng{position:relative;height:38px;margin-top:var(--s2)}
+.rng__track{position:absolute;left:0;right:0;top:17px;height:4px;border-radius:2px;
+  background:var(--line)}
+.rng__fill{position:absolute;top:17px;height:4px;border-radius:2px;background:var(--brand-edge)}
+.rng input{position:absolute;left:0;width:100%;top:9px;height:20px;margin:0;
+  -webkit-appearance:none;appearance:none;background:none;pointer-events:none}
+/* When both handles meet, the later element wins every grab and the
+   min handle becomes unreachable. Raising the min input fixes it. */
+.rng #pmin{z-index:3}
+.rng #pmax{z-index:2}
+.rng input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;
+  width:20px;height:20px;border-radius:50%;background:var(--brand);
+  border:2px solid var(--brand-edge);cursor:grab;box-shadow:var(--btn-sh)}
+.rng input::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.1)}
+.rng input::-moz-range-thumb{pointer-events:auto;width:20px;height:20px;border-radius:50%;
+  background:var(--brand);border:2px solid var(--brand-edge);cursor:grab;box-shadow:var(--btn-sh)}
+.rng input:focus-visible::-webkit-slider-thumb{outline:2px solid var(--brand-ink);outline-offset:2px}
+.rng__v{display:flex;justify-content:space-between;font-family:var(--m);
+  font-size:var(--t-xs);color:var(--grey);margin-top:2px}
+.rng__v b{color:var(--ink);font-weight:600}
+
+/* active filters */
+.active{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:var(--s4)}
+.active__c{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;
+  border-radius:var(--pill);background:var(--brand-soft);color:var(--brand-ink);
+  font-size:var(--t-xs);font-weight:600}
+.active__c button{cursor:pointer;color:inherit;opacity:.6;font-size:13px;line-height:1}
+.active__c button:hover{opacity:1}
+
+.srch__bar{display:flex;align-items:center;gap:var(--s3);justify-content:space-between;
+  flex-wrap:wrap;margin-bottom:var(--s4)}
+.srch__bar select{padding:8px var(--s3);border:1px solid var(--line);
+  border-radius:var(--r1);background:var(--surface);font-size:var(--t-sm)}
+
 /* Search results: three across on desktop so each card is narrow
    enough to scan as a set rather than read as a list. */
 .results{display:grid;gap:var(--s4);grid-template-columns:repeat(3,1fr)}
+/* Inside the search rail the results column is ~560-640px, not the
+   full 940px, so three tracks land at 175px. Two until there is
+   room for three. */
+@media(max-width:1120px){.srch .results{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.srch .results{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.srch .results{grid-template-columns:1fr}}
 @media(max-width:900px){.results{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.results{grid-template-columns:1fr;gap:var(--s3)}}
 
@@ -872,82 +1322,6 @@ textarea.input{min-height:96px;resize:vertical}
 .menu button[data-logout]{border-top:1px solid var(--line);border-radius:0 0 var(--r1) var(--r1);
   margin-top:var(--s1);color:var(--grey)}
 
-/* ============================================================
-   MAP — Leaflet + OpenStreetMap. No API key, no billing.
-   Swapping to Google later means replacing initMap() only.
-   ============================================================ */
-let MAP=null;
-function initMap(){
-  const el=document.getElementById('map');
-  if(!el) return;
-  if(typeof L==='undefined'){
-    el.innerHTML='<div class="empty" style="height:100%;display:grid;place-content:center">'+
-      '<p class="h3">Map unavailable offline</p>'+
-      '<p class="body">The map library could not load. Everything else still works.</p></div>';
-    return;
-  }
-  if(MAP){ MAP.remove(); MAP=null; }
-  MAP=L.map(el,{scrollWheelZoom:false}).setView([GEO.here.lat,GEO.here.lng],10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:18, attribution:'&copy; OpenStreetMap contributors'
-  }).addTo(MAP);
-
-  const group=[];
-  DB.events.forEach(e=>{
-    const free=e.price_cents===0;
-    const icon=L.divIcon({html:'<div class="pin" data-free="'+free+'"><b>'+
-      (free?'FREE':(e.price_cents/100))+'</b></div>',
-      className:'', iconSize:[34,34], iconAnchor:[17,34]});
-    const m=L.marker([e.lat,e.lng],{icon,title:e.title}).addTo(MAP);
-    m.bindPopup('<div class="pop"><img src="'+IMG+e.cover+'?w=300&q=65" alt="">'+
-      '<p style="margin:0;font-weight:700">'+esc(e.title)+'</p>'+
-      '<p style="margin:2px 0 6px;font-size:12px;color:#6B665E">'+
-        F.day(e.start_at).long+' \u00b7 '+F.time(e.start_at)+'</p>'+
-      '<a href="#/event/'+e.id+'" style="font-size:12px;font-weight:600;'+
-        'text-decoration:underline">View event</a></div>');
-    group.push([e.lat,e.lng]);
-  });
-  if(group.length) MAP.fitBounds(group,{padding:[40,40],maxZoom:12});
-}
-
-/* Single-marker map on the event page. Same provider as the main
-   map so there is one map implementation to swap, not two. */
-let EVMAP=null;
-function initEventMap(){
-  const el=document.getElementById('evmap');
-  if(!el) return;
-  if(typeof L==='undefined'){
-    el.innerHTML='<div class="empty" style="height:100%;display:grid;place-content:center">'+
-      '<p class="body">Map unavailable offline</p></div>';
-    return;
-  }
-  if(EVMAP){ EVMAP.remove(); EVMAP=null; }
-  const lat=+el.dataset.lat, lng=+el.dataset.lng;
-  EVMAP=L.map(el,{scrollWheelZoom:false,zoomControl:true}).setView([lat,lng],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:18, attribution:'&copy; OpenStreetMap contributors'
-  }).addTo(EVMAP);
-  L.marker([lat,lng],{icon:L.divIcon({
-    html:'<div class="pin"><b>&#9678;</b></div>', className:'',
-    iconSize:[34,34], iconAnchor:[17,34]}),
-    title:el.dataset.label}).addTo(EVMAP);
-}
-
-/* Real geolocation, with a graceful decline path. Never blocks
-   the page: the default centre is already useful. */
-function locate(){
-  if(!navigator.geolocation){ toast('Location not supported'); return; }
-  toast('Finding you\u2026');
-  navigator.geolocation.getCurrentPosition(
-    pos=>{
-      GEO.here={lat:pos.coords.latitude,lng:pos.coords.longitude,label:'your location',exact:true};
-      toast('Using your location');
-      route();
-    },
-    ()=>toast('Location declined \u2014 showing Dubai'),
-    {timeout:8000, maximumAge:300000}
-  );
-}
 
 /* ============================================================
    SHARE SHEET
@@ -958,6 +1332,9 @@ function locate(){
 .sheet__c{width:min(400px,100%);background:var(--surface);border:1px solid var(--line);
   border-radius:var(--r3);padding:var(--s5);box-shadow:var(--sh)}
 .share-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3);margin:var(--s4) 0}
+/* 4 across leaves 51px per target at 320px — under the icon width.
+   Two rows of two keeps the tap area honest. */
+@media(max-width:380px){.share-grid{grid-template-columns:repeat(2,1fr)}}
 .share-btn{display:grid;justify-items:center;gap:var(--s2);padding:var(--s3) 4px;
   border-radius:var(--r2);cursor:pointer;border:1px solid var(--line);background:var(--surface);
   transition:border-color .15s var(--ez),transform .15s var(--ez)}
@@ -1022,10 +1399,9 @@ function locate(){
 /* ============================================================
    NARROW SCREENS
    The two real constraints on a phone: horizontal room, and the
-   fact that .bar + .tabbar together eat ~150px of a 667px screen.
+   fact that the fixed action bar sits in the thumb zone.
    ============================================================ */
 @media(max-width:600px){
-  :root{--tabh:70px}
   .wrap{padding:0 var(--s4)}
   .sec{padding:var(--s5) 0}
 
@@ -1083,18 +1459,8 @@ function locate(){
   .card:hover{border-color:var(--line)}
 }
 
-.demo{position:fixed;left:var(--s4);bottom:calc(var(--tabh) + 12px);z-index:55;
-  display:flex;align-items:center;gap:var(--s2);
-  padding:8px 8px 8px var(--s3);border-radius:var(--pill);
-  background:var(--ink);color:var(--paper);font-family:var(--m);font-size:var(--t-2xs);
-  letter-spacing:.04em;box-shadow:var(--sh);max-width:calc(100vw - 32px)}
-.demo[data-off=true]{display:none}
-.demo button{width:22px;height:22px;border-radius:50%;background:rgba(250,248,244,.16);
-  color:inherit;cursor:pointer;flex:none;line-height:1}
-.demo button:hover{background:rgba(250,248,244,.3)}
-@media(max-width:560px){.demo span{display:none}.demo{padding:8px}}
 
-.toast{position:fixed;left:50%;bottom:calc(var(--tabh) + 96px);max-width:calc(100vw - 32px);transform:translateX(-50%) translateY(20px);
+.toast{position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom));max-width:calc(100vw - 32px);transform:translateX(-50%) translateY(20px);
   z-index:60;background:var(--ink);color:var(--paper);padding:12px var(--s4);
   border-radius:var(--pill);font-size:var(--t-sm);font-weight:600;
   opacity:0;pointer-events:none;transition:opacity .2s var(--ez),transform .2s var(--ez)}
@@ -1110,9 +1476,15 @@ function locate(){
     <a href="#/discover">Discover</a>
     <a href="#/mine">My events</a>
     <a href="#/dashboard" data-host>Host</a>
+    <a href="#/alerts" data-auth>Alerts</a>
     <a href="#/profile" data-auth>Account</a>
   </nav>
   <div style="display:flex;align-items:center;gap:var(--s2)" id="topright">
+    <a class="theme" id="searchbtn" href="#/search" aria-label="Search events" title="Search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/>
+      <line x1="16.2" y1="16.2" x2="21" y2="21"/></svg></a>
+    <a class="theme bell" id="alertbtn" data-auth href="#/alerts"
+       aria-label="Alerts">&#9678;<b class="bell__n" id="badge">2</b></a>
     <button class="theme" id="theme" aria-pressed="false"
       aria-label="Switch to dark mode" title="Theme">&#9789;</button>
     <a class="btn" data-v="ink" href="#/login" id="authbtn">Sign in</a>
@@ -1131,14 +1503,6 @@ function locate(){
 
 <main id="app" aria-live="polite"></main>
 
-<nav class="tabbar" id="tabbar">
-  <a href="#/discover"><span class="g">◆</span>Home</a>
-  <a href="#/search"><span class="g">◎</span>Search</a>
-  
-  <a href="#/mine" data-auth><span class="g">◇</span>Tickets</a>
-  <a href="#/alerts" data-auth><span class="g bell">◔<b class="bell__n" id="badge">2</b></span>Alerts</a>
-  <a href="#/profile" data-auth><span class="g">◍</span>You</a>
-</nav>
 
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t">
   <div class="sheet__c">
@@ -1160,10 +1524,7 @@ function locate(){
   </div>
 </div>
 
-<div class="demo" id="demo" role="note">
-  <span>Prototype &middot; sample data, no real bookings</span>
-  <button data-demo="close" aria-label="Hide notice">&times;</button>
-</div>
+<div id="trail" aria-hidden="true"></div>
 
 <div class="toast" id="toast" role="status"></div>
 
@@ -1191,29 +1552,48 @@ const DB = {
   /* Live cities carry real supply. `soon` cities are shown but
      disabled — an empty city that looks bookable is worse than one
      that is honestly marked as not open yet. */
-  cities: [
-    {slug:'dubai',    label:'Dubai',     region:'uae',  icon:'\u25C6', lat:25.2048,lng:55.2708, live:true},
-    {slug:'abudhabi', label:'Abu Dhabi', region:'uae',  icon:'\u25CF', lat:24.4539,lng:54.3773, live:true},
-    {slug:'sharjah',  label:'Sharjah',   region:'uae',  icon:'\u25B2', lat:25.3463,lng:55.4209, live:true},
-    {slug:'ajman',    label:'Ajman',     region:'uae',  icon:'\u25A0', lat:25.4052,lng:55.5136, live:false},
-    {slug:'rak',      label:'Ras Al Khaimah',region:'uae',icon:'\u25BC',lat:25.7895,lng:55.9432,live:false},
-    {slug:'fujairah', label:'Fujairah',  region:'uae',  icon:'\u25C7', lat:25.1288,lng:56.3265, live:false},
-    {slug:'riyadh',   label:'Riyadh',    region:'gulf', icon:'\u25C6', lat:24.7136,lng:46.6753, live:false},
-    {slug:'jeddah',   label:'Jeddah',    region:'gulf', icon:'\u25CF', lat:21.4858,lng:39.1925, live:false},
-    {slug:'doha',     label:'Doha',      region:'gulf', icon:'\u25B2', lat:25.2854,lng:51.5310, live:false},
-    {slug:'manama',   label:'Manama',    region:'gulf', icon:'\u25A0', lat:26.2285,lng:50.5860, live:false},
-    {slug:'kuwait',   label:'Kuwait City',region:'gulf',icon:'\u25BC', lat:29.3759,lng:47.9774, live:false},
-    {slug:'muscat',   label:'Muscat',    region:'gulf', icon:'\u25C7', lat:23.5880,lng:58.3829, live:false},
-    {slug:'mumbai',   label:'Mumbai',    region:'wider',icon:'\u25C6', lat:19.0760,lng:72.8777, live:false},
-    {slug:'london',   label:'London',    region:'wider',icon:'\u25CF', lat:51.5074,lng:-0.1278, live:false},
-    {slug:'singapore',label:'Singapore', region:'wider',icon:'\u25B2', lat:1.3521, lng:103.8198,live:false}
+  /* Everything the admin can change lives here, and the public
+     views read from it. A CMS that does not drive the site is a
+     form with no consequences. */
+  cms: {
+    hero:{
+      lead:'Turn your curiosity',
+      words:['creativity','passion','adventure','fun','learning','growth'],
+      sub:'Workshops, classes and gatherings across Dubai \u2014 for seven year olds and grown-ups alike.',
+      cta:'Start Exploring', alt:'Host an experience'
+    },
+    close:{
+      title:'Let\u2019s strive ahead together!',
+      sub:'Join us for immersive workshops and events designed to inspire creativity and foster community engagement.',
+      a1:'Discover More', a2:'Host for free'
+    },
+    brandColor:'#C7F464',
+    feePct:5, plusPrice:249, referralAed:15,
+    moderationHours:24
+  },
+
+  audit: [
+    {at:'2026-07-31T14:20:00+04:00', who:'admin', what:'Approved brand', target:'Al Quoz Run Club'},
+    {at:'2026-07-31T11:05:00+04:00', who:'admin', what:'Published event', target:'Sunrise 5K'},
+    {at:'2026-07-30T16:42:00+04:00', who:'admin', what:'Changed platform fee', target:'5%'},
+    {at:'2026-07-29T09:15:00+04:00', who:'admin', what:'Suspended brand', target:'Ghost Events DXB'}
   ],
 
-  regions: [
-    {slug:'uae',   label:'United Arab Emirates'},
-    {slug:'gulf',  label:'Gulf'},
-    {slug:'wider', label:'Further afield'}
+  /* V1 is Dubai only. What used to be a city list is now a list of
+     hubs inside one city — same picker, one level down. */
+  city: {slug:'dubai', label:'Dubai', lat:25.2048, lng:55.2708},
+
+  hubs: [
+    {slug:'all',       label:'All of Dubai',    lat:25.2048, lng:55.2708},
+    {slug:'downtown',  label:'Downtown',        lat:25.1972, lng:55.2744},
+    {slug:'silicon',   label:'Silicon Oasis',   lat:25.1213, lng:55.3773},
+    {slug:'alquoz',    label:'Al Quoz',         lat:25.1421, lng:55.2274},
+    {slug:'barsha',    label:'Barsha',          lat:25.1107, lng:55.2007},
+    {slug:'alnahda',   label:'Al Nahda',        lat:25.2897, lng:55.3653},
+    {slug:'ranches',   label:'Arabian Ranches', lat:25.0518, lng:55.2699}
   ],
+
+
 
   /* Multi-day festivals and weeks — different shape to a session,
      so they get their own row rather than being forced into cards. */
@@ -1222,10 +1602,10 @@ const DB = {
      city:'Al Quoz, Dubai',icon:'photo-1518998053901-5348d3961a04'},
     {id:'m2',title:'Dubai Design Week',from:'2026-09-08',to:'2026-09-14',
      city:'d3, Dubai',icon:'photo-1600880292203-757bb62b4baf'},
-    {id:'m3',title:'Sharjah Light Festival',from:'2026-09-02',to:'2026-09-12',
-     city:'Sharjah',icon:'photo-1512453979798-5ea266f8880c'},
-    {id:'m4',title:'Abu Dhabi Culinary Week',from:'2026-10-05',to:'2026-10-11',
-     city:'Saadiyat, Abu Dhabi',icon:'photo-1414235077428-338989a2e8c0'}
+    {id:'m3',title:'Al Quoz Light Festival',from:'2026-09-02',to:'2026-09-12',
+     city:'Al Quoz, Dubai',icon:'photo-1512453979798-5ea266f8880c'},
+    {id:'m4',title:'Downtown Culinary Week',from:'2026-10-05',to:'2026-10-11',
+     city:'Downtown, Dubai',icon:'photo-1414235077428-338989a2e8c0'}
   ],
   brands: [
     {id:'b1',name:'Alserkal Avenue',initials:'AA',verified:true,
@@ -1243,14 +1623,23 @@ const DB = {
     {id:'b7',name:'Thrift Market DXB',initials:'TM',verified:false,
      bio:'Weekend markets for vintage, secondhand and independent makers.',followers:1740},
     {id:'b8',name:'Dubai AI Hub',initials:'AI',verified:true,
-     bio:'Builder labs, hackathons and workshops for people shipping with AI.',followers:5460}
+     bio:'Builder labs, hackathons and workshops for people shipping with AI.',followers:5460},
+    {id:'b9',name:'Marina Clay Studio',initials:'MC',verified:false,status:'pending',
+     licence:'CN-4471902', licence_expires:'2027-03-14', applied:'2026-07-30',
+     bio:'Hand-building and wheel classes on the Marina walk.',followers:0},
+    {id:'b10',name:'Deira Supper Club',initials:'DS',verified:false,status:'pending',
+     licence:'CN-3320118', licence_expires:'2026-09-02', applied:'2026-07-31',
+     bio:'Long-table dinners in old Deira. Twelve seats, one menu.',followers:0},
+    {id:'b11',name:'Ghost Events DXB',initials:'GE',verified:false,status:'suspended',
+     licence:'CN-1180044', licence_expires:'2026-06-01', applied:'2026-05-02',
+     bio:'Licence lapsed. Listings paused automatically.',followers:120}
   ],
   events: [
     {id:'e1',brand_id:'b4',title:'Sonic Geometry Workshop',category:'workshops',
      tags:['Sound','Hands-on'],start_at:'2026-08-04T18:00:00+04:00',duration_min:90,
      location_name:'Dubai Design District',address:'Building 7, d3, Dubai',
      capacity:24,booked_count:24,price_cents:15000,currency:'AED',age_min:16,
-     city:'dubai',lat:25.1855,lng:55.2932,created_at:'2026-07-02',views:940,
+     hub:'downtown',lat:25.1855,lng:55.2932,created_at:'2026-07-02',views:940,
      cover:'photo-1511379938547-c1f69419868d',live_now:false,
      about:'Build a synth patch from scratch, then map it to geometry. No prior music theory needed \u2014 bring headphones and a laptop.',
      faces:['MK','RA','JD'],friends:2},
@@ -1258,7 +1647,7 @@ const DB = {
      tags:['Morning'],start_at:'2026-08-04T07:00:00+04:00',duration_min:60,
      location_name:'Alserkal Avenue',address:'Concrete, Alserkal Avenue, Al Quoz 1',
      capacity:30,booked_count:12,price_cents:0,currency:'AED',age_min:0,
-     city:'dubai',lat:25.1443,lng:55.2265,created_at:'2026-07-20',views:410,
+     hub:'alquoz',lat:25.1443,lng:55.2265,created_at:'2026-07-20',views:410,
      cover:'photo-1544367567-0f2fcb009e0b',live_now:false,
      about:'An hour of flow in the warehouse space before the district opens. All levels. Mats provided.',
      faces:['SN','TL'],friends:0},
@@ -1266,7 +1655,7 @@ const DB = {
      tags:['Community'],start_at:'2026-07-31T12:00:00+04:00',duration_min:120,
      location_name:'Nightjar, Al Quoz',address:'Alserkal Avenue, Al Quoz 1, Dubai',
      capacity:60,booked_count:41,price_cents:0,currency:'AED',age_min:0,
-     city:'dubai',lat:25.1418,lng:55.2298,created_at:'2026-06-28',views:1580,
+     hub:'alquoz',lat:25.1418,lng:55.2298,created_at:'2026-06-28',views:1580,
      cover:'photo-1511920170033-f8396924c348',live_now:true,
      about:'Open table for builders. No talks, no deck, no pitch \u2014 just coffee and whatever you are shipping this week.',
      faces:['AB','YZ','PK'],friends:4},
@@ -1274,7 +1663,7 @@ const DB = {
      tags:['Screening','Limited'],start_at:'2026-08-05T19:00:00+04:00',duration_min:150,
      location_name:'Cinema Akil',address:'Alserkal Avenue, Al Quoz 1, Dubai',
      capacity:40,booked_count:36,price_cents:9000,currency:'AED',age_min:18,
-     city:'dubai',lat:25.1435,lng:55.228,created_at:'2026-07-26',views:1120,
+     hub:'alquoz',lat:25.1435,lng:55.228,created_at:'2026-07-26',views:1120,
      cover:'photo-1478720568477-152d9b164e26',live_now:false,
      about:'A double bill of speculative cinema, then a director-led breakdown of how the future kept getting reimagined.',
      faces:['LM','DR','HS'],friends:1},
@@ -1282,7 +1671,7 @@ const DB = {
      tags:['Walk'],start_at:'2026-08-05T23:00:00+04:00',duration_min:100,
      location_name:'DIFC Main Gate',address:'Gate Village, DIFC, Dubai',
      capacity:20,booked_count:8,price_cents:12000,currency:'AED',age_min:12,
-     city:'dubai',lat:25.211,lng:55.279,created_at:'2026-07-29',views:630,
+     hub:'downtown',lat:25.211,lng:55.279,created_at:'2026-07-29',views:630,
      cover:'photo-1512453979798-5ea266f8880c',live_now:false,
      about:'Walk the financial district after the offices empty. Ninety minutes on how the skyline was argued into existence.',
      faces:['CE'],friends:0},
@@ -1290,7 +1679,7 @@ const DB = {
      tags:['Ceramics','Hands-on'],start_at:'2026-08-06T17:30:00+04:00',duration_min:180,
      location_name:'Studio Quoz',address:'Warehouse 12, Al Quoz 1, Dubai',
      capacity:12,booked_count:5,price_cents:28000,currency:'AED',age_min:14,
-     city:'dubai',lat:25.1402,lng:55.2331,created_at:'2026-07-11',views:380,
+     hub:'alquoz',lat:25.1402,lng:55.2331,created_at:'2026-07-11',views:380,
      cover:'photo-1565193298357-c5b46b0d6b1f',live_now:false,
      about:'Three hours at the wheel. Clay, tools and firing included \u2014 leave with two pieces you actually made.',
      faces:['NV','OI'],friends:3},
@@ -1298,14 +1687,14 @@ const DB = {
      tags:['Tasting'],start_at:'2026-08-07T16:00:00+04:00',duration_min:75,
      location_name:'Nightjar Roastery',address:'Alserkal Avenue, Al Quoz 1, Dubai',
      capacity:16,booked_count:14,price_cents:7500,currency:'AED',age_min:0,
-     city:'dubai',lat:25.1421,lng:55.2274,created_at:'2026-07-30',views:760,
+     hub:'alquoz',lat:25.1421,lng:55.2274,created_at:'2026-07-30',views:760,
      cover:'photo-1414235077428-338989a2e8c0',live_now:false,
      about:'Six Yemeni lots, blind. Learn the vocabulary for what you are tasting and why altitude changes it.',
      faces:['RM','KT','WS'],friends:1},
     {id:'e8',brand_id:'b6',title:'Founders Table: Pricing',category:'business',
      tags:['Talk'],start_at:'2026-08-08T18:30:00+04:00',duration_min:120,
      location_name:'d3 Business Hub',address:'Building 4, d3, Dubai',
-     city:'dubai',lat:25.1878,lng:55.2954,created_at:'2026-07-30',views:2100,
+     hub:'downtown',lat:25.1878,lng:55.2954,created_at:'2026-07-30',views:2100,
      capacity:35,booked_count:29,price_cents:0,currency:'AED',age_min:18,
      cover:'photo-1600880292203-757bb62b4baf',live_now:false,
      about:'Six founders, one question: how did you land on your price? Honest numbers, no theory.',
@@ -1313,23 +1702,23 @@ const DB = {
     {id:'e9',brand_id:'b5',title:'Sunrise 5K, Al Quoz Loop',category:'fitness',
      tags:['Run','Weekly'],start_at:'2026-08-07T05:45:00+04:00',duration_min:60,
      location_name:'Alserkal Avenue Gate',address:'Al Quoz 1, Dubai',
-     city:'dubai',lat:25.1447,lng:55.2318,created_at:'2026-07-31',views:1840,
+     hub:'alquoz',lat:25.1447,lng:55.2318,created_at:'2026-07-31',views:1840,
      capacity:80,booked_count:52,price_cents:0,currency:'AED',age_min:0,
      cover:'photo-1552674605-db6ffd4facb5',live_now:false,
      about:'Flat 5K through the warehouse district before the heat arrives. Coffee after, always.',
      faces:['HK','JM','RS'],friends:5},
-    {id:'e10',brand_id:'b2',title:'Corniche Film Picnic',category:'art',
+    {id:'e10',brand_id:'b2',title:'Ranches Film Picnic',category:'art',
      tags:['Screening','Outdoor'],start_at:'2026-08-09T19:30:00+04:00',duration_min:140,
-     location_name:'Corniche Beach',address:'Corniche Rd, Abu Dhabi',
-     city:'abudhabi',lat:24.4672,lng:54.3226,created_at:'2026-07-29',views:1290,
+     location_name:'Ranches Souk Lawn',address:'Arabian Ranches, Dubai',
+     hub:'ranches',lat:25.0518,lng:55.2699,created_at:'2026-07-29',views:1290,
      capacity:120,booked_count:74,price_cents:5000,currency:'AED',age_min:0,
      cover:'photo-1478720568477-152d9b164e26',live_now:false,
-     about:'Open-air screening on the sand. Bring a blanket; popcorn is on us.',
+     about:'Open-air screening on the lawn. Bring a blanket; popcorn is on us.',
      faces:['NA','TB'],friends:0},
-    {id:'e11',brand_id:'b7',title:'Sharjah Thrift Exchange',category:'business',
+    {id:'e11',brand_id:'b7',title:'Al Nahda Thrift Exchange',category:'business',
      tags:['Market'],start_at:'2026-08-08T10:00:00+04:00',duration_min:300,
-     location_name:'Al Majaz Waterfront',address:'Al Majaz, Sharjah',
-     city:'sharjah',lat:25.3241,lng:55.3838,created_at:'2026-07-27',views:870,
+     location_name:'Al Nahda Community Hall',address:'Al Nahda 2, Dubai',
+     hub:'alnahda',lat:25.2897,lng:55.3653,created_at:'2026-07-27',views:870,
      capacity:200,booked_count:63,price_cents:0,currency:'AED',age_min:0,
      cover:'photo-1441984904996-e0b6ba687e04',live_now:false,
      about:'Bring three things you no longer wear, leave with three you will. Stall space free.',
@@ -1337,7 +1726,7 @@ const DB = {
     {id:'e12',brand_id:'b3',title:'Knife Skills Intensive',category:'cooking',
      tags:['Hands-on'],start_at:'2026-08-10T16:00:00+04:00',duration_min:150,
      location_name:'Nightjar Kitchen',address:'Alserkal Avenue, Al Quoz 1, Dubai',
-     city:'dubai',lat:25.1425,lng:55.2269,created_at:'2026-07-31',views:520,
+     hub:'alquoz',lat:25.1425,lng:55.2269,created_at:'2026-07-31',views:520,
      capacity:10,booked_count:9,price_cents:22000,currency:'AED',age_min:16,
      cover:'photo-1517245386807-bb43f82c33c4',live_now:false,
      about:'Three hours, one good knife. Julienne, brunoise, chiffonade \u2014 and how to keep it sharp.',
@@ -1345,7 +1734,7 @@ const DB = {
     {id:'e13',brand_id:'b4',title:'Little Potters: Ages 6\u201310',category:'kids',
      tags:['Hands-on','Parent welcome'],start_at:'2026-08-08T10:00:00+04:00',duration_min:90,
      location_name:'Studio Quoz',address:'Warehouse 12, Al Quoz 1, Dubai',
-     city:'dubai',lat:25.1402,lng:55.2331,created_at:'2026-07-28',views:1460,
+     hub:'alquoz',lat:25.1402,lng:55.2331,created_at:'2026-07-28',views:1460,
      capacity:10,booked_count:6,price_cents:12000,currency:'AED',age_min:6,age_max:10,
      cover:'photo-1503454537195-1dcabb73ffb9',live_now:false,
      about:'Ninety minutes of hand-building with clay. Aprons on, mess encouraged. '+
@@ -1354,7 +1743,7 @@ const DB = {
     {id:'e14',brand_id:'b6',title:'Saturday Science Lab: Ages 8\u201312',category:'kids',
      tags:['STEM','Drop-off'],start_at:'2026-08-08T14:00:00+04:00',duration_min:120,
      location_name:'d3 Learning Studio',address:'Building 7, d3, Dubai',
-     city:'dubai',lat:25.1878,lng:55.2954,created_at:'2026-07-30',views:2240,
+     hub:'downtown',lat:25.1878,lng:55.2954,created_at:'2026-07-30',views:2240,
      capacity:18,booked_count:15,price_cents:9000,currency:'AED',age_min:8,age_max:12,
      cover:'photo-1567168544813-cc03465b4fa8',live_now:false,
      about:'Circuits, slime and one small controlled explosion. Drop-off session with '+
@@ -1363,12 +1752,44 @@ const DB = {
     {id:'e15',brand_id:'b1',title:'Family Print Morning',category:'kids',
      tags:['All ages','Parent and child'],start_at:'2026-08-09T09:30:00+04:00',duration_min:100,
      location_name:'Alserkal Avenue',address:'Concrete, Alserkal Avenue, Al Quoz 1',
-     city:'dubai',lat:25.1443,lng:55.2265,created_at:'2026-07-31',views:980,
+     hub:'alquoz',lat:25.1443,lng:55.2265,created_at:'2026-07-31',views:980,
      capacity:24,booked_count:9,price_cents:0,currency:'AED',age_min:4,age_max:12,
      cover:'photo-1499195333224-3ce974eecb47',live_now:false,
      about:'Screen-printing for pairs. Every child needs one adult with them \u2014 you make '+
        'a tote together and take it home wet.',
-     faces:['BW','CD','EF'],friends:2}
+     faces:['BW','CD','EF'],friends:2},
+    {id:'e16',brand_id:'b6',title:'Build Night: Ship Something Small',category:'tech',
+     tags:['Hands-on','Weekly'],start_at:'2026-08-11T19:00:00+04:00',duration_min:180,
+     location_name:'Silicon Oasis HQ',address:'DSO Headquarters, Dubai Silicon Oasis',
+     hub:'silicon',lat:25.1213,lng:55.3773,created_at:'2026-07-29',views:1620,
+     capacity:40,booked_count:27,price_cents:0,currency:'AED',age_min:16,
+     cover:'photo-1511920170033-f8396924c348',live_now:false,
+     about:'Three hours, one small thing shipped. Bring a laptop and a half-finished idea.',
+     faces:['ZK','PM','RD'],friends:3},
+    {id:'e17',brand_id:'b7',title:'Barsha Makers Market',category:'business',
+     tags:['Market','Family'],start_at:'2026-08-09T16:00:00+04:00',duration_min:240,
+     location_name:'Al Barsha Pond Park',address:'Al Barsha 2, Dubai',
+     hub:'barsha',lat:25.1107,lng:55.2007,created_at:'2026-07-30',views:1180,
+     capacity:150,booked_count:61,price_cents:0,currency:'AED',age_min:0,
+     cover:'photo-1441984904996-e0b6ba687e04',live_now:false,
+     about:'Independent makers around the pond. Free to browse, bring cash for the small stalls.',
+     faces:['NF','QA'],friends:1},
+    {id:'e18',brand_id:'b5',title:'Barsha Sunset Run',category:'fitness',
+     tags:['Run','Weekly'],start_at:'2026-08-12T18:15:00+04:00',duration_min:60,
+     location_name:'Al Barsha Pond Park',address:'Al Barsha 2, Dubai',
+     hub:'barsha',lat:25.1107,lng:55.2007,created_at:'2026-07-31',views:940,
+     capacity:60,booked_count:33,price_cents:0,currency:'AED',age_min:12,
+     cover:'photo-1552674605-db6ffd4facb5',live_now:false,
+     about:'Five kilometres round the pond as the heat drops. All paces, nobody left behind.',
+     faces:['JT','LO','VM'],friends:2},
+    {id:'e19',brand_id:'b4',title:'Sensory Play: Ages 2\u20134',category:'kids',
+     tags:['Toddlers','Parent and child'],start_at:'2026-08-10T09:30:00+04:00',duration_min:60,
+     location_name:'Silicon Oasis Play Studio',address:'DSO Community Centre, Dubai',
+     hub:'silicon',lat:25.1213,lng:55.3773,created_at:'2026-07-31',views:1340,
+     capacity:12,booked_count:10,price_cents:8000,currency:'AED',age_min:2,age_max:4,
+     cover:'photo-1503454537195-1dcabb73ffb9',live_now:false,
+     about:'An hour of messy play built for toddlers. One adult per child, aprons provided.',
+     faces:['HB','SM'],friends:0}
   ],
   /* bookings the demo user already holds */
   /* Long-form body + agenda. Real event pages are mostly prose;
@@ -1513,6 +1934,16 @@ const F = {
    colour stops reading as *their* mark and starts reading as ours. */
 /* real imagery beats initials: a community reads as a place, and
    a grid of coloured squares reads as a settings screen */
+/* Only IDs already proven to load elsewhere in this build. A
+   picker full of broken boxes is worse than repeated photography. */
+/* Only IDs already proven to load elsewhere in this build. */
+const CITYIMG={
+  all:'photo-1512453979798-5ea266f8880c',      downtown:'photo-1512453979798-5ea266f8880c',
+  silicon:'photo-1600880292203-757bb62b4baf',  alquoz:'photo-1518998053901-5348d3961a04',
+  barsha:'photo-1517245386807-bb43f82c33c4',   alnahda:'photo-1441984904996-e0b6ba687e04',
+  ranches:'photo-1552674605-db6ffd4facb5'
+};
+
 const COMMIMG={
   b1:'photo-1518998053901-5348d3961a04', b2:'photo-1478720568477-152d9b164e26',
   b3:'photo-1511920170033-f8396924c348', b4:'photo-1565193298357-c5b46b0d6b1f',
@@ -1623,10 +2054,14 @@ function going(e){
   return '<div class="going"><div class="going__stack">'+faces+'</div>'+over+friends+'</div>';
 }
 
+const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 '+
+  '3.8 12.6a4.9 4.9 0 0 1 0-7 4.9 4.9 0 0 1 7 0l1.2 1.2 1.2-1.2a4.9 4.9 0 0 1 7 0 '+
+  '4.9 4.9 0 0 1 0 7Z"/></svg>';
+
 function saveBtn(id){
   const on=DB.saved.has(id);
   return '<button class="save" data-save="'+id+'" aria-pressed="'+on+'" '+
-         'aria-label="Save event">'+(on?'&#9829;':'&#9825;')+'</button>';
+         'aria-label="'+(on?'Remove from saved':'Save event')+'">'+HEART+'</button>';
 }
 
 /* Title, date, location, status, price.
@@ -1634,6 +2069,21 @@ function saveBtn(id){
    date rail that already states the day — repeating it is noise.
    Status and price share one line: both answer "can I go, and
    what does it cost", so they belong together at the bottom. */
+/* Price is visible only when signed in. Free events are gated too:
+   signed out, a visitor cannot distinguish a free run club from a
+   paid workshop, which is the point of the gate. */
+function priceLabel(e, size){
+  if(DB.session.authed){
+    return '<span class="price" data-free="'+(e.price_cents===0)+'"'+
+      (size?' style="font-size:'+size+'"':'')+'>'+
+      F.money(e.price_cents,e.currency)+'</span>';
+  }
+  return '<span class="price-gate">'+
+    '<span aria-hidden="true">&#9679;&#9679;&#9679;</span>'+
+    '<span class="sr">Price hidden. Sign in to see it.</span>'+
+    '<b>Sign in</b></span>';
+}
+
 function statusTag(e){
   const st=F.state(e);
   if(e.live_now)        return '<span class="live">Live now</span>';
@@ -1653,9 +2103,7 @@ function card(e,v){
       '<p class="'+(v==='hero'?'h1':'h3')+' card__t">'+esc(e.title)+'</p>'+
       '<p class="meta card__when">'+when+'</p>'+
       '<p class="meta card__where">'+esc(e.location_name)+'</p>'+
-      '<div class="card__s">'+statusTag(e)+
-        '<span class="price" data-free="'+(e.price_cents===0)+'">'+
-          F.money(e.price_cents,e.currency)+'</span></div>'+
+      '<div class="card__s">'+statusTag(e)+priceLabel(e)+'</div>'+
     '</div>';
   const inner = v==='row' ? body+img : img+saveBtn(e.id)+body;
   return '<a class="card" data-v="'+v+'" data-state="'+st+'" href="#/event/'+e.id+'">'+inner+'</a>';
@@ -1679,7 +2127,7 @@ function emptyState(msg,cta){
   return '<div class="empty"><p class="empty__m">&mdash;</p>'+
     '<p class="h3" style="margin:var(--s3) 0 var(--s1)">'+(msg||'Nothing here yet')+'</p>'+
     '<p class="body" style="margin-bottom:var(--s4)">'+(cta||'Try another category, or widen the date range.')+'</p>'+
-    '<a class="btn" data-v="primary" href="#/discover">Browse Dubai</a></div>';
+    '<a class="btn" data-v="primary" href="#/discover">Start Exploring</a></div>';
 }
 
 /* ============================================================
@@ -1694,19 +2142,52 @@ const views={};
 /* Negative x/y are intentional: those tiles hang off the edge and
    get cut by the viewport, which is what sells the "field extends
    past the screen" effect. */
+/* Five tiles. Positions resolve against .hero__field, not the
+   viewport, so the cluster holds its composition at any width.
+   Fewer images means each one is larger and has to earn its place,
+   so they are spread to the corners with one anchoring the centre
+   rather than clustered into a pile. */
+/* Density falls off from the bottom-right corner toward the
+   centre, so the effect reads as coming from somewhere rather
+   than being sprinkled evenly. Opacity and size taper the same way. */
+/* Two clusters hugging the left and right edges. The centre stays
+   empty so the headline never competes with a twinkle. */
+const CLOSE_SPARKS=[
+  {x:'3%',  y:'18%', w:'26px', o:.9,  d:'3.2s', dl:'0s',   e:'out'},
+  {x:'11%', y:'40%', w:'18px', o:.75, d:'3.8s', dl:'.7s',  e:'out'},
+  {x:'2%',  y:'62%', w:'22px', o:.8,  d:'3.4s', dl:'1.5s', e:'out'},
+  {x:'15%', y:'74%', w:'13px', o:.55, d:'4.4s', dl:'2.2s', e:'in'},
+  {x:'8%',  y:'88%', w:'16px', o:.6,  d:'4.0s', dl:'.4s',  e:'in'},
+  {x:'95%', y:'22%', w:'24px', o:.9,  d:'3.6s', dl:'.9s',  e:'out'},
+  {x:'86%', y:'44%', w:'16px', o:.7,  d:'4.2s', dl:'1.9s', e:'in'},
+  {x:'96%', y:'66%', w:'20px', o:.8,  d:'3.3s', dl:'.2s',  e:'out'},
+  {x:'83%', y:'82%', w:'13px', o:.5,  d:'4.6s', dl:'2.7s', e:'in'},
+  {x:'92%', y:'92%', w:'17px', o:.6,  d:'3.9s', dl:'1.2s', e:'out'}
+];
+
+const SPARKS=[
+  {x:'96%', y:'92%', w:'26px', o:.95, d:'3.2s', dl:'0s'},
+  {x:'88%', y:'97%', w:'20px', o:.9,  d:'3.6s', dl:'.4s'},
+  {x:'99%', y:'78%', w:'22px', o:.9,  d:'3.0s', dl:'.9s'},
+  {x:'82%', y:'86%', w:'15px', o:.8,  d:'4.0s', dl:'1.3s'},
+  {x:'91%', y:'70%', w:'18px', o:.8,  d:'3.4s', dl:'.2s'},
+  {x:'75%', y:'95%', w:'13px', o:.7,  d:'4.4s', dl:'1.9s'},
+  {x:'78%', y:'74%', w:'12px', o:.65, d:'3.8s', dl:'2.4s'},
+  {x:'68%', y:'86%', w:'14px', o:.6,  d:'4.2s', dl:'.7s'},
+  {x:'85%', y:'58%', w:'11px', o:.55, d:'4.6s', dl:'1.6s'},
+  {x:'62%', y:'72%', w:'10px', o:.45, d:'5.0s', dl:'2.8s'},
+  {x:'71%', y:'60%', w:'9px',  o:.4,  d:'4.8s', dl:'2.1s'},
+  {x:'55%', y:'82%', w:'9px',  o:.35, d:'5.4s', dl:'3.3s'},
+  {x:'58%', y:'52%', w:'8px',  o:.28, d:'5.2s', dl:'1.1s'},
+  {x:'46%', y:'68%', w:'7px',  o:.22, d:'5.8s', dl:'3.8s'}
+];
+
 const TILES=[
-  {x:'-3%',y:'30%',w:'182px',r:'-5deg', d:'7.5s', dl:'0s',   img:'photo-1511379938547-c1f69419868d'},
-  {x:'9%', y:'62%',w:'196px',r:'3deg',  d:'9s',   dl:'.6s',  img:'photo-1544367567-0f2fcb009e0b'},
-  {x:'-4%',y:'-6%',w:'168px',r:'6deg',  d:'8.2s', dl:'1.4s', img:'photo-1518998053901-5348d3961a04', sm:'hide'},
-  {x:'17%',y:'6%', w:'172px',r:'4deg',  d:'8.8s', dl:'.3s',  img:'photo-1414235077428-338989a2e8c0'},
-  {x:'34%',y:'-12%',w:'176px',r:'-2deg',d:'10s',  dl:'.9s',  img:'photo-1565193298357-c5b46b0d6b1f'},
-  {x:'27%',y:'88%',w:'166px',r:'5deg',  d:'8.4s', dl:'1.1s', img:'photo-1552674605-db6ffd4facb5', sm:'hide'},
-  {x:'52%',y:'92%',w:'180px',r:'-4deg', d:'9.6s', dl:'.2s',  img:'photo-1511920170033-f8396924c348', sm:'hide'},
-  {x:'70%',y:'-4%',w:'178px',r:'3deg',  d:'7.8s', dl:'.8s',  img:'photo-1478720568477-152d9b164e26'},
-  {x:'87%',y:'24%',w:'190px',r:'-3deg', d:'9.2s', dl:'1.6s', img:'photo-1517245386807-bb43f82c33c4'},
-  {x:'76%',y:'62%',w:'170px',r:'5deg',  d:'8.6s', dl:'.5s',  img:'photo-1441984904996-e0b6ba687e04'},
-  {x:'95%',y:'86%',w:'160px',r:'-6deg', d:'10.4s',dl:'1.2s', img:'photo-1600880292203-757bb62b4baf', sm:'hide'},
-  {x:'60%',y:'44%',w:'132px',r:'7deg',  d:'7.2s', dl:'1.8s', img:'photo-1512453979798-5ea266f8880c', sm:'hide'}
+  {x:'12%', y:'-2%', w:'36%', r:'-6deg', d:'8.4s', dl:'0s',   img:'photo-1565193298357-c5b46b0d6b1f'},
+  {x:'58%', y:'8%',  w:'34%', r:'7deg',  d:'9.8s', dl:'.9s',  img:'photo-1511379938547-c1f69419868d'},
+  {x:'33%', y:'36%', w:'35%', r:'3deg',  d:'8.9s', dl:'1.6s', img:'photo-1478720568477-152d9b164e26'},
+  {x:'-4%', y:'52%', w:'32%', r:'6deg',  d:'10.4s',dl:'.4s',  img:'photo-1544367567-0f2fcb009e0b', sm:'hide'},
+  {x:'62%', y:'62%', w:'36%', r:'-5deg', d:'9.2s', dl:'2.1s', img:'photo-1414235077428-338989a2e8c0'}
 ];
 
 views.home = () => {
@@ -1715,26 +2196,33 @@ views.home = () => {
       ' style="--x:'+t.x+';--y:'+t.y+';--w:'+t.w+';--r:'+t.r+';--d:'+t.d+';--dl:'+t.dl+'">'+
       '<img alt="" loading="lazy" src="'+IMG+t.img+'?w=400&q=65"></div>').join('');
 
+  const sparks = SPARKS.map(k=>
+    '<span class="spk" aria-hidden="true" style="--sx:'+k.x+';--sy:'+k.y+
+      ';--sw:'+k.w+';--so:'+k.o+';--sd:'+k.d+';--sdl:'+k.dl+'"></span>').join('');
+
   /* The rotating word is now the NOUN. Swapping the adjective sold
      a mood; swapping the subject shows the range — which is the
      actual problem when one audience books pottery for a seven
      year old and another books a midnight walk. */
-  const words=['workshops','weekends','days out','Saturdays'];
+  /* The rotating word carries the promise. Screen readers get the
+     first variant only — six headlines read aloud is noise. */
+  const words=DB.cms.hero.words;
   const swap='<span class="swap" aria-hidden="true">'+
-    words.map(w=>'<span>'+w+'</span>').join('')+'</span>'+
-    '<span class="sr">workshops</span>';
+    words.map(w=>'<span class="hero__g">'+esc(w)+'.</span>').join('')+'</span>'+
+    '<span class="sr">'+esc(words[0]||'')+'.</span>';
 
   return '<div class="view">'+
     '<section class="hero">'+
-      '<div class="amb" aria-hidden="true"><i></i><i></i><i></i></div>'+tiles+
+      '<div class="hero__in">'+
       '<div class="hero__c">'+
         '<p class="hero__mark">KREO</p>'+
-        '<h1 class="hero__h">Good '+swap+'<br>'+
-          '<span class="hero__g">start here.</span></h1>'+
+        '<h1 class="hero__h">'+esc(DB.cms.hero.lead)+'<br>into '+swap+'</h1>'+
         '<p class="hero__s">Pottery for seven year olds, film labs for grown-ups, and '+
           'everything in between \u2014 across Al Quoz, d3 and DIFC.</p>'+
-        '<div><a class="hero__cta" href="#/discover">Browse Dubai</a></div>'+
-        '<div><a class="hero__alt" href="#/create">Host an event &rarr;</a></div>'+
+        '<div><a class="hero__cta" href="#/discover">'+esc(DB.cms.hero.cta)+'</a></div>'+
+        '<div><a class="hero__alt" href="#/create">'+esc(DB.cms.hero.alt)+' &rarr;</a></div>'+
+      '</div>'+
+      '<div class="hero__field">'+tiles+sparks+'</div>'+
       '</div>'+
     '</section>'+
 
@@ -1745,11 +2233,16 @@ views.home = () => {
     '</div>'+
 
     '<section class="close">'+
-      '<div class="amb" aria-hidden="true"><i></i><i></i><i></i></div>'+
-      '<h2>The best thing your family does this month is already listed.</h2>'+
-      '<div class="btn-row">'+
-        '<a class="btn" data-v="ink" data-size="lg" style="width:auto" href="#/discover">Discover events</a>'+
-        '<a class="btn" data-v="outline" data-size="lg" style="width:auto" href="#/pricing">Host for free</a>'+
+      CLOSE_SPARKS.map(k=>
+        '<span class="spk" aria-hidden="true" data-edge="'+k.e+'" style="--sx:'+k.x+
+          ';--sy:'+k.y+';--sw:'+k.w+';--so:'+k.o+';--sd:'+k.d+';--sdl:'+k.dl+'"></span>').join('')+
+      '<div class="close__in">'+
+        '<h2>'+esc(DB.cms.close.title)+'</h2>'+
+        '<p>'+esc(DB.cms.close.sub)+'</p>'+
+        '<div class="btn-row">'+
+          '<a class="close__a" data-v="light" href="#/discover">'+esc(DB.cms.close.a1)+'</a>'+
+          '<a class="close__a" data-v="dark" href="#/pricing">'+esc(DB.cms.close.a2)+'</a>'+
+        '</div>'+
       '</div>'+
     '</section>'+
 
@@ -1760,39 +2253,37 @@ views.home = () => {
 /* City picker. The heading itself is the control — a separate
    dropdown next to a static heading reads as a filter; the heading
    as button reads as "this page is about a place". */
-let CITY='dubai', REGION='uae';
+let HUB='all';
 
 function cityPicker(){
-  const cur=DB.cities.find(c=>c.slug===CITY)||DB.cities[0];
-  const list=DB.cities.filter(c=>c.region===REGION);
+  const cur=DB.hubs.find(h=>h.slug===HUB)||DB.hubs[0];
   return '<span class="pick">'+
     '<button class="pick__btn" id="pickbtn" aria-haspopup="true" aria-expanded="false">'+
       esc(cur.label)+'<i>\u25BC</i></button>'+
-    '<div class="pick__p" id="pickpanel" role="dialog" aria-label="Choose a city">'+
-      '<div class="pick__tabs">'+DB.regions.map(r=>
-        '<button data-region="'+r.slug+'" aria-pressed="'+(r.slug===REGION)+'">'+
-        esc(r.label)+'</button>').join('')+'</div>'+
-      '<div class="pick__grid">'+list.map(c=>
-        '<button class="pick__c" data-city="'+c.slug+'" aria-pressed="'+(c.slug===CITY)+'"'+
-          (c.live?'':' disabled')+'>'+
-          '<span class="pick__i">'+c.icon+'</span>'+
-          '<span class="pick__n">'+esc(c.label)+'</span>'+
-          (c.live?'':'<span class="pick__k">soon</span>')+
+    '<div class="pick__p" id="pickpanel" role="dialog" aria-label="Choose an area">'+
+      '<p class="eyebrow" style="margin-bottom:var(--s3)">Popular hubs in Dubai</p>'+
+      '<div class="pick__grid">'+DB.hubs.map(h=>
+        '<button class="pick__c" data-city="'+h.slug+'" aria-pressed="'+(h.slug===HUB)+'">'+
+          '<span class="pick__n">'+esc(h.label)+'</span>'+
+          '<span class="pick__k">'+countHub(h.slug)+'</span>'+
+          '<img alt="" loading="lazy" src="'+IMG+(CITYIMG[h.slug]||CITYIMG.all)+'?w=400&q=60">'+
         '</button>').join('')+'</div>'+
-      '<p class="meta" style="margin-top:var(--s3)">Live in three cities today. '+
-        'Tell us where to open next from your profile.</p>'+
     '</div></span>';
 }
 
+function countHub(slug){
+  const n = slug==='all' ? DB.events.length : DB.events.filter(e=>e.hub===slug).length;
+  return n+(n===1?' event':' events');
+}
+
 function popularSection(){
-  const cur=DB.cities.find(c=>c.slug===CITY)||DB.cities[0];
-  const list=DB.events.filter(e=>e.city===CITY)
-    .sort((a,b)=>RANK.trending(b)-RANK.trending(a)).slice(0,4);
+  const cur=DB.hubs.find(h=>h.slug===HUB)||DB.hubs[0];
+  const list=(HUB==='all'?DB.events:DB.events.filter(e=>e.hub===HUB))
+    .sort((a,b)=>RANK.trending(b)-RANK.trending(a)).slice(0,5);
   return '<div class="sec">'+
-    '<h2 class="h1" style="margin-bottom:var(--s4)">Popular events in '+cityPicker()+'</h2>'+
+    '<h2 class="h1" style="margin-bottom:var(--s4)">Trending events in '+cityPicker()+'</h2>'+
     (list.length
-      ? '<div class="results reveal" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr))">'+
-          list.map(e=>card(e,'tile')).join('')+'</div>'
+      ? '<div class="five reveal">'+list.map(e=>card(e,'tile')).join('')+'</div>'
       : emptyState('Nothing listed in '+esc(cur.label)+' yet',
           'We are onboarding hosts there now. Try Dubai in the meantime.'))+
   '</div>';
@@ -1843,6 +2334,22 @@ function footer(){
 /* A rail is only worth its vertical space if it says why it
    exists — an unexplained "For you" is indistinguishable from
    a random shuffle. */
+/* Arrows render only when the set overflows five slots — otherwise
+   they are chrome with nothing to do. */
+let RAILN = 0;
+function dragRail(items, render, perView){
+  perView = perView || 5;
+  const id = 'rx'+(++RAILN);
+  const over = items.length > perView;
+  return '<div class="rail-x">'+
+    (over ? '<button class="rail-x__a" data-dir="prev" data-rail="'+id+'" '+
+            'aria-label="Scroll left" disabled>&#8249;</button>' : '')+
+    '<div class="rail-x__t" id="'+id+'">'+items.map(render).join('')+'</div>'+
+    (over ? '<button class="rail-x__a" data-dir="next" data-rail="'+id+'" '+
+            'aria-label="Scroll right">&#8250;</button>' : '')+
+  '</div>';
+}
+
 function collectionRail(title, list, showWhy, sub){
   if(!list.length) return '';
   return '<div class="sec" style="padding-top:0">'+
@@ -1852,19 +2359,26 @@ function collectionRail(title, list, showWhy, sub){
         ? '<button class="btn" data-v="quiet" data-locate>Use my location</button>'
         : '<a class="btn" data-v="quiet" href="#/search">See all</a>')+
     '</div>'+
-    '<div class="rail-x">'+list.map(e=>
+    dragRail(list, e=>
       (showWhy ? '<div><span class="why">'+esc(RANK.why(e))+'</span>'+card(e,'tile')+'</div>'
-               : card(e,'tile'))).join('')+
-    '</div></div>';
+               : card(e,'tile')))+
+  '</div>';
 }
 
 /* shared by home + discover */
+/* Only approved hosts appear publicly. A brand awaiting moderation
+   or suspended for a lapsed licence must not be advertised. */
+function publicBrands(){
+  return DB.brands.filter(b=>!b.status || b.status==='active');
+}
+
 function communities(heading){
+  const list=publicBrands();
   return '<div class="sec"><div class="sec__h"><h2 class="h2">'+heading+'</h2>'+
-    '<span class="meta">'+DB.brands.length+' in Dubai</span></div>'+
-    '<div class="comm">'+DB.brands.map(b=>
+    '<span class="meta">'+list.length+' in Dubai</span></div>'+
+    '<div class="comm">'+list.map(b=>
       '<a class="comm__c" href="#/brand/'+b.id+'">'+
-        '<img class="comm__i" alt="" loading="lazy" src="'+IMG+COMMIMG[b.id]+'?w=180&q=65">'+
+        '<img class="comm__i" alt="" loading="lazy" src="'+IMG+(COMMIMG[b.id]||COMMIMG.b1)+'?w=180&q=65">'+
         '<p class="comm__t">'+esc(b.name)+(b.verified?' &#10003;':'')+'</p>'+
         '<p class="comm__d">'+esc(b.bio)+'</p></a>').join('')+
     '</div></div>';
@@ -1932,56 +2446,111 @@ views.discover = () => {
     '<div style="height:var(--s7)"></div></div>';
 };
 
+/* Search state lives outside the view so a re-render never resets
+   what the person has already narrowed down. */
+const SQ = {q:'', hub:'', cats:[], from:'', to:'', min:0, max:0, sort:'trending'};
+const PRICE_MAX = Math.ceil(Math.max(...DB.events.map(e=>e.price_cents))/100/50)*50;
+if(!SQ.max) SQ.max = PRICE_MAX;
+
 views.search = () => {
   const cats=DB.categories.filter(c=>c.slug!=='all');
+  const hits=searchHits();
+
+  const chips=[];
+  if(SQ.q)    chips.push(['q','\u201C'+esc(SQ.q)+'\u201D']);
+  if(SQ.hub)  chips.push(['hub',(DB.hubs.find(h=>h.slug===SQ.hub)||{}).label||SQ.hub]);
+  SQ.cats.forEach(c=>chips.push(['cat:'+c,(cats.find(x=>x.slug===c)||{}).label||c]));
+  if(SQ.from) chips.push(['from','From '+SQ.from]);
+  if(SQ.to)   chips.push(['to','To '+SQ.to]);
+  if(SQ.min>0 || SQ.max<PRICE_MAX) chips.push(['price','AED '+SQ.min+'\u2013'+SQ.max]);
+
+  const rail =
+    '<aside class="srch__rail">'+
+      '<div class="fset">'+
+        '<label class="label" for="q">Keyword</label>'+
+        '<input class="input" id="q" type="search" value="'+esc(SQ.q)+'" '+
+          'placeholder="Ceramics, film, coffee\u2026" autocomplete="off" style="margin-top:6px">'+
+        '<span class="hint">Title, host, venue, tags and description.</span>'+
+      '</div>'+
+
+      '<div class="fset">'+
+        '<div class="fset__h"><p>Area</p></div>'+
+        '<select class="input" id="f-hub">'+
+          '<option value="">All of Dubai</option>'+
+          DB.hubs.filter(h=>h.slug!=='all').map(h=>
+            '<option value="'+h.slug+'"'+(SQ.hub===h.slug?' selected':'')+'>'+
+            esc(h.label)+'</option>').join('')+
+        '</select>'+
+      '</div>'+
+
+      '<div class="fset">'+
+        '<div class="fset__h"><p>Category</p>'+
+          (SQ.cats.length?'<button class="btn" data-v="quiet" style="padding:2px 6px;font-size:11px" '+
+            'data-clearcat>Clear</button>':'')+'</div>'+
+        '<div class="fchips">'+cats.map(c=>
+          '<button class="fchip" data-cat2="'+c.slug+'" aria-pressed="'+
+          SQ.cats.includes(c.slug)+'">'+esc(c.label)+'</button>').join('')+'</div>'+
+      '</div>'+
+
+      '<div class="fset">'+
+        '<div class="fset__h"><p>Dates</p></div>'+
+        '<label class="label" for="f-from" style="display:block;margin-bottom:4px">From</label>'+
+        '<input class="input" id="f-from" type="date" value="'+SQ.from+'">'+
+        '<label class="label" for="f-to" style="display:block;margin:var(--s3) 0 4px">To</label>'+
+        '<input class="input" id="f-to" type="date" value="'+SQ.to+'">'+
+      '</div>'+
+
+      '<div class="fset">'+
+        '<div class="fset__h"><p>Price</p>'+
+          ((SQ.min>0||SQ.max<PRICE_MAX)
+            ? '<button class="btn" data-v="quiet" style="padding:2px 6px;font-size:11px" '+
+              'data-clearprice>Reset</button>' : '')+'</div>'+
+        '<div class="rng">'+
+          '<span class="rng__track"></span>'+
+          '<span class="rng__fill" id="rngfill" style="left:'+
+            (SQ.min/PRICE_MAX*100)+'%;right:'+(100-SQ.max/PRICE_MAX*100)+'%"></span>'+
+          '<input type="range" id="pmin" min="0" max="'+PRICE_MAX+'" step="10" '+
+            'value="'+SQ.min+'" aria-label="Minimum price">'+
+          '<input type="range" id="pmax" min="0" max="'+PRICE_MAX+'" step="10" '+
+            'value="'+SQ.max+'" aria-label="Maximum price">'+
+        '</div>'+
+        '<div class="rng__v"><span>AED <b id="pminv">'+SQ.min+'</b></span>'+
+          '<span>AED <b id="pmaxv">'+SQ.max+'</b>'+(SQ.max>=PRICE_MAX?'+':'')+'</span></div>'+
+        (DB.session.authed?'':'<span class="hint" style="margin-top:6px;display:block">'+
+          'Filtering works signed out; amounts appear once you sign in.</span>')+
+      '</div>'+
+    '</aside>';
+
   return '<div class="wrap view"><div class="sec">'+
     '<h1 class="d2">Search</h1>'+
-
-    '<div class="field" style="margin-top:var(--s5)">'+
-      '<label class="label" for="q">Find an event</label>'+
-      '<input class="input" id="q" type="search" placeholder="Ceramics, film, coffee\u2026" autocomplete="off">'+
-      '<span class="hint">Matches title, host, venue, category and tags.</span>'+
-    '</div>'+
-
-    '<div class="two">'+
-      '<div class="field"><label class="label" for="f-city">City</label>'+
-        '<select class="input" id="f-city"><option value="">All cities</option>'+
-          DB.cities.map(c=>'<option value="'+c.slug+'">'+esc(c.label)+'</option>').join('')+
-        '</select></div>'+
-      '<div class="field"><label class="label" for="f-cat">Category</label>'+
-        '<select class="input" id="f-cat"><option value="">All categories</option>'+
-          cats.map(c=>'<option value="'+c.slug+'">'+esc(c.label)+'</option>').join('')+
-        '</select></div>'+
-    '</div>'+
-
-    '<div class="two">'+
-      '<div class="field"><label class="label" for="f-from">From</label>'+
-        '<input class="input" id="f-from" type="date"></div>'+
-      '<div class="field"><label class="label" for="f-to">To</label>'+
-        '<input class="input" id="f-to" type="date"></div>'+
-    '</div>'+
-
-    '<div class="field"><span class="label">Price</span>'+
-      '<div class="seg" id="cost">'+
-        ['Any','Free','Under 150','150+'].map((l,i)=>
-          '<button data-cost="'+i+'" aria-pressed="'+(i===0)+'">'+l+'</button>').join('')+
-      '</div></div>'+
-
-    '<div class="field"><span class="label">Availability</span>'+
-      '<div class="seg" id="avail">'+
-        ['Any','Seats left','Almost full','Sold out'].map((l,i)=>
-          '<button data-avail="'+i+'" aria-pressed="'+(i===0)+'">'+l+'</button>').join('')+
-      '</div></div>'+
-
-    '<div class="sec__h" style="margin-top:var(--s5)">'+
-      '<p class="meta" id="rcount">'+DB.events.length+' events</p>'+
-      '<div style="display:flex;gap:var(--s2)">'+
-        '<a class="btn" data-v="outline" href="#/map">Map view</a>'+
-        '<button class="btn" data-v="quiet" data-clear>Clear all</button>'+
-      '</div></div>'+
-
-    '<div id="results" class="results reveal">'+
-      DB.events.map(e=>card(e,'tile')).join('')+
+    '<p class="body" style="margin:var(--s3) 0 var(--s5)">'+
+      DB.events.length+' events across Dubai.</p>'+
+    '<div class="srch">'+rail+
+      '<div class="srch__main">'+
+        (chips.length
+          ? '<div class="active">'+chips.map(c=>
+              '<span class="active__c">'+c[1]+
+              '<button data-unfilter="'+c[0]+'" aria-label="Remove filter">&times;</button></span>').join('')+
+            '<button class="btn" data-v="quiet" style="padding:4px 8px" data-clear>Clear all</button></div>'
+          : '')+
+        '<div class="srch__bar">'+
+          '<p class="meta" id="rcount">'+hits.length+' event'+(hits.length===1?'':'s')+'</p>'+
+          '<div style="display:flex;gap:var(--s2);align-items:center">'+
+            '<select id="f-sort" aria-label="Sort results">'+
+              [['trending','Trending'],['soon','Starting soonest'],
+               ['low','Price: low to high'],['high','Price: high to low']]
+              .map(o=>'<option value="'+o[0]+'"'+(SQ.sort===o[0]?' selected':'')+'>'+
+                o[1]+'</option>').join('')+
+            '</select>'+
+            '<a class="btn" data-v="outline" href="#/map">Map</a>'+
+          '</div>'+
+        '</div>'+
+        '<div id="results" class="'+(hits.length?'results reveal':'')+'">'+
+          (hits.length ? hits.map(e=>card(e,'tile')).join('')
+            : emptyState('No events match',
+                'Try removing a category or widening the price range.'))+
+        '</div>'+
+      '</div>'+
     '</div></div></div>';
 };
 
@@ -1990,7 +2559,7 @@ views.map = () => {
     '<button class="back" data-back>&larr; Search</button>'+
     '<h1 class="d2">Map</h1>'+
     '<p class="body" style="margin:var(--s3) 0 var(--s5)">'+
-      DB.events.length+' events across Dubai, Abu Dhabi and Sharjah. '+
+      DB.events.length+' events across Dubai. '+
       'Tap a pin for the event.</p>'+
     '<div class="mapwrap"><div id="map"></div></div>'+
     '<div class="maplegend">'+
@@ -2007,7 +2576,7 @@ views.event = (id) => {
   const b=brand(e.brand_id), st=F.state(e), d=F.day(e.start_at);
   const sold = st==='soldout';
   const cat = DB.categories.find(c=>c.slug===e.category);
-  const city = DB.cities.find(c=>c.slug===e.city);
+  const hub = DB.hubs.find(h=>h.slug===e.hub);
   const det = DB.detail[e.id] || {lead:e.about, body:[], agenda:[], bring:[]};
   const sessions = DB.sessions[e.id];
   /* Adults-only events require approval. Age-capped children's
@@ -2056,9 +2625,15 @@ views.event = (id) => {
             '<span><b style="color:var(--ink)">Approval required</b><br>'+
             'Your booking is subject to host approval. You will hear back within 24 hours.</span></div>'
           : '')+
-        '<div class="reg__price"><b class="'+(e.price_cents?'':'muted')+'">'+
-          F.money(e.price_cents,e.currency)+'</b>'+
-          '<span class="meta">'+(e.price_cents?'per seat':'no charge')+'</span></div>'+
+        (DB.session.authed
+          ? '<div class="reg__price"><b class="'+(e.price_cents?'':'muted')+'">'+
+            F.money(e.price_cents,e.currency)+'</b>'+
+            '<span class="meta">'+(e.price_cents?'per seat':'no charge')+'</span></div>'
+          : '<a class="reg__locked" href="#/login">'+
+            '<span class="reg__locked-i" aria-hidden="true">&#9679;&#9679;&#9679;</span>'+
+            '<span><b>Sign in to see the price</b>'+
+            '<span class="meta">Takes a few seconds. Browsing stays free.</span></span>'+
+            '<span class="meta">&rarr;</span></a>')+
         '<p class="body" style="font-size:var(--t-sm);margin-bottom:var(--s4)">'+
           (sold
             ? 'This date is full. Join the waitlist and we will alert you the moment a seat frees up.'
@@ -2098,7 +2673,7 @@ views.event = (id) => {
 
         '<div class="ev__chips">'+
           (cat?'<span class="tag" data-t="soft">'+esc(cat.label)+'</span>':'')+
-          (city?'<span class="tag" data-t="line">'+esc(city.label)+'</span>':'')+
+          (hub?'<span class="tag" data-t="line">'+esc(hub.label)+'</span>':'')+
           (e.live_now?'<span class="live">Live now</span>':'')+
           (st==='limited'?'<span class="tag" data-t="brand">'+F.left(e)+' left</span>':'')+
           '<span class="tag" data-t="line">'+F.age(e)+'</span>'+
@@ -2138,8 +2713,7 @@ views.event = (id) => {
 
     /* mobile only — desktop has the registration card in flow */
     '<div class="bar ev-bar">'+
-      '<div><p class="price" data-free="'+(e.price_cents===0)+'" style="font-size:var(--t-lg)">'+
-        F.money(e.price_cents,e.currency)+'</p>'+
+      '<div>'+priceLabel(e,'var(--t-lg)')+
         '<p class="meta">'+(sold?'No seats left':F.left(e)+' seats left')+'</p></div>'+
       (sold
         ? '<button class="btn" data-v="ink" style="margin-left:auto" data-wait="'+e.id+'">'+
@@ -2271,12 +2845,11 @@ function recalc(){
   const disc=CART.promo?Math.round(sub*CART.promo.pct/100):0;
   const credits=CART.pay==='credits'?Math.min(DB.me.credits,sub-disc):0;
   const total=Math.max(0,sub-disc-credits);
-  const fee=Math.round(total*0.05);
 
   const rows=[['Seats',F.money(t.price_cents,e.currency)+' \u00d7 '+CART.qty,F.money(sub,e.currency)]];
   if(disc)    rows.push(['Discount '+CART.promo.code,'','\u2212 '+F.money(disc,e.currency)]);
   if(credits) rows.push(['KREO credits','','\u2212 '+F.money(credits,e.currency)]);
-  if(total)   rows.push(['Platform fee (paid by host)','5%',F.money(fee,e.currency)]);
+
 
   const box=document.getElementById('sum');
   if(box) box.innerHTML=rows.map(r=>
@@ -2375,87 +2948,139 @@ views.mine = () => {
     '</div></div></div>';
 };
 
+/* Multi-date selection. A workshop that runs four Saturdays is one
+   listing with four dates, not four listings — the old start/end
+   pair could not express that. */
+let CAL = {y:2026, m:7, picked:['2026-08-12']};
+
+function calendar(){
+  const y=CAL.y, m=CAL.m;
+  const first=new Date(Date.UTC(y,m,1)).getUTCDay();
+  const days=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  const label=new Date(Date.UTC(y,m,1))
+    .toLocaleDateString('en-GB',{month:'long',year:'numeric',timeZone:'UTC'});
+  const todayKey=F.day(new Date().toISOString()).key;
+
+  let cells='';
+  ['M','T','W','T','F','S','S'].forEach(d=>cells+='<span class="cal__w">'+d+'</span>');
+  const lead=(first+6)%7;                      /* week starts Monday */
+  for(let i=0;i<lead;i++) cells+='<span class="cal__d" data-pad="true"></span>';
+  for(let d=1;d<=days;d++){
+    const key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const past=key<todayKey;
+    cells+='<button class="cal__d" data-day="'+key+'"'+
+      ' data-sel="'+CAL.picked.includes(key)+'"'+
+      ' data-today="'+(key===todayKey)+'"'+(past?' disabled':'')+'>'+d+'</button>';
+  }
+
+  const chips = CAL.picked.length
+    ? [...CAL.picked].sort().map(k=>{
+        const d=F.day(k+'T12:00:00+04:00');
+        return '<span class="cal__chip">'+d.w+' '+d.n+' '+d.m+
+          '<button data-unpick="'+k+'" aria-label="Remove date">&times;</button></span>';
+      }).join('')
+    : '<span class="cal__none">No dates chosen yet</span>';
+
+  return '<div class="cal">'+
+    '<div class="cal__h"><button data-cal="-1" aria-label="Previous month">&#8249;</button>'+
+      '<b>'+label+'</b>'+
+      '<button data-cal="1" aria-label="Next month">&#8250;</button></div>'+
+    '<div class="cal__g">'+cells+'</div>'+
+    '<div class="cal__sel">'+chips+'</div>'+
+  '</div>';
+}
+
+const TIMES=(()=>{const t=[];for(let h=6;h<=23;h++)for(const m of ['00','30'])
+  t.push(String(h).padStart(2,'0')+':'+m);return t;})();
+const timeSel=(id,def)=>'<select class="input" id="'+id+'">'+
+  TIMES.map(t=>'<option'+(t===def?' selected':'')+'>'+t+'</option>').join('')+'</select>';
+
 views.create = () => {
-  return '<div class="wrap view"><div class="sec">'+
-    '<p class="eyebrow">Host</p>'+
-    '<h1 class="d2" style="margin-top:var(--s2)">Create event</h1>'+
-    '<p class="body" style="margin-top:var(--s3);max-width:52ch">'+
-      'Goes to moderation once submitted. Most listings are approved within 24 hours.</p>'+
-
-    '<div class="panel" style="margin-top:var(--s5)">'+
-      '<div class="field"><label class="label" for="c-t">Event name</label>'+
-        '<input class="input" id="c-t" placeholder="Wheel-throwing for beginners"></div>'+
-      '<div class="field"><label class="label" for="c-d">Description</label>'+
-        '<textarea class="input" id="c-d" placeholder="What happens, what to bring, who it\u2019s for."></textarea></div>'+
-      '<div class="field"><span class="label">Cover images</span>'+
-        '<div class="drop" data-toast="Image picker opens here">'+
-          '<p class="h3">Drop images or browse</p>'+
-          '<p class="meta">JPG or PNG, 1600\u00d71000 or larger. First image is the cover.</p></div>'+
-        '<div class="thumbs">'+
-          ['photo-1565193298357-c5b46b0d6b1f','photo-1517245386807-bb43f82c33c4']
-            .map(x=>'<img alt="" src="'+IMG+x+'?w=160&q=60">').join('')+
-        '</div></div>'+
-      '<div class="field"><label class="label" for="c-vid">Video preview</label>'+
-        '<input class="input" id="c-vid" placeholder="YouTube or Vimeo link">'+
-        '<span class="hint">Shown above the cover on your event page.</span></div>'+
-      '<div class="two">'+
-        '<div class="field"><label class="label" for="c-s">Starts</label>'+
-          '<input class="input" id="c-s" type="datetime-local" value="2026-08-12T17:30"></div>'+
-        '<div class="field"><label class="label" for="c-e">Ends</label>'+
-          '<input class="input" id="c-e" type="datetime-local" value="2026-08-12T20:30"></div>'+
-      '</div>'+
-      '<div class="field"><label class="label" for="c-v">Venue</label>'+
-        '<input class="input" id="c-v" placeholder="Warehouse 12, Al Quoz 1"></div>'+
-      '<div class="two">'+
-        '<div class="field"><label class="label" for="c-c">Category</label>'+
-          '<select class="input" id="c-c">'+
-            DB.categories.filter(c=>c.slug!=='all')
-              .map(c=>'<option>'+esc(c.label)+'</option>').join('')+'</select></div>'+
-        '<div class="field"><label class="label" for="c-a">Minimum age</label>'+
-          '<select class="input" id="c-a"><option>All ages</option><option>12+</option>'+
-            '<option>16+</option><option>18+</option><option>21+</option></select></div>'+
-      '</div>'+
+  return '<div class="wrap view"><div class="sec" '+
+    'style="padding-top:var(--s5);padding-bottom:var(--s4)">'+
+    '<div class="sec__h" style="margin-bottom:var(--s3)">'+
+      '<div><p class="eyebrow">Host</p>'+
+      '<h1 class="h2" style="margin-top:2px">Create event</h1></div>'+
+      '<button class="btn" data-v="primary" '+
+        'data-toast="Submitted \u2014 moderation usually takes under 24 hrs">Submit for review</button>'+
     '</div>'+
 
-    '<div class="panel" style="margin-top:var(--s4)">'+
-      '<h2 class="h3" style="margin-bottom:var(--s3)">Tickets</h2>'+
-      '<div class="two">'+
-        '<div class="field"><label class="label" for="c-p">Price (AED)</label>'+
-          '<input class="input" id="c-p" type="number" min="0" value="0" placeholder="0">'+
-          '<span class="hint">Leave at 0 for a free event.</span></div>'+
-        '<div class="field"><label class="label" for="c-cap">Capacity</label>'+
-          '<input class="input" id="c-cap" type="number" min="1" value="20"></div>'+
-      '</div>'+
-      '<label class="toggle"><input type="checkbox" checked><span class="track"></span>'+
-        '<span><span class="h3" style="font-size:var(--t-base)">Waitlist when full</span><br>'+
-        '<span class="meta">Notify the queue when a seat frees up.</span></span></label>'+
-      '<label class="toggle"><input type="checkbox"><span class="track"></span>'+
-        '<span><span class="h3" style="font-size:var(--t-base)">Approve each guest</span><br>'+
-        '<span class="meta">You confirm every booking by hand.</span></span></label>'+
-      '<div class="field" style="margin-top:var(--s4)"><span class="label">Pricing tiers</span>'+
-        '<div class="two"><input class="input" placeholder="Standard" value="Standard">'+
-          '<input class="input" type="number" placeholder="AED" value="280"></div>'+
-        '<div class="two" style="margin-top:var(--s2)">'+
-          '<input class="input" placeholder="Tier name e.g. Bring a friend">'+
-          '<input class="input" type="number" placeholder="AED"></div>'+
-        '<span class="hint">Attendees pick a tier at checkout.</span></div>'+
-      '<div class="field"><label class="label" for="c-pol">Cancellation policy</label>'+
-        '<select class="input" id="c-pol">'+
-          '<option>Flexible \u2014 full refund up to 24 hrs before</option>'+
-          '<option>Moderate \u2014 full refund up to 5 days before</option>'+
-          '<option>Strict \u2014 50% refund up to 7 days before</option>'+
-        '</select><span class="hint">Shown on your event page before booking.</span></div>'+
-      '<label class="toggle" style="border-bottom:0"><input type="checkbox" checked><span class="track"></span>'+
-        '<span><span class="h3" style="font-size:var(--t-base)">Show who\u2019s going</span><br>'+
-        '<span class="meta">Guest avatars appear on the event page.</span></span></label>'+
-      '<p class="note" style="margin-top:var(--s4)">You collect payment directly. '+
-        'KREO charges no transaction fee on the free plan.</p>'+
-    '</div>'+
+    '<div class="cx">'+
+      '<div class="cx__col">'+
+        '<div class="panel">'+
+          '<div class="field"><label class="label" for="c-t">Event name</label>'+
+            '<input class="input" id="c-t" placeholder="Wheel-throwing for beginners"></div>'+
+          '<div class="field" style="margin-top:var(--s3)">'+
+            '<label class="label" for="c-d">Description</label>'+
+            '<textarea class="input" id="c-d" placeholder="What happens, what to bring, who it\u2019s for."></textarea></div>'+
+          '<div class="two" style="margin-top:var(--s3)">'+
+            '<div class="field"><label class="label" for="c-v">Venue</label>'+
+              '<input class="input" id="c-v" placeholder="Warehouse 12"></div>'+
+            '<div class="field"><label class="label" for="c-hub">Area</label>'+
+              '<select class="input" id="c-hub">'+
+                DB.hubs.filter(h=>h.slug!=='all')
+                  .map(h=>'<option>'+esc(h.label)+'</option>').join('')+
+              '</select></div>'+
+          '</div>'+
+          '<div class="two" style="margin-top:var(--s3)">'+
+            '<div class="field"><label class="label" for="c-c">Category</label>'+
+              '<select class="input" id="c-c">'+
+                DB.categories.filter(c=>c.slug!=='all')
+                  .map(c=>'<option>'+esc(c.label)+'</option>').join('')+'</select></div>'+
+            '<div class="field"><label class="label" for="c-a">Ages</label>'+
+              '<select class="input" id="c-a"><option>All ages</option><option>4\u201310</option>'+
+                '<option>8\u201312</option><option>12+</option><option>16+</option>'+
+                '<option>18+</option></select></div>'+
+          '</div>'+
+        '</div>'+
 
-    '<div class="btn-row" style="margin-top:var(--s5)">'+
-      '<button class="btn" data-v="primary" data-size="lg" data-toast="Submitted \u2014 moderation usually takes under 24 hrs">Submit for review</button>'+
-    '</div>'+
-    '<div style="height:var(--s7)"></div></div></div>';
+        '<div class="panel">'+
+          '<div class="field"><span class="label">Cover image</span>'+
+            '<div class="drop" data-toast="Image picker opens here" style="padding:var(--s4)">'+
+              '<p class="h3">Drop an image or browse</p>'+
+              '<p class="hint">1600\u00d71000 or larger</p></div></div>'+
+          '<div class="field" style="margin-top:var(--s3)">'+
+            '<label class="label" for="c-vid">Video preview</label>'+
+            '<input class="input" id="c-vid" placeholder="YouTube or Vimeo link"></div>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="cx__col">'+
+        '<div class="panel">'+
+          '<p class="label" style="margin-bottom:var(--s2)">Dates \u2014 pick one or more</p>'+
+          calendar()+
+          '<div class="two" style="margin-top:var(--s3)">'+
+            '<div class="field"><label class="label" for="c-s">Starts</label>'+
+              timeSel('c-s','17:30')+'</div>'+
+            '<div class="field"><label class="label" for="c-e">Ends</label>'+
+              timeSel('c-e','20:30')+'</div>'+
+          '</div>'+
+          '<span class="hint">These times apply to every date you picked.</span>'+
+        '</div>'+
+
+        '<div class="panel">'+
+          '<div class="two">'+
+            '<div class="field"><label class="label" for="c-p">Price (AED)</label>'+
+              '<input class="input" id="c-p" type="number" min="0" value="0"></div>'+
+            '<div class="field"><label class="label" for="c-cap">Capacity</label>'+
+              '<input class="input" id="c-cap" type="number" min="1" value="20"></div>'+
+          '</div>'+
+          '<div class="field" style="margin-top:var(--s3)">'+
+            '<label class="label" for="c-pol">Cancellation policy</label>'+
+            '<select class="input" id="c-pol">'+
+              '<option>Flexible \u2014 full refund up to 24 hrs before</option>'+
+              '<option>Moderate \u2014 full refund up to 5 days before</option>'+
+              '<option>Strict \u2014 50% refund up to 7 days before</option>'+
+            '</select></div>'+
+          '<label class="toggle"><input type="checkbox" checked><span class="track"></span>'+
+            '<span class="h3">Waitlist when full</span></label>'+
+          '<label class="toggle"><input type="checkbox"><span class="track"></span>'+
+            '<span class="h3">Approve each guest</span></label>'+
+          '<label class="toggle" style="border-bottom:0"><input type="checkbox" checked>'+
+            '<span class="track"></span><span class="h3">Show who\u2019s going</span></label>'+
+        '</div>'+
+      '</div>'+
+    '</div></div></div>';
 };
 
 views.dashboard = () => {
@@ -2517,7 +3142,7 @@ views.profile = () => {
 
     '<div class="sec"><div class="sec__h"><h2 class="h2">Invite friends</h2>'+
       '<span class="meta">'+me.invited+' joined</span></div>'+
-      '<p class="body" style="margin-bottom:var(--s4)">You both get AED 15 in credits '+
+      '<p class="body" style="margin-bottom:var(--s4)">You both get AED '+DB.cms.referralAed+' in credits '+
         'when a friend books their first event.</p>'+
       '<div class="code"><b>'+esc(me.code)+'</b>'+
         '<button class="btn" data-v="outline" data-toast="Referral link copied">Copy link</button></div>'+
@@ -2565,8 +3190,8 @@ views.analytics = () => {
 
     '<div class="stats panel" style="margin-top:var(--s5)">'+
       '<div class="stat"><b>'+(gross/100).toFixed(0)+'</b><span class="meta">AED gross</span></div>'+
-      '<div class="stat"><b>'+(gross*0.05/100).toFixed(0)+'</b><span class="meta">AED fees (5%)</span></div>'+
-      '<div class="stat"><b>'+(gross*0.95/100).toFixed(0)+'</b><span class="meta">AED net</span></div>'+
+      '<div class="stat"><b>'+(gross*DB.cms.feePct/100/100).toFixed(0)+'</b><span class="meta">AED fees ('+DB.cms.feePct+'%)</span></div>'+
+      '<div class="stat"><b>'+(gross*(100-DB.cms.feePct)/100/100).toFixed(0)+'</b><span class="meta">AED net</span></div>'+
       '<div class="stat"><b>'+mine.reduce((s,e)=>s+e.booked_count,0)+'</b><span class="meta">Seats sold</span></div>'+
     '</div>'+
 
@@ -2590,7 +3215,7 @@ views.analytics = () => {
           '<p class="meta">'+r[1]+'</p></div>'+
           '<span class="ledger__v" data-dir="'+r[2]+'">'+r[3]+'</span></div>').join('')+
       '</div>'+
-      '<p class="meta" style="margin-top:var(--s3)">Upgrade to Plus and the 5% platform '+
+      '<p class="meta" style="margin-top:var(--s3)">Upgrade to Plus and the '+DB.cms.feePct+'% platform '+
         'fee drops to zero. Stripe processing still applies.</p></div>'+
     '<div style="height:var(--s7)"></div></div>';
 };
@@ -2830,7 +3455,7 @@ views.discounts = () => {
 /* Answers here are the public statement of decisions made
    elsewhere in the product — fees, refund window, credits, data.
    If one changes in the app it must change here too. */
-const FAQ = [
+const FAQ_DATA = () => [
   {group:'Booking', items:[
     {q:'Do I need an account to browse?',
      a:['No. Discover, search, the map and every event page are open to anyone. '+
@@ -2873,19 +3498,19 @@ const FAQ = [
         'Credits do not expire and have no cash value.']},
     {q:'How does the referral bonus work?',
      a:['Share your code from your profile. When a friend completes their first booking, '+
-        'you both receive AED 15 in credits.']}
+        'you both receive AED '+DB.cms.referralAed+' in credits.']}
   ]},
   {group:'Hosting', items:[
     {q:'What does it cost to list an event?',
-     a:['Listing is free. On the free plan KREO takes a <strong>5% platform fee</strong> on paid '+
+     a:['Listing is free. On the free plan KREO takes a <strong>'+DB.cms.feePct+'% platform fee</strong> on paid '+
         'events; free events cost you nothing at all.',
-        'On <strong>KREO Plus</strong> at AED 249 a month the platform fee is 0%. Stripe\u2019s own '+
+        'On <strong>KREO Plus</strong> at AED '+DB.cms.plusPrice+' a month the platform fee is 0%. Stripe\u2019s own '+
         'card processing applies on both plans.']},
     {q:'When do I get paid?',
      a:['Stripe transfers your takings <strong>three days after the event</strong>, minus the '+
         'platform fee and card processing. Every transfer is itemised under Payouts &amp; analytics.']},
     {q:'How long does approval take?',
-     a:['New hosts are reviewed within <strong>24 to 48 hours</strong>. We check the trade licence '+
+     a:['New hosts are reviewed within <strong>'+DB.cms.moderationHours+' to 48 hours</strong>. We check the trade licence '+
         'and that the listing is what it says it is.',
         'Once you are verified your later events go live without waiting.']},
     {q:'Can I message people who came to my events?',
@@ -2912,6 +3537,8 @@ const FAQ = [
 ];
 
 let FAQGROUP='Booking';
+/* Re-read on every render so admin edits reach the page. */
+Object.defineProperty(globalThis,'FAQ',{get:FAQ_DATA});
 
 views.faq = () => {
   const g=FAQ.find(x=>x.group===FAQGROUP)||FAQ[0];
@@ -2952,11 +3579,11 @@ views.pricing = () => {
         '<p class="meta">Forever</p><hr class="hr" style="margin:var(--s3) 0">'+
         '<ul><li>Unlimited events and guests</li><li>500 invites per week</li>'+
         '<li>Check-in and door list</li><li>Waitlist and capacity control</li>'+
-        '<li>5% platform fee on paid events</li><li>Stripe checkout, payouts 3 days post-event</li></ul>'+
+        '<li>'+DB.cms.feePct+'% platform fee on paid events</li><li>Stripe checkout, payouts 3 days post-event</li></ul>'+
         '<a class="btn" data-v="outline" href="#/create" style="margin-top:var(--s3)">Start listing</a>'+
       '</div>'+
       '<div class="plan" data-hot="true">'+
-        '<p class="eyebrow" style="color:var(--brand-ink)">KREO Plus</p><p class="d2">AED 249</p>'+
+        '<p class="eyebrow" style="color:var(--brand-ink)">KREO Plus</p><p class="d2">AED '+DB.cms.plusPrice+'</p>'+
         '<p class="meta">Per month</p><hr class="hr" style="margin:var(--s3) 0">'+
         '<ul><li>Everything in Free</li><li>0% platform fee on paid events</li><li>5,000 invites per week</li>'+
         '<li>Custom event URLs</li><li>Featured placement in Discover</li>'+
@@ -2990,13 +3617,14 @@ function route(){
   mark(shown);
   applyRole();
   updateBadge();
+  RAIL.init();
   if(shown==='book') recalc();
   if(shown==='search') wireSearch();
   if(shown==='map') setTimeout(initMap,0);
   if(shown==='event') setTimeout(initEventMap,0);
 }
 
-/* Nav reflects the session. "Host an event" is never hidden —
+/* Nav reflects the session. "Host an experience" is never hidden —
    hiding it would close the only door a new organiser can find. */
 function updateBadge(){
   const b=document.getElementById('badge');
@@ -3021,12 +3649,12 @@ function applyRole(){
      next useful action and identity moves into the avatar menu. */
   btn.style.display = authed ? '' : '';
   if(role==='host'){ btn.textContent='Create event'; btn.setAttribute('href','#/create'); }
-  else if(authed){  btn.textContent='Host an event'; btn.setAttribute('href','#/gate'); }
+  else if(authed){  btn.textContent='Host an experience'; btn.setAttribute('href','#/gate'); }
   else {            btn.textContent='Sign in';       btn.setAttribute('href','#/login'); }
 }
 
 function mark(name){
-  document.querySelectorAll('#topnav a, #tabbar a').forEach(a=>{
+  document.querySelectorAll('#topnav a, #searchbtn').forEach(a=>{
     const target=a.getAttribute('href').slice(2).split('/')[0];
     const on = target===name
       /* the landing page is not a nav destination — nothing should
@@ -3040,59 +3668,76 @@ function mark(name){
   });
 }
 
-function runSearch(){
-  const out=document.getElementById('results');
-  if(!out) return;
-  const val = id => { const el=document.getElementById(id); return el?el.value:''; };
-  const seg = sel => {
-    const b=document.querySelector(sel+' button[aria-pressed="true"]');
-    if(!b) return 0;
-    return parseInt(b.dataset.cost ?? b.dataset.avail ?? 0,10);
-  };
-
-  const q=(val('q')||'').trim().toLowerCase();
-  const city=val('f-city'), cat=val('f-cat');
-  const from=val('f-from'), to=val('f-to');
-  const cost=seg('#cost'), avail=seg('#avail');
-
-  const hits=DB.events.filter(e=>{
+/* One predicate, used by both the view and the live re-render, so
+   the count in the toolbar can never disagree with the grid. */
+function searchHits(){
+  const q=SQ.q.trim().toLowerCase();
+  let out=DB.events.filter(e=>{
     const b=brand(e.brand_id);
-    /* full-text across every field a person might type */
     if(q){
       const hay=(e.title+' '+b.name+' '+e.location_name+' '+e.address+' '+
                  e.category+' '+e.tags.join(' ')+' '+e.about).toLowerCase();
       if(!hay.includes(q)) return false;
     }
-    if(city && e.city!==city) return false;
-    if(cat && e.category!==cat) return false;
-
+    if(SQ.hub && e.hub!==SQ.hub) return false;
+    if(SQ.cats.length && !SQ.cats.includes(e.category)) return false;
     const day=F.day(e.start_at).key;
-    if(from && day<from) return false;
-    if(to   && day>to)   return false;
-
-    if(cost===1 && e.price_cents!==0) return false;
-    if(cost===2 && !(e.price_cents>0 && e.price_cents<15000)) return false;
-    if(cost===3 && e.price_cents<15000) return false;
-
-    const st=F.state(e);
-    if(avail===1 && st==='soldout') return false;
-    if(avail===2 && st!=='limited') return false;
-    if(avail===3 && st!=='soldout') return false;
+    if(SQ.from && day<SQ.from) return false;
+    if(SQ.to   && day>SQ.to)   return false;
+    const aed=e.price_cents/100;
+    if(aed<SQ.min) return false;
+    if(SQ.max<PRICE_MAX && aed>SQ.max) return false;
     return true;
   });
+  const by={
+    trending:(a,b)=>RANK.trending(b)-RANK.trending(a),
+    soon:(a,b)=>a.start_at.localeCompare(b.start_at),
+    low:(a,b)=>a.price_cents-b.price_cents,
+    high:(a,b)=>b.price_cents-a.price_cents
+  };
+  return out.sort(by[SQ.sort]||by.trending);
+}
 
+function runSearch(){
+  const out=document.getElementById('results');
+  if(!out) return;
+  const hits=searchHits();
   const n=document.getElementById('rcount');
   if(n) n.textContent = hits.length+' event'+(hits.length===1?'':'s');
   out.className = hits.length ? 'results reveal' : '';
   out.innerHTML = hits.length ? hits.map(e=>card(e,'tile')).join('')
-    : emptyState('Nothing matches those filters','Clear a filter or widen the date range.');
+    : emptyState('No events match','Try removing a category or widening the price range.');
+}
+
+/* The slider updates its fill and labels on every input event but
+   only re-renders results on release — dragging across 30 steps
+   should not rebuild the grid 30 times. */
+function paintRange(){
+  const lo=document.getElementById('pmin'), hi=document.getElementById('pmax');
+  const fill=document.getElementById('rngfill');
+  if(!lo||!hi||!fill) return;
+  let a=+lo.value, b=+hi.value;
+  if(a>b){ [a,b]=[b,a]; }
+  SQ.min=a; SQ.max=b;
+  fill.style.left=(a/PRICE_MAX*100)+'%';
+  fill.style.right=(100-b/PRICE_MAX*100)+'%';
+  const av=document.getElementById('pminv'), bv=document.getElementById('pmaxv');
+  if(av) av.textContent=a;
+  if(bv) bv.textContent=b;
 }
 
 function wireSearch(){
-  ['q','f-city','f-cat','f-from','f-to'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.addEventListener(id==='q'?'input':'change',runSearch);
+  const bind=(id,ev,fn)=>{const el=document.getElementById(id); if(el) el.addEventListener(ev,fn);};
+  bind('q','input',e=>{ SQ.q=e.target.value; runSearch(); });
+  bind('f-hub','change',e=>{ SQ.hub=e.target.value; route(); });
+  bind('f-from','change',e=>{ SQ.from=e.target.value; route(); });
+  bind('f-to','change',e=>{ SQ.to=e.target.value; route(); });
+  bind('f-sort','change',e=>{ SQ.sort=e.target.value; runSearch(); });
+  ['pmin','pmax'].forEach(id=>{
+    bind(id,'input',paintRange);
+    bind(id,'change',()=>route());
   });
+  paintRange();
 }
 
 /* ============================================================
@@ -3109,7 +3754,7 @@ document.addEventListener('click',ev=>{
     const id=save.dataset.save, on=DB.saved.has(id);
     on ? DB.saved.delete(id) : DB.saved.add(id);
     save.setAttribute('aria-pressed',String(!on));
-    save.innerHTML = on ? '&#9825;' : '&#9829;';
+    save.setAttribute('aria-label', on ? 'Save event' : 'Remove from saved');
     toast(on?'Removed from saved':'Saved');
     return;
   }
@@ -3178,6 +3823,55 @@ document.addEventListener('click',ev=>{
     return;
   }
 
+  const ra2=ev.target.closest('.rail-x__a');
+  if(ra2){
+    const t=document.getElementById(ra2.dataset.rail);
+    if(t) RAIL.step(t, ra2.dataset.dir);
+    return;
+  }
+
+  /* search facets */
+  const fc=ev.target.closest('[data-cat2]');
+  if(fc){
+    const k=fc.dataset.cat2, i=SQ.cats.indexOf(k);
+    i>-1 ? SQ.cats.splice(i,1) : SQ.cats.push(k);
+    route(); return;
+  }
+  const uf=ev.target.closest('[data-unfilter]');
+  if(uf){
+    const k=uf.dataset.unfilter;
+    if(k==='q') SQ.q='';
+    else if(k==='hub') SQ.hub='';
+    else if(k==='from') SQ.from='';
+    else if(k==='to') SQ.to='';
+    else if(k==='price'){ SQ.min=0; SQ.max=PRICE_MAX; }
+    else if(k.startsWith('cat:')) SQ.cats=SQ.cats.filter(c=>c!==k.slice(4));
+    route(); return;
+  }
+  if(ev.target.closest('[data-clearcat]')){ SQ.cats=[]; route(); return; }
+  if(ev.target.closest('[data-clearprice]')){ SQ.min=0; SQ.max=PRICE_MAX; route(); return; }
+
+  /* calendar */
+  const cm=ev.target.closest('[data-cal]');
+  if(cm){
+    CAL.m += +cm.dataset.cal;
+    if(CAL.m<0){ CAL.m=11; CAL.y--; }
+    if(CAL.m>11){ CAL.m=0; CAL.y++; }
+    route(); return;
+  }
+  const cd=ev.target.closest('[data-day]');
+  if(cd){
+    const k=cd.dataset.day, i=CAL.picked.indexOf(k);
+    i>-1 ? CAL.picked.splice(i,1) : CAL.picked.push(k);
+    route(); return;
+  }
+  const cu=ev.target.closest('[data-unpick]');
+  if(cu){
+    const i=CAL.picked.indexOf(cu.dataset.unpick);
+    if(i>-1) CAL.picked.splice(i,1);
+    route(); return;
+  }
+
   /* FAQ */
   const fq=ev.target.closest('[data-faq]');
   if(fq){
@@ -3195,30 +3889,18 @@ document.addEventListener('click',ev=>{
   const pb=ev.target.closest('#pickbtn');
   if(pb){
     const pnl=document.getElementById('pickpanel');
-    const open=pnl.dataset.open!=='true';
-    pnl.dataset.open=String(open);
-    pb.setAttribute('aria-expanded',String(open));
+    PICK.set(pnl.dataset.open!=='true');
     return;
   }
-  const rg=ev.target.closest('[data-region]');
-  if(rg){ REGION=rg.dataset.region; route();
-    setTimeout(()=>{const p=document.getElementById('pickpanel');
-      if(p){p.dataset.open='true';
-        document.getElementById('pickbtn').setAttribute('aria-expanded','true');}},0);
-    return; }
   const ct=ev.target.closest('[data-city]');
   if(ct){
-    CITY=ct.dataset.city;
-    const c=DB.cities.find(x=>x.slug===CITY);
-    if(c){ GEO.here={lat:c.lat,lng:c.lng,label:c.label,exact:false}; }
-    toast('Showing '+(c?c.label:CITY));
+    HUB=ct.dataset.city;
+    const h=DB.hubs.find(x=>x.slug===HUB);
+    if(h){ GEO.here={lat:h.lat,lng:h.lng,label:h.label,exact:false}; }
+    toast('Showing '+(h?h.label:HUB));
     route(); return;
   }
-  if(!ev.target.closest('.pick')){
-    const pnl=document.getElementById('pickpanel');
-    if(pnl && pnl.dataset.open==='true'){ pnl.dataset.open='false';
-      const b=document.getElementById('pickbtn'); if(b) b.setAttribute('aria-expanded','false'); }
-  }
+  if(!ev.target.closest('.pick')) PICK.close();
 
   /* checkout controls */
   const sl=ev.target.closest('[data-sess]');
@@ -3283,21 +3965,14 @@ document.addEventListener('click',ev=>{
     toast(t+' copied'); return;
   }
 
-  const dm=ev.target.closest('[data-demo]');
-  if(dm){ document.getElementById('demo').dataset.off='true'; return; }
-
   const loc=ev.target.closest('[data-locate]');
   if(loc){ locate(); return; }
 
   const clr=ev.target.closest('[data-clear]');
   if(clr){
-    ['q','f-city','f-cat','f-from','f-to'].forEach(id=>{
-      const el=document.getElementById(id); if(el) el.value='';
-    });
-    document.querySelectorAll('#cost button, #avail button').forEach((b,i)=>
-      b.setAttribute('aria-pressed', String(b.dataset.cost==='0'||b.dataset.avail==='0')));
-    runSearch();
-    return;
+    SQ.q=''; SQ.hub=''; SQ.cats=[]; SQ.from=''; SQ.to='';
+    SQ.min=0; SQ.max=PRICE_MAX; SQ.sort='trending';
+    route(); return;
   }
 
   const am=ev.target.closest('#acct');
@@ -3376,7 +4051,6 @@ document.addEventListener('click',ev=>{
   if(seg){
     seg.parentElement.querySelectorAll('button')
       .forEach(x=>x.setAttribute('aria-pressed',String(x===seg)));
-    if(seg.dataset.cost!==undefined||seg.dataset.avail!==undefined) runSearch();
     return;
   }
 
@@ -3532,9 +4206,203 @@ document.addEventListener('keydown',e=>{
   const sh=document.getElementById('sheet');
   if(sh && sh.dataset.open==='true'){ SHEET.close(); return; }
   const pnl=document.getElementById('pickpanel');
-  if(pnl && pnl.dataset.open==='true'){ pnl.dataset.open='false';
-    const b=document.getElementById('pickbtn'); if(b) b.setAttribute('aria-expanded','false'); }
+  if(pnl && pnl.dataset.open==='true') PICK.close();
 });
+
+/* ============================================================
+   CITY PICKER — hover open, click still works
+   Hover is an enhancement on fine pointers only. Click remains
+   the primary interaction, so touch and keyboard are unaffected.
+   The close delay exists because a cursor moving diagonally to a
+   card clips the panel edge; closing instantly there is the most
+   common complaint about hover menus.
+   ============================================================ */
+const PICK = {
+  t:null, DELAY:260,
+  panel(){ return document.getElementById('pickpanel'); },
+  btn(){   return document.getElementById('pickbtn'); },
+  wrap(){  const b=this.btn(); return b && b.closest('.pick'); },
+
+  set(open){
+    const p=this.panel(), b=this.btn(), w=this.wrap();
+    if(!p||!b) return;
+    p.dataset.open=String(open);
+    b.setAttribute('aria-expanded',String(open));
+    if(w) w.dataset.hot=String(open);
+  },
+  open(){  clearTimeout(this.t); this.set(true); },
+  close(){ clearTimeout(this.t); this.set(false); },
+  soon(){  clearTimeout(this.t); this.t=setTimeout(()=>this.set(false), this.DELAY); },
+
+  init(){
+    if(matchMedia('(hover: none), (pointer: coarse)').matches) return;
+    document.addEventListener('pointerover', e=>{
+      if(e.pointerType && e.pointerType!=='mouse') return;
+      const t=e.target;
+      if(t.closest && (t.closest('#pickbtn') || t.closest('#pickpanel') || t.closest('.pick'))){
+        this.open();
+      }
+    });
+    document.addEventListener('pointerout', e=>{
+      if(e.pointerType && e.pointerType!=='mouse') return;
+      const to=e.relatedTarget;
+      if(to && to.closest && (to.closest('.pick') || to.closest('#pickpanel'))) return;
+      if(e.target.closest && e.target.closest('.pick')) this.soon();
+    });
+  }
+};
+PICK.init();
+
+/* ============================================================
+   RAIL DRAG + ARROWS
+   Pointer-events based so mouse, pen and touch share one path.
+   A 5px threshold separates a drag from a tap — without it every
+   card click while the finger moves 1px becomes a dead press.
+   ============================================================ */
+const RAIL = {
+  DRAG_MIN: 5,
+
+  arrows(t){
+    const wrap=t.parentElement;
+    const prev=wrap.querySelector('[data-dir=prev]');
+    const next=wrap.querySelector('[data-dir=next]');
+    const max=t.scrollWidth-t.clientWidth-2;
+    if(prev) prev.disabled = t.scrollLeft<=2;
+    if(next) next.disabled = t.scrollLeft>=max;
+  },
+
+  step(t,dir){
+    /* 80% of a page, so the last visible card stays on screen as
+       an anchor instead of jumping to a blank edge */
+    const d=Math.max(200, t.clientWidth*0.8);
+    t.scrollBy({left: dir==='next' ? d : -d, behavior:'smooth'});
+  },
+
+  bind(t){
+    if(t.dataset.bound) return;
+    t.dataset.bound='1';
+    let down=false, moved=false, sx=0, sl=0, id=null;
+
+    t.addEventListener('pointerdown', e=>{
+      if(e.button!==undefined && e.button!==0) return;
+      down=true; moved=false; sx=e.clientX; sl=t.scrollLeft; id=e.pointerId;
+    });
+
+    t.addEventListener('pointermove', e=>{
+      if(!down) return;
+      const dx=e.clientX-sx;
+      if(!moved && Math.abs(dx) < this.DRAG_MIN) return;
+      if(!moved){
+        moved=true;
+        t.dataset.drag='true';
+        try{ t.setPointerCapture(id); }catch(_){}
+      }
+      t.scrollLeft = sl - dx;
+    });
+
+    const end=()=>{
+      if(!down) return;
+      down=false;
+      if(moved){
+        /* the click that follows a drag must not open a card */
+        t.addEventListener('click', ev=>{
+          ev.preventDefault(); ev.stopPropagation();
+        }, {capture:true, once:true});
+      }
+      delete t.dataset.drag;
+      moved=false;
+      this.arrows(t);
+    };
+    t.addEventListener('pointerup', end);
+    t.addEventListener('pointercancel', end);
+    t.addEventListener('pointerleave', end);
+    t.addEventListener('scroll', ()=>this.arrows(t), {passive:true});
+    this.arrows(t);
+  },
+
+  init(){ document.querySelectorAll('.rail-x__t').forEach(t=>this.bind(t)); }
+};
+
+/* ============================================================
+   CURSOR TRAIL
+   Spawn-and-forget sparkles. Three guards keep it cheap:
+   rAF batching (never more than one spawn per frame), a minimum
+   travel distance (a resting cursor emits nothing), and a hard
+   cap on live nodes so a fast swipe cannot flood the DOM.
+   ============================================================ */
+const TRAIL = {
+  layer:null, x:0, y:0, lx:0, ly:0, queued:false, live:0,
+  MAX:22, GAP:46,          /* px of travel between sparkles */
+
+  /* Sparkles over an input make text hard to read while typing,
+     and inside a dialog they compete with the thing being decided. */
+  muted(t){
+    return !!(t && t.closest &&
+      t.closest('input,textarea,select,[contenteditable],.sheet,.q-modal,#pickpanel'));
+  },
+
+  init(){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(matchMedia('(hover: none), (pointer: coarse)').matches) return;
+    this.layer=document.getElementById('trail');
+    if(!this.layer) return;
+    document.addEventListener('pointermove', e=>{
+      if(e.pointerType!=='mouse') return;
+      if(this.muted(e.target)) return;
+      this.x=e.clientX; this.y=e.clientY;
+      if(this.queued) return;
+      this.queued=true;
+      requestAnimationFrame(()=>{ this.queued=false; this.tick(); });
+    }, {passive:true});
+  },
+
+  tick(){
+    const dx=this.x-this.lx, dy=this.y-this.ly;
+    if(Math.hypot(dx,dy) < this.GAP) return;
+    this.lx=this.x; this.ly=this.y;
+    this.spawn(this.x, this.y);
+  },
+
+  spawn(x,y){
+    if(this.live >= this.MAX) return;
+    const s=document.createElement('span');
+    s.className='tspk';
+    const size = 6 + Math.random()*8;
+    const dur  = 620 + Math.random()*420;
+    /* drift up and sideways — sparks rise, they do not fall */
+    const dx = (Math.random()*36 - 18).toFixed(1);
+    const dy = (-14 - Math.random()*26).toFixed(1);
+    s.style.cssText =
+      'left:'+x+'px;top:'+y+'px;--tw:'+size.toFixed(1)+'px;'+
+      '--dx:'+dx+'px;--dy:'+dy+'px;--tdur:'+dur+'ms';
+    this.live++;
+    s.addEventListener('animationend', ()=>{ s.remove(); this.live--; }, {once:true});
+    this.layer.appendChild(s);
+  }
+};
+TRAIL.init();
+
+/* ============================================================
+   CMS BRIDGE
+   admin.html is a separate document, so it cannot share memory
+   with this one. It writes to localStorage; this reads on load.
+   Wrapped because storage can be blocked, and a blocked read must
+   fall back to the defaults rather than break the page.
+   ============================================================ */
+(function loadCms(){
+  try{
+    const raw=localStorage.getItem('kreo-cms');
+    if(!raw) return;
+    const saved=JSON.parse(raw);
+    Object.keys(saved).forEach(k=>{
+      if(saved[k] && typeof saved[k]==='object' && !Array.isArray(saved[k]))
+        Object.assign(DB.cms[k], saved[k]);
+      else DB.cms[k]=saved[k];
+    });
+    if(DB.cms.brandColor)
+      document.documentElement.style.setProperty('--brand', DB.cms.brandColor);
+  }catch(e){ /* storage blocked — defaults stand */ }
+})();
 
 /* ============================================================
    THEME
