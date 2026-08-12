@@ -1,0 +1,2979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KREO Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FAF8F4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   QUEST — tokens
+   Palette + type taken from the brief's colour scheme board.
+   Orange is a signal colour: graphics and large type only.
+   ============================================================ */
+:root{
+  --ink:#0F0E0C; --ink-2:#2A2723; --paper:#FAF8F4; --surface:#FFF;
+  --line:#E4DFD5; --grey:#6B665E; --grey-2:#8E8880;
+  /* Signal lime. Luminance .78 — it is a FILL, never text on light.
+     --on-brand is the label colour that sits on a lime fill;
+     --brand-ink is the readable-as-text role. Both are roles,
+     not shades, so dark mode can invert them independently. */
+  --brand:#C7F464;      /* fill · ink label reads 15.21 on it */
+  --on-brand:#0F0E0C;   /* label colour ON a brand fill */
+  --brand-ink:#4A630D;  /* 6.42 on paper — lime as readable text */
+  --brand-soft:#F4FBDE; --brand-edge:#6E9314; --live:#C0180A; --good:#0E7A4F;
+  /* Hero sits on lime in both themes, so its text colours are fixed
+     rather than theme-derived — cream ink on lime would vanish. */
+  --hero-ink:#14401F; --hero-accent:#0A2A12; --hero-btn:#14401F;
+  --close-end:#D9F58C; --close-sub:#3F5F45;
+  --trail-c:#6E9314;
+
+  --f-display:'Heading Now','Archivo',system-ui,sans-serif;
+  --f:'TT Norms Pro','Manrope','Inter',system-ui,-apple-system,sans-serif;
+  --m:'IBM Plex Mono',ui-monospace,monospace;
+
+  --t-2xs:11px; --t-xs:12px; --t-sm:14px; --t-base:16px;
+  --t-lg:19px; --t-xl:23px; --t-2xl:30px; --t-3xl:42px; --t-4xl:56px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px;
+  --s6:32px; --s7:48px; --s8:64px;
+
+  --r1:6px; --r2:14px; --r3:20px; --pill:999px;
+  --sh:0 1px 2px rgba(15,14,12,.05),0 10px 30px -18px rgba(15,14,12,.25);
+  /* Button lift. Four values, scaled to weight: a quiet button that
+     casts the same shadow as a primary is no longer quiet. */
+  --btn-sh:0 1px 2px rgba(15,14,12,.08),0 2px 6px -1px rgba(15,14,12,.14);
+  --btn-sh-h:0 2px 4px rgba(15,14,12,.10),0 8px 18px -4px rgba(15,14,12,.22);
+  --btn-sh-a:0 1px 1px rgba(15,14,12,.14);
+  --btn-sh-soft:0 1px 2px rgba(15,14,12,.06);
+  --scrim:rgba(250,248,244,.88);   /* sticky bars */
+  --scrim-2:rgba(255,255,255,.94);
+  --on-media:#FAF8F4;              /* text over photos — never flips */
+  --ok-bg:#F2FAF6;
+  --ez:cubic-bezier(.2,.7,.3,1);
+}
+
+/* Dark. ink/paper are a *pair* — flipping both keeps every
+   ink-on-paper component correct without touching a component.
+   brand-ink lightens: it is the readable-brand role, not a hue. */
+[data-theme=dark]{
+  --ink:#F4F1EB; --ink-2:#DCD6CB; --paper:#0D0C0B; --surface:#171614;
+  --line:#2E2B26; --grey:#9C968C; --grey-2:#8E887C;
+  --trail-c:#C7F464;
+  --close-end:#AFDD5C; --close-sub:#2F4A18;
+  --brand:#C7F464; --on-brand:#0F0E0C; --brand-ink:#C7F464;
+  --brand-soft:#242D12; --brand-edge:#C7F464;
+  --live:#FF4B33; --good:#3FBF87;
+  --sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
+  /* On near-black a cast shadow is invisible, so depth comes from a
+     rim highlight above plus a deeper shadow below. */
+  --btn-sh:0 1px 0 rgba(255,255,255,.08) inset,0 2px 8px -2px rgba(0,0,0,.75);
+  --btn-sh-h:0 1px 0 rgba(255,255,255,.12) inset,0 10px 22px -6px rgba(0,0,0,.9);
+  --btn-sh-a:0 1px 2px rgba(0,0,0,.6);
+  --btn-sh-soft:0 1px 4px -1px rgba(0,0,0,.6);
+  --scrim:rgba(13,12,11,.85); --scrim-2:rgba(23,22,20,.94);
+  --ok-bg:#12241B;
+}
+[data-theme=dark] .story__img,[data-theme=dark] .face{border-color:var(--surface)}
+[data-theme=dark] .btn[data-v=primary]:hover{background:#D6FA84;box-shadow:var(--btn-sh-h)}
+[data-theme=dark] img{filter:brightness(.94)}
+[data-theme=dark] .qr,[data-theme=dark] .qr i{filter:none}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--f);font-size:var(--t-base);line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0}
+a{color:inherit;text-decoration:none}
+input,select,textarea{font:inherit;color:inherit}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--brand-ink);outline-offset:2px;border-radius:var(--r1)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* --- type ---------------------------------------------------- */
+.d1{font-size:var(--t-4xl);font-weight:800;line-height:.92;letter-spacing:-.045em;margin:0}
+.d2{font-size:var(--t-3xl);font-weight:800;line-height:.96;letter-spacing:-.04em;margin:0}
+.h1{font-size:var(--t-2xl);font-weight:800;line-height:1.05;letter-spacing:-.035em;margin:0}
+.h2{font-size:var(--t-xl);font-weight:700;line-height:1.15;letter-spacing:-.03em;margin:0}
+.h3{font-size:var(--t-lg);font-weight:700;line-height:1.2;letter-spacing:-.02em;margin:0}
+.body{font-size:var(--t-base);color:var(--grey);margin:0}
+.meta{font-family:var(--m);font-size:var(--t-xs);color:var(--grey);margin:0}
+.eyebrow{font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
+  letter-spacing:.14em;color:var(--grey);margin:0}
+.price{font-family:var(--m);font-size:var(--t-sm);font-weight:500;color:var(--brand-ink)}
+.price[data-free=true]{color:var(--grey)}
+.muted{color:var(--grey)}
+
+/* --- buttons -------------------------------------------------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+  padding:11px var(--s4);border:1px solid transparent;border-radius:var(--r1);
+  font-size:var(--t-sm);font-weight:600;cursor:pointer;
+  transition:transform .12s var(--ez),background-color .15s var(--ez),
+             color .15s var(--ez),box-shadow .15s var(--ez)}
+/* Pressing flattens the shadow as the button travels down. Without
+   it the lift reads as a sticker rather than a control. */
+.btn:active{transform:translateY(1px) scale(.99);box-shadow:var(--btn-sh-a)}
+/* Lime on cream has no visible edge (1.20:1). The border supplies
+   the component boundary WCAG 1.4.11 requires; dark mode does not
+   need it, where lime reads 15.40:1 against the page. */
+.btn[data-v=primary]{background:var(--brand);color:var(--on-brand);
+  border-color:var(--brand-edge);box-shadow:var(--btn-sh)}
+.btn[data-v=primary]:hover{background:#B4E24A;box-shadow:var(--btn-sh-h)}
+.btn[data-v=ink]{background:var(--ink);color:var(--paper);box-shadow:var(--btn-sh)}
+.btn[data-v=ink]:hover{background:var(--ink-2);box-shadow:var(--btn-sh-h)}
+.btn[data-v=outline]{border-color:var(--ink);box-shadow:var(--btn-sh-soft)}
+.btn[data-v=outline]:hover{background:var(--ink);color:var(--paper);box-shadow:var(--btn-sh-h)}
+/* quiet stays flat until touched — that is what makes it quiet */
+.btn[data-v=quiet]{color:var(--grey)}
+.btn[data-v=quiet]:hover{color:var(--ink);background:var(--brand-soft);box-shadow:var(--btn-sh-soft)}
+.btn[data-size=lg]{padding:15px var(--s5);font-size:var(--t-base);width:100%}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn[disabled]:hover{box-shadow:none}
+.btn-row{display:flex;gap:var(--s2);flex-wrap:wrap}
+
+/* --- chips / tags --------------------------------------------- */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px var(--s3);min-height:44px;
+  border:1px solid var(--line);border-radius:var(--pill);background:var(--surface);
+  font-family:var(--m);font-size:var(--t-xs);cursor:pointer;white-space:nowrap;
+  transition:background-color .15s var(--ez),border-color .15s var(--ez)}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--brand);border-color:var(--brand-edge);color:var(--on-brand)}
+.tag{display:inline-block;padding:3px 7px;font-family:var(--m);font-size:var(--t-2xs);
+  text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--ink);border-radius:var(--r1)}
+.tag[data-t=ink]{background:var(--ink);color:var(--paper)}
+.tag[data-t=brand]{background:var(--brand);color:var(--on-brand);border-color:var(--brand-edge)}
+.tag[data-t=soft]{background:var(--brand-soft);color:var(--brand-ink);border-color:transparent}
+.tag[data-t=line]{background:transparent;color:var(--grey);border-color:var(--line)}
+
+.live{display:inline-flex;align-items:center;gap:6px;font-family:var(--m);
+  font-size:var(--t-2xs);text-transform:uppercase;letter-spacing:.12em;color:var(--live)}
+.live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--live);
+  animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,27,0,.5)}
+  70%{box-shadow:0 0 0 7px rgba(224,27,0,0)}100%{box-shadow:0 0 0 0 rgba(224,27,0,0)}}
+
+/* --- avatar / mark -------------------------------------------- */
+.mark{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:var(--r1);
+  background:var(--ink);color:var(--paper);font-family:var(--m);font-size:var(--t-2xs)}
+.mark[data-size=lg]{width:52px;height:52px;font-size:var(--t-sm);border-radius:var(--r2)}
+
+/* --- social proof --------------------------------------------- */
+.going{display:flex;align-items:center;gap:var(--s2)}
+.going__stack{display:flex}
+.face{width:24px;height:24px;border-radius:50%;flex:none;border:2px solid var(--surface);
+  display:grid;place-items:center;background:var(--ink-2);color:var(--paper);
+  font-family:var(--m);font-size:9px}
+.face+.face{margin-left:-8px}
+.going__n{font-family:var(--m);font-size:var(--t-xs);color:var(--grey)}
+.going__n b{color:var(--ink);font-weight:600}
+
+/* --- save ------------------------------------------------------ */
+.save{position:absolute;top:var(--s3);right:var(--s3);z-index:2;width:44px;height:44px;
+  display:grid;place-items:center;cursor:pointer;background:none;
+  transition:transform .18s var(--ez)}
+.save:hover svg{transform:scale(1.12)}
+.save:active{transform:scale(.86)}
+
+/* SVG rather than the heart glyphs: outline and filled hearts sit
+   on different baselines in most system fonts, so the icon jumped
+   on toggle. One path, fill swaps. */
+.save svg{width:23px;height:23px;display:block;overflow:visible}
+.save svg{filter:drop-shadow(0 1px 2px rgba(15,14,12,.55))
+                 drop-shadow(0 0 6px rgba(15,14,12,.45));
+  transition:transform .18s var(--ez)}
+.save svg path{
+  fill:rgba(15,14,12,.28);stroke:#fff;stroke-width:2;stroke-linejoin:round;
+  transition:fill .2s var(--ez),stroke .2s var(--ez)}
+.save[aria-pressed=true] svg path{fill:var(--brand);stroke:#fff}
+
+/* The fill pops once on save. Confirmation you can feel. */
+@keyframes savepop{
+  0%{transform:scale(1)} 40%{transform:scale(1.28)} 100%{transform:scale(1)}
+}
+.save[aria-pressed=true] svg{animation:savepop .32s var(--ez)}
+@media(prefers-reduced-motion:reduce){.save[aria-pressed=true] svg{animation:none}}
+
+/* --- category tiles: label + live count (counts are information,
+       circles were decoration) --------------------------------- */
+.cat{display:flex;align-items:center;gap:var(--s3);flex:none;
+  padding:var(--s3);width:186px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r2);cursor:pointer;text-align:left;
+  transition:border-color .15s var(--ez),transform .15s var(--ez)}
+.cat:hover{border-color:var(--ink);transform:translateY(-2px)}
+.cat__i{width:40px;height:40px;border-radius:var(--r1);object-fit:cover;flex:none}
+.cat__l{font-weight:600;font-size:var(--t-sm);line-height:1.2}
+.cat__n{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey)}
+.cat[aria-pressed=true]{border-color:var(--brand-edge);background:var(--brand-soft)}
+.cat[aria-pressed=true] .cat__n{color:var(--brand-ink)}
+.cat-grid{display:grid;gap:var(--s3);grid-template-columns:repeat(auto-fill,minmax(186px,1fr))}
+.cat-grid .cat{width:auto}
+
+/* --- follow card (Luma's "Featured Calendars") ---------------- */
+.follow{display:flex;align-items:center;gap:var(--s3);padding:var(--s4);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r2)}
+.follow__b{flex:1;min-width:0}
+.follow__b p{margin:0}
+.follow__d{font-size:var(--t-sm);color:var(--grey);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* --- city header --------------------------------------------- */
+.city{display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.city__i{width:64px;height:64px;border-radius:var(--r2);object-fit:cover;flex:none}
+
+/* --- date rail  (signature) ------------------------------------ */
+.rail{display:grid;grid-template-columns:92px 1fr;gap:var(--s5)}
+.rail+.rail{margin-top:var(--s6)}
+.rail__d{position:relative;padding-top:2px}
+.rail__n{font-size:44px;font-weight:800;line-height:.85;letter-spacing:-.05em}
+.rail__m,.rail__w{font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
+  letter-spacing:.16em;color:var(--grey);margin-top:5px}
+.rail__w{color:var(--brand-ink);margin-top:2px}
+.rail__d[data-today=true] .rail__n{color:var(--brand-ink)}
+.rail__list{display:grid;gap:var(--s3);border-left:1px solid var(--line);padding-left:var(--s5)}
+@media(max-width:720px){
+  .rail{grid-template-columns:1fr;gap:var(--s3)}
+  .rail__d{display:flex;align-items:baseline;gap:var(--s3)}
+  .rail__n{font-size:30px}.rail__m,.rail__w{margin-top:0}
+  .rail__list{border-left:0;padding-left:0}
+}
+
+/* --- card ------------------------------------------------------ */
+.card{position:relative;display:block;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r2);overflow:hidden;cursor:pointer;
+  transition:border-color .15s var(--ez),transform .15s var(--ez),box-shadow .2s var(--ez)}
+.card:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:var(--sh)}
+.card:active{transform:scale(.99)}
+.card__b{min-width:0}
+.card__tags{display:flex;gap:6px;margin-bottom:var(--s2);flex-wrap:wrap;align-items:center}
+.card__f{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);min-width:0}
+.card__f .meta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.card__f .price{flex:none}
+.card__t{margin:0 0 var(--s2)}
+.card__when{margin:0 0 2px}
+.card__where{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* status left, price right — price never gets squeezed by a long
+   status label, because it is the number people scan for */
+.card__s{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);min-width:0}
+.card__s .price,.card__s .price-gate{margin-left:auto;flex:none}
+/* Reads as a deliberate lock, not as a loading state */
+.price-gate{display:inline-flex;align-items:center;gap:6px;flex:none;
+  font-family:var(--m);font-size:var(--t-xs);color:var(--grey-2)}
+.price-gate b{font-weight:600;color:var(--brand-ink);
+  text-decoration:underline;text-underline-offset:2px}
+.price-gate span[aria-hidden]{letter-spacing:-1px;font-size:9px;opacity:.6}
+.card__s .tag,.card__s .live{flex:none}
+
+.card[data-v=row]{display:grid;grid-template-columns:1fr 108px;gap:var(--s4);padding:var(--s4);align-items:start}
+.card[data-v=row] .card__img{width:108px;height:108px;border-radius:var(--r1);object-fit:cover}
+@media(max-width:560px){
+  .card[data-v=row]{grid-template-columns:1fr 84px;gap:var(--s3);padding:var(--s3)}
+  .card[data-v=row] .card__img{width:84px;height:84px}
+}
+.card[data-v=tile] .card__img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.card[data-v=tile] .card__b{padding:var(--s4)}
+.card[data-v=hero]{border:0;min-height:360px;display:flex;align-items:flex-end}
+.card[data-v=hero] .card__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card[data-v=hero]::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(15,14,12,.9) 0%,rgba(15,14,12,.35) 48%,transparent 78%)}
+.card[data-v=hero] .card__b{position:relative;z-index:1;padding:var(--s5);color:var(--on-media);width:100%}
+.card[data-v=hero] .meta,.card[data-v=hero] .going__n{color:rgba(250,248,244,.75)}
+.card[data-v=hero] .h1{color:var(--on-media)}
+.card[data-v=hero] .going__n b{color:var(--on-media)}
+.card[data-v=hero] .face{border-color:rgba(15,14,12,.85);background:#3A352E;color:var(--on-media)}
+.card[data-state=soldout] .card__img{filter:grayscale(1);opacity:.55}
+
+/* --- forms ----------------------------------------------------- */
+.field{display:grid;gap:6px;margin-bottom:var(--s4)}
+.label{font-family:var(--m);font-size:var(--t-2xs);text-transform:uppercase;
+  letter-spacing:.12em;color:var(--grey)}
+.input{width:100%;padding:12px var(--s3);background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r1);font-size:var(--t-base)}
+.input:focus{border-color:var(--ink);outline:none}
+.input::placeholder{color:var(--grey-2)}
+textarea.input{min-height:96px;resize:vertical}
+.hint{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey-2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media(max-width:520px){.two{grid-template-columns:1fr}}
+
+.toggle{display:flex;align-items:center;gap:var(--s3);cursor:pointer;
+  padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.toggle input{position:absolute;opacity:0;width:0;height:0}
+.track{width:42px;height:24px;border-radius:var(--pill);background:var(--line);
+  position:relative;transition:background-color .18s var(--ez);flex:none}
+.track::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;
+  border-radius:50%;background:#fff;transition:transform .18s var(--ez)}
+.toggle input:checked+.track{background:var(--brand-edge)}
+.toggle input:checked+.track::after{transform:translateX(18px)}
+.toggle input:focus-visible+.track{outline:2px solid var(--brand-ink);outline-offset:2px}
+
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:var(--r1)}
+.stepper button{width:46px;height:46px;font-size:19px;cursor:pointer}
+.stepper button:hover{background:var(--brand-soft)}
+.stepper span{min-width:44px;text-align:center;font-family:var(--m);font-weight:500}
+
+/* --- ticket ---------------------------------------------------- */
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.ticket__top{padding:var(--s5);display:grid;justify-items:center;gap:var(--s4);text-align:center}
+/* QR stays light in both themes — inverted codes fail most scanners */
+.qr{display:grid;padding:12px;background:#fff;border-radius:var(--r1)}
+.qr i{display:block;width:6px;height:6px}
+.perf{height:1px;border:0;border-top:2px dashed var(--line);margin:0;position:relative}
+.perf::before,.perf::after{content:'';position:absolute;top:-11px;width:22px;height:22px;
+  border-radius:50%;background:var(--paper)}
+.perf::before{left:-11px}.perf::after{right:-11px}
+.ticket__bot{padding:var(--s4) var(--s5);display:grid;gap:var(--s2)}
+.kv{display:flex;justify-content:space-between;gap:var(--s4);font-size:var(--t-sm)}
+.kv dt{color:var(--grey)}
+.kv dd{margin:0;font-family:var(--m);text-align:right;min-width:0;overflow-wrap:anywhere}
+.kv dt{flex:none}
+
+/* --- misc ------------------------------------------------------ */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s5)}
+.ink-panel{background:var(--ink);color:var(--paper);border-radius:var(--r2);padding:var(--s5)}
+.ink-panel .meta,.ink-panel .body{color:rgba(250,248,244,.66)}
+.empty{text-align:center;padding:var(--s8) var(--s5);border:1px dashed var(--line);
+  border-radius:var(--r2);background:var(--surface)}
+.empty__m{font-size:var(--t-3xl);font-weight:800;color:var(--brand-ink);line-height:1;letter-spacing:-.04em}
+.roster{display:grid;gap:var(--s2)}
+.roster__r{display:grid;grid-template-columns:36px 1fr auto;gap:var(--s3);align-items:center;
+  padding:var(--s3);background:var(--surface);border:1px solid var(--line);border-radius:var(--r1)}
+.roster__r[data-in=true]{border-color:var(--good);background:var(--ok-bg)}
+.stat{display:grid;gap:2px}
+.stat b{font-size:var(--t-2xl);font-weight:800;letter-spacing:-.03em;line-height:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:var(--s4)}
+.tabs{display:flex;gap:var(--s1);background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--pill);padding:var(--s1);width:fit-content}
+.tabs button{padding:8px var(--s4);border-radius:var(--pill);font-size:var(--t-sm);
+  font-weight:600;color:var(--grey);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--paper)}
+.plan{display:grid;gap:var(--s3);padding:var(--s5);border-radius:var(--r2);
+  border:1px solid var(--line);background:var(--surface)}
+.plan[data-hot=true]{border-color:var(--brand-edge);border-width:2px}
+.plan ul{margin:0;padding-left:var(--s4);display:grid;gap:var(--s2);
+  font-size:var(--t-sm);color:var(--grey)}
+.note{background:var(--brand-soft);border-radius:var(--r1);padding:var(--s3);
+  font-size:var(--t-sm);color:var(--brand-ink)}
+
+/* --- shell ----------------------------------------------------- */
+.wrap{max-width:940px;margin:0 auto;padding:0 var(--s5)}
+.grid{display:grid;gap:var(--s4);grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.stack{display:grid;gap:var(--s3)}
+.scroll-x{display:flex;gap:var(--s3);overflow-x:auto;padding-bottom:var(--s2);
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.sec{padding:var(--s6) 0}
+.sec__h{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);
+  margin-bottom:var(--s4);flex-wrap:wrap}
+.hr{height:1px;background:var(--line);border:0;margin:var(--s6) 0}
+
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:var(--s4);
+  justify-content:space-between;padding:var(--s3) var(--s5);
+  background:var(--scrim);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{font-size:var(--t-xl);font-weight:800;letter-spacing:-.05em;color:var(--brand-ink)}
+.top__nav{display:flex;gap:var(--s5)}
+.top__nav a{font-family:var(--m);font-size:var(--t-xs);text-transform:uppercase;
+  letter-spacing:.1em;color:var(--grey);padding-bottom:2px;border-bottom:1px solid transparent}
+.top__nav a:hover{color:var(--ink)}
+.top__nav a[aria-current=page]{color:var(--ink);border-bottom-color:var(--brand)}
+/* The top bar is now the only navigation, so it scrolls
+   horizontally on narrow screens rather than disappearing. */
+@media(max-width:720px){
+  .top__nav{gap:var(--s4);overflow-x:auto;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;flex:1;min-width:0}
+  .top__nav::-webkit-scrollbar{display:none}
+  .top__nav a{white-space:nowrap;padding-bottom:4px}
+  .top{gap:var(--s3);padding:var(--s3) var(--s4)}
+  .brand{font-size:var(--t-lg)}
+}
+@media(max-width:520px){
+  .top .btn[data-v=ink]{padding:9px var(--s3);font-size:var(--t-2xs)}
+  .theme{width:36px;height:36px}
+}
+/* At 320px the nav strip is left with ~40px. The wordmark is the
+   least useful thing in the bar once you are inside the app. */
+@media(max-width:340px){
+  .brand{font-size:0}
+  .brand::after{content:'K';font-size:var(--t-lg)}
+  .top{gap:var(--s2);padding:var(--s3) var(--s3)}
+  .theme{width:32px;height:32px}
+}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;
+  display:flex;align-items:center;gap:var(--s4);padding:var(--s3) var(--s5);
+  background:var(--scrim-2);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.bar .btn{flex:none;min-width:150px}
+
+.theme{width:40px;height:40px;display:grid;place-items:center;border-radius:var(--r1);
+  border:1px solid var(--line);cursor:pointer;font-size:15px;flex:none;
+  transition:background-color .15s var(--ez),border-color .15s var(--ez)}
+.theme:hover{border-color:var(--ink);background:var(--brand-soft)}
+#searchbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;
+  stroke-width:2;stroke-linecap:round}
+/* current page: the icon fills so you can tell you are already there */
+#searchbtn[aria-current=page]{background:var(--brand);border-color:var(--brand-edge);
+  color:var(--on-brand)}
+
+.back{display:inline-flex;align-items:center;gap:6px;font-family:var(--m);
+  font-size:var(--t-xs);color:var(--grey);padding:var(--s4) var(--s2) var(--s4) 0;
+  min-height:44px;cursor:pointer}
+.back:hover{color:var(--ink)}
+
+.cover{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:var(--r2)}
+@media(max-width:560px){.cover{aspect-ratio:4/3}}
+
+
+/* ============================================================
+   ADMIN CONSOLE
+   A control surface, not a shop window. Dense rows, one accent,
+   no motion. Tokens are shared with the public site so the two
+   cannot drift, but every proportion here is tighter.
+   ============================================================ */
+body{padding-bottom:0;font-size:var(--t-sm)}
+
+/* --- app frame: fixed sidebar, scrolling main ---------------- */
+.ap{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:var(--surface);border-right:1px solid var(--line);
+  display:grid;grid-template-rows:auto 1fr auto;scrollbar-width:thin}
+.side__b{padding:var(--s4) var(--s4) var(--s3);display:flex;align-items:center;gap:8px}
+.side__b b{font-family:var(--f-display);font-size:var(--t-lg);font-weight:800;letter-spacing:-.05em;color:var(--brand-ink)}
+.side__b em{font-style:normal;font-family:var(--m);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--grey);border:1px solid var(--line);
+  padding:2px 5px;border-radius:var(--r1)}
+.side__n{padding:0 var(--s2);display:grid;gap:1px;align-content:start}
+.side__g{font-family:var(--m);font-size:9px;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--grey-2);padding:var(--s4) var(--s3) 6px}
+.side a{display:flex;align-items:center;gap:10px;padding:8px var(--s3);border-radius:var(--r1);
+  color:var(--grey);font-size:var(--t-sm);transition:background-color .1s var(--ez)}
+.side a:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.side a[aria-current=page]{background:var(--ink);color:var(--paper);font-weight:600}
+.side a i{font-style:normal;width:16px;text-align:center;font-size:13px;opacity:.85}
+.side a u{margin-left:auto;text-decoration:none;font-family:var(--m);font-size:9px;
+  padding:1px 6px;border-radius:var(--pill);background:var(--live);color:#fff}
+.side a[aria-current=page] u{background:var(--paper);color:var(--ink)}
+.side__f{padding:var(--s3) var(--s4);border-top:1px solid var(--line);display:grid;gap:6px}
+.side__f a{padding:6px var(--s2);font-size:var(--t-xs)}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.top2{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:var(--s3);
+  padding:var(--s3) var(--s5);background:var(--scrim);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line)}
+.crumb{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey);letter-spacing:.06em}
+.crumb b{color:var(--ink);font-weight:600}
+.gsearch{flex:1;max-width:420px;position:relative}
+.gsearch input{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--line);
+  border-radius:var(--r1);background:var(--surface);font-size:var(--t-sm)}
+.gsearch svg{position:absolute;left:10px;top:9px;width:15px;height:15px;
+  fill:none;stroke:var(--grey-2);stroke-width:2}
+.gsearch kbd{position:absolute;right:8px;top:8px;font-family:var(--m);font-size:9px;
+  color:var(--grey-2);border:1px solid var(--line);border-radius:3px;padding:2px 5px}
+.top2__r{margin-left:auto;display:flex;align-items:center;gap:var(--s2)}
+
+.page{padding:var(--s5);display:grid;gap:var(--s4);align-content:start;flex:1}
+@media(max-width:1000px){
+  .ap{grid-template-columns:1fr}
+  .side{position:static;height:auto;grid-template-rows:auto auto auto}
+  .side__n{grid-auto-flow:column;overflow-x:auto;scrollbar-width:none}
+  .side__n::-webkit-scrollbar{display:none}
+  .side__g,.side__f{display:none}
+  .side a{white-space:nowrap}
+  .page{padding:var(--s4)}
+  .gsearch kbd{display:none}
+}
+
+/* --- page header --------------------------------------------- */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s4);
+  flex-wrap:wrap}
+.ph h1{font-family:var(--f-display);font-size:var(--t-2xl);font-weight:800;letter-spacing:-.035em;margin:0}
+.ph p{margin:3px 0 0;font-size:var(--t-sm);color:var(--grey)}
+
+/* --- metric strip -------------------------------------------- */
+.mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3)}
+.met{padding:var(--s4);border:1px solid var(--line);border-radius:var(--r2);
+  background:var(--surface)}
+.met b{display:block;font-family:var(--f-display);font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.met span{font-family:var(--m);font-size:9px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--grey);display:block;margin-top:3px}
+.met i{font-style:normal;font-family:var(--m);font-size:var(--t-2xs);display:block;margin-top:6px}
+.met i[data-d=up]{color:var(--good)}
+.met i[data-d=down]{color:var(--live)}
+.met i[data-d=flat]{color:var(--grey-2)}
+
+/* --- card ---------------------------------------------------- */
+.cd{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);
+  overflow:hidden}
+.cd__h{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.cd__h h2{font-size:var(--t-base);font-weight:700;letter-spacing:-.01em;margin:0}
+.cd__h .meta{margin:0}
+.cd__h>.btn-row{margin-left:auto}
+.cd__b{padding:var(--s4)}
+.cd__b--flush{padding:0}
+.cd__f{padding:var(--s3) var(--s4);border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+
+/* --- toolbar (filters above a table) ------------------------- */
+.tb{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tb input,.tb select{padding:7px 10px;border:1px solid var(--line);border-radius:var(--r1);
+  background:var(--surface);font-size:var(--t-sm)}
+.tb input[type=search]{min-width:180px}
+.tb__r{margin-left:auto;display:flex;align-items:center;gap:var(--s2)}
+.seg2{display:flex;border:1px solid var(--line);border-radius:var(--r1);overflow:hidden}
+.seg2 button{padding:7px 12px;font-size:var(--t-xs);font-weight:600;color:var(--grey);
+  cursor:pointer;border-right:1px solid var(--line)}
+.seg2 button:last-child{border-right:0}
+.seg2 button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+.views{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:8px var(--s4);border-bottom:1px solid var(--line);background:var(--paper)}
+.vchip{display:inline-flex;align-items:center;border:1px solid var(--line);
+  border-radius:var(--pill);background:var(--surface);overflow:hidden}
+.vchip button{padding:4px 10px;font-size:var(--t-xs);font-weight:600;cursor:pointer;
+  color:var(--ink)}
+.vchip button:first-child:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.vchip button:last-child{padding:4px 8px 4px 4px;color:var(--grey-2);font-size:13px}
+.vchip button:last-child:hover{color:var(--live)}
+
+/* --- data table ---------------------------------------------- */
+.tw{overflow-x:auto}
+table.dt{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.dt th{text-align:left;font-family:var(--m);font-size:9px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--grey);font-weight:500;padding:10px var(--s4);
+  border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface);
+  position:sticky;top:0;z-index:2}
+.dt th[data-sort]{cursor:pointer;user-select:none}
+.dt th[data-sort]:hover{color:var(--ink)}
+.dt th[aria-sort] span{color:var(--brand-ink)}
+.dt td{padding:11px var(--s4);border-bottom:1px solid var(--line);vertical-align:middle}
+.dt tr:last-child td{border-bottom:0}
+.dt tbody tr{transition:background-color .1s var(--ez)}
+.dt tbody tr:hover{background:var(--brand-soft)}
+.dt tbody tr[data-sel=true]{background:var(--brand-soft)}
+.dt td.num{font-family:var(--m);text-align:right;white-space:nowrap}
+.dt td.act{text-align:right;white-space:nowrap}
+.dt .ttl{font-weight:600;letter-spacing:-.01em}
+.dt .sub{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey);margin-top:2px}
+.dt input[type=checkbox]{width:15px;height:15px;accent-color:var(--brand-edge);cursor:pointer}
+.dt .cell{display:flex;align-items:center;gap:10px;min-width:0}
+.dt .thumb{width:34px;height:34px;border-radius:var(--r1);object-fit:cover;flex:none;
+  border:1px solid var(--line)}
+
+/* --- status pills -------------------------------------------- */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--pill);
+  font-family:var(--m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid transparent;white-space:nowrap}
+.pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.pill[data-s=live],.pill[data-s=active],.pill[data-s=paid],.pill[data-s=confirmed]
+  {background:#EAF7DF;color:#2F6B1F}
+.pill[data-s=pending],.pill[data-s=review],.pill[data-s=scheduled]
+  {background:var(--brand-soft);color:var(--brand-ink)}
+.pill[data-s=draft],.pill[data-s=ended]{background:var(--paper);color:var(--grey);
+  border-color:var(--line)}
+.pill[data-s=suspended],.pill[data-s=cancelled],.pill[data-s=refunded],.pill[data-s=rejected]
+  {background:#FDEBE8;color:#A31708}
+[data-theme=dark] .pill[data-s=live],[data-theme=dark] .pill[data-s=active],
+[data-theme=dark] .pill[data-s=paid],[data-theme=dark] .pill[data-s=confirmed]
+  {background:#16301A;color:#8FD14F}
+[data-theme=dark] .pill[data-s=suspended],[data-theme=dark] .pill[data-s=cancelled],
+[data-theme=dark] .pill[data-s=refunded],[data-theme=dark] .pill[data-s=rejected]
+  {background:#3A1512;color:#FF8A7A}
+
+/* --- bulk action bar ----------------------------------------- */
+.bulk{display:flex;align-items:center;gap:var(--s3);padding:10px var(--s4);
+  background:var(--ink);color:var(--paper);flex-wrap:wrap}
+.bulk b{font-family:var(--m);font-size:var(--t-xs)}
+.bulk .btn-row{margin-left:auto}
+.bulk .btn[data-v=quiet]{color:rgba(250,248,244,.8)}
+.bulk .btn[data-v=quiet]:hover{color:var(--paper);background:rgba(250,248,244,.12)}
+
+/* --- detail drawer ------------------------------------------- */
+.dw{position:fixed;inset:0;z-index:80;display:none}
+.dw[data-open=true]{display:block}
+.dw__s{position:absolute;inset:0;background:rgba(15,14,12,.45);backdrop-filter:blur(2px)}
+.dw__p{position:absolute;top:0;right:0;bottom:0;width:min(520px,100%);
+  background:var(--paper);border-left:1px solid var(--line);
+  box-shadow:-24px 0 60px -24px rgba(15,14,12,.4);
+  display:grid;grid-template-rows:auto 1fr auto;animation:slidein .22s var(--ez)}
+@keyframes slidein{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+.dw__h{padding:var(--s4) var(--s5);border-bottom:1px solid var(--line);
+  display:flex;align-items:flex-start;gap:var(--s3);background:var(--surface)}
+.dw__h h3{margin:0;font-size:var(--t-lg);font-weight:700;letter-spacing:-.02em}
+.dw__h .meta{margin:3px 0 0}
+.dw__x{margin-left:auto;width:32px;height:32px;border-radius:var(--r1);cursor:pointer;
+  display:grid;place-items:center;color:var(--grey);font-size:17px;flex:none}
+.dw__x:hover{background:var(--brand-soft);color:var(--brand-ink)}
+.dw__b{overflow-y:auto;padding:var(--s5);display:grid;gap:var(--s4);align-content:start}
+.dw__f{padding:var(--s4) var(--s5);border-top:1px solid var(--line);background:var(--surface);
+  display:flex;gap:var(--s2);flex-wrap:wrap}
+.kv2{display:grid;grid-template-columns:120px 1fr;gap:8px var(--s3);font-size:var(--t-sm)}
+.kv2 dt{color:var(--grey);font-family:var(--m);font-size:var(--t-2xs);padding-top:2px}
+.kv2 dd{margin:0}
+@media(prefers-reduced-motion:reduce){.dw__p{animation:none}}
+
+/* --- misc ---------------------------------------------------- */
+.tl{display:grid;gap:0}
+.tl__r{display:grid;grid-template-columns:112px 1fr auto;gap:var(--s3);padding:9px 0;
+  border-bottom:1px solid var(--line);align-items:baseline;font-size:var(--t-sm)}
+.tl__r:last-child{border-bottom:0}
+.tl__r time{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey-2)}
+@media(max-width:560px){.tl__r{grid-template-columns:1fr;gap:2px}}
+
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:var(--s3)}
+.bars div{flex:1;display:grid;justify-items:center;gap:6px;align-content:end;height:100%}
+.bars i{width:100%;background:var(--brand-soft);border-top:3px solid var(--brand-edge);
+  border-radius:3px 3px 0 0;min-height:3px}
+.bars span{font-family:var(--m);font-size:9px;color:var(--grey)}
+
+.chips2{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--pill);
+  background:var(--brand-soft);color:var(--brand-ink);font-size:var(--t-xs);font-weight:600}
+.chip2 button{cursor:pointer;color:inherit;opacity:.55;line-height:1;font-size:13px}
+.chip2 button:hover{opacity:1}
+
+.swatch{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap}
+.swatch input[type=color]{width:54px;height:38px;padding:2px;border:1px solid var(--line);
+  border-radius:var(--r1);cursor:pointer;background:var(--surface)}
+.swatch code{font-family:var(--m);font-size:var(--t-sm)}
+/* typeface picker */
+/* --- charts: SVG, no library ---------------------------------- */
+.ch{display:grid;gap:var(--s3)}
+.ch svg{width:100%;height:auto;display:block;overflow:visible}
+.ch__area{fill:var(--brand);opacity:.18}
+.ch__line{fill:none;stroke:var(--brand-edge);stroke-width:2.5;
+  stroke-linejoin:round;stroke-linecap:round}
+.ch__dot{fill:var(--surface);stroke:var(--brand-edge);stroke-width:2.5}
+.ch__grid{stroke:var(--line);stroke-width:1}
+.ch__lab{font-family:var(--m);font-size:9px;fill:var(--grey-2)}
+.ch__val{font-family:var(--m);font-size:10px;fill:var(--ink);font-weight:500}
+
+.don{display:flex;align-items:center;gap:var(--s5);flex-wrap:wrap}
+.don svg{width:132px;height:132px;flex:none}
+.don__k{display:grid;gap:6px;flex:1;min-width:150px}
+.don__r{display:flex;align-items:center;gap:8px;font-size:var(--t-xs)}
+.don__r i{width:9px;height:9px;border-radius:2px;flex:none}
+.don__r b{margin-left:auto;font-family:var(--m);font-weight:500}
+
+.fun{display:grid;gap:6px}
+.fun__r{display:grid;grid-template-columns:118px 1fr auto;gap:var(--s3);align-items:center;
+  font-size:var(--t-xs)}
+.fun__b{height:22px;border-radius:3px;background:var(--brand-soft);
+  border-left:3px solid var(--brand-edge);position:relative}
+.fun__r b{font-family:var(--m);font-weight:500;white-space:nowrap}
+.fun__d{font-family:var(--m);font-size:9px;color:var(--grey-2)}
+
+.rank{display:grid;gap:2px}
+.rank__r{display:grid;grid-template-columns:18px 1fr auto;gap:var(--s3);align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--line);font-size:var(--t-sm)}
+.rank__r:last-child{border-bottom:0}
+.rank__r i{font-style:normal;font-family:var(--m);font-size:9px;color:var(--grey-2)}
+.rank__r b{font-family:var(--m);font-weight:500}
+
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+@media(max-width:1000px){.two-up{grid-template-columns:1fr}}
+
+/* --- masters -------------------------------------------------- */
+.ms{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--s3)}
+.ms__c{border:1px solid var(--line);border-radius:var(--r2);background:var(--surface);
+  overflow:hidden;display:grid;align-content:start}
+.ms__h{padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px}
+.ms__h b{font-size:var(--t-sm);font-weight:700}
+.ms__h .lock{margin-left:auto}
+.ms__n{padding:8px var(--s4) 0;font-size:var(--t-2xs);color:var(--grey);line-height:1.5}
+.ms__l{padding:var(--s3) var(--s4) var(--s4);display:grid;gap:4px}
+.ms__i{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+  padding:5px 0;border-bottom:1px solid var(--line);font-size:var(--t-xs)}
+.ms__i:last-child{border-bottom:0}
+.ms__i span{font-family:var(--m);font-size:9px;color:var(--grey-2)}
+.ms__i button{cursor:pointer;color:var(--grey-2);font-size:13px;line-height:1;padding:0 2px}
+.ms__i button:hover{color:var(--live)}
+.ms__i button[disabled]{opacity:.25;cursor:not-allowed}
+.ms__add{display:flex;gap:6px;padding:0 var(--s4) var(--s4)}
+.ms__add input{flex:1;min-width:0;padding:6px 9px;border:1px solid var(--line);
+  border-radius:var(--r1);background:var(--surface);font-size:var(--t-xs)}
+
+/* --- roles ---------------------------------------------------- */
+.matrix{overflow-x:auto}
+.matrix table{width:100%;border-collapse:collapse;font-size:var(--t-xs)}
+.matrix th{padding:8px var(--s3);border-bottom:1px solid var(--line);text-align:center;
+  font-family:var(--m);font-size:9px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--grey);font-weight:500;white-space:nowrap}
+.matrix th:first-child{text-align:left}
+.matrix td{padding:7px var(--s3);border-bottom:1px solid var(--line);text-align:center}
+.matrix td:first-child{text-align:left;font-size:var(--t-xs)}
+.matrix tr:last-child td{border-bottom:0}
+.matrix .yes{color:var(--good);font-weight:700}
+.matrix .no{color:var(--line)}
+.matrix .scope{font-family:var(--m);font-size:9px;color:var(--grey-2);display:block}
+
+/* --- integrations ------------------------------------------- */
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s3)}
+.ig__c{display:grid;gap:var(--s3);padding:var(--s4);border:1px solid var(--line);
+  border-radius:var(--r2);background:var(--surface);cursor:pointer;align-content:start;
+  transition:border-color .12s var(--ez),transform .12s var(--ez)}
+.ig__c:hover{border-color:var(--ink);transform:translateY(-2px)}
+.ig__c[data-state=connected]{border-left:3px solid var(--good)}
+.ig__c[data-state=available]{border-left:3px solid var(--line)}
+.ig__h{display:flex;align-items:center;gap:10px}
+.ig__m{width:36px;height:36px;border-radius:var(--r1);display:grid;place-items:center;
+  flex:none;color:#fff;font-weight:700;font-size:var(--t-xs);letter-spacing:-.01em}
+.ig__t{flex:1;min-width:0}
+.ig__t b{display:block;font-size:var(--t-sm);font-weight:700;letter-spacing:-.01em}
+.ig__t span{font-family:var(--m);font-size:9px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--grey)}
+.ig__w{font-size:var(--t-xs);color:var(--grey);line-height:1.5;margin:0}
+.ig__f{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
+.req{font-family:var(--m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--live);border:1px solid currentColor;padding:1px 5px;border-radius:var(--r1)}
+
+.keyrow{display:grid;grid-template-columns:1fr auto;gap:var(--s3);align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line)}
+.keyrow:last-child{border-bottom:0}
+.keyrow b{display:block;font-size:var(--t-xs);font-weight:600}
+.keyrow code{font-family:var(--m);font-size:var(--t-2xs);color:var(--grey);
+  word-break:break-all}
+.lock{font-family:var(--m);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--brand-ink);background:var(--brand-soft);padding:2px 6px;border-radius:var(--r1);
+  white-space:nowrap}
+
+.warn{display:flex;gap:10px;padding:var(--s3);border-radius:var(--r1);
+  background:#FDEBE8;color:#7A1206;font-size:var(--t-xs);line-height:1.5}
+[data-theme=dark] .warn{background:#3A1512;color:#FFB3A7}
+.warn b{font-weight:700}
+
+.fs{display:flex;align-items:center;gap:var(--s3);width:100%;text-align:left;
+  padding:var(--s3);border:1px solid var(--line);border-radius:var(--r1);
+  background:var(--surface);cursor:pointer;
+  transition:border-color .12s var(--ez),background-color .12s var(--ez)}
+.fs:hover{border-color:var(--ink)}
+.fs[aria-pressed=true]{border-color:var(--brand-edge);background:var(--brand-soft)}
+.fs__p{width:44px;height:44px;display:grid;place-items:center;flex:none;
+  border-radius:var(--r1);background:var(--ink);color:var(--paper);
+  font-size:19px;font-weight:800;letter-spacing:-.03em}
+.fs[aria-pressed=true] .fs__p{background:var(--brand);color:var(--on-brand)}
+.fs__t{flex:1;min-width:0;display:grid;gap:1px}
+.fs__t b{font-size:var(--t-sm);font-weight:600}
+.fs__r{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none}
+.fs[aria-pressed=true] .fs__r{border-color:var(--brand-edge);border-width:6px}
+.fs__demo{margin-top:var(--s4);padding:var(--s4);border:1px dashed var(--line);
+  border-radius:var(--r2);background:var(--paper)}
+.fs__big{font-family:var(--f-display);font-size:26px;font-weight:800;
+  letter-spacing:-.035em;line-height:1.1;margin:0}
+.fs__sub{font-size:var(--t-sm);color:var(--grey);margin:8px 0 var(--s3)}
+
+.sw{width:28px;height:28px;border-radius:50%;cursor:pointer;border:1px solid var(--line)}
+
+.empty2{padding:var(--s7) var(--s5);text-align:center}
+.empty2 b{display:block;font-size:var(--t-lg);font-weight:700;letter-spacing:-.02em}
+.empty2 p{margin:6px 0 0;font-size:var(--t-sm);color:var(--grey)}
+
+.saved{display:inline-flex;align-items:center;gap:6px;font-family:var(--m);
+  font-size:var(--t-2xs);color:var(--good);opacity:0;transition:opacity .2s var(--ez)}
+.saved[data-on=true]{opacity:1}
+
+/* command palette */
+.cmdk{position:fixed;inset:0;z-index:90;display:none;padding-top:12vh;justify-content:center}
+.cmdk[data-open=true]{display:flex}
+.cmdk__s{position:absolute;inset:0;background:rgba(15,14,12,.5)}
+.cmdk__p{position:relative;width:min(560px,92vw);height:fit-content;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r3);box-shadow:var(--sh);overflow:hidden}
+.cmdk__i{width:100%;padding:var(--s4);border:0;border-bottom:1px solid var(--line);
+  font-size:var(--t-base);background:none}
+.cmdk__l{max-height:50vh;overflow-y:auto;padding:6px}
+.cmdk__l a{display:flex;align-items:center;gap:10px;padding:9px var(--s3);
+  border-radius:var(--r1);font-size:var(--t-sm)}
+.cmdk__l a:hover,.cmdk__l a[data-hi=true]{background:var(--brand-soft);color:var(--brand-ink)}
+.cmdk__l small{margin-left:auto;font-family:var(--m);font-size:9px;color:var(--grey-2)}
+
+/* gate */
+.gate2{min-height:100vh;display:grid;place-items:center;padding:var(--s5)}
+.gate2__c{width:min(380px,100%)}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+
+/* ============================================================
+   DATA
+   Shapes mirror the production schema so a real API drops in
+   without touching the views.
+   ============================================================ */
+const LS = {cms:'kreo-cms', session:'kreo-admin', audit:'kreo-audit', theme:'kreo-theme',
+            ops:'kreo-ops'};
+
+const DEFAULT_CMS = {
+  hero:{lead:'Turn your curiosity',
+    words:['creativity','passion','adventure','fun','learning','growth'],
+    sub:'Workshops, classes and gatherings across Dubai \u2014 for seven year olds and grown-ups alike.',
+    cta:'Start Exploring', alt:'Host an experience'},
+  close:{title:'Let\u2019s strive ahead together!',
+    sub:'Join us for immersive workshops and events designed to inspire creativity and foster community engagement.',
+    a1:'Discover More', a2:'Host for free'},
+  brandColor:'#C7F464', fonts:'brand',
+  feePct:5, plusPrice:249, referralAed:15, moderationHours:24,
+  cancelWindowHrs:24, payoutDelayDays:3, groupMax:10
+};
+
+const Store = {
+  read(k,f){ try{const v=localStorage.getItem(k); return v?JSON.parse(v):f;}catch(e){return f;} },
+  write(k,v){ try{localStorage.setItem(k,JSON.stringify(v)); return true;}catch(e){return false;} },
+  clear(k){ try{localStorage.removeItem(k);}catch(e){} }
+};
+
+const CMS = Object.assign(structuredClone(DEFAULT_CMS), Store.read(LS.cms,{}));
+const IMG='https://images.unsplash.com/';
+
+/* Typeface presets, identical to the public site. Heading Now
+   (Fontfabric) and TT Norms Pro (TypeType) are commercial: they are
+   named first in the stack so licensed files take over on drop-in,
+   and the free stand-ins render until then. */
+const FONTSETS = {
+  brand:   {label:'Heading Now + TT Norms', note:'Brand default \u2014 needs licence files',
+            display:"'Heading Now','Archivo',system-ui,sans-serif",
+            body:"'TT Norms Pro','Manrope','Inter',system-ui,sans-serif"},
+  archivo: {label:'Archivo + Manrope', note:'Closest free stand-in',
+            display:"'Archivo',system-ui,sans-serif",
+            body:"'Manrope','Inter',system-ui,sans-serif"},
+  inter:   {label:'Archivo + Inter', note:'Tighter, more neutral',
+            display:"'Archivo',system-ui,sans-serif",
+            body:"'Inter',system-ui,sans-serif"},
+  mono:    {label:'Archivo + IBM Plex Mono', note:'Technical, low warmth',
+            display:"'Archivo',system-ui,sans-serif",
+            body:"'IBM Plex Mono',ui-monospace,monospace"}
+};
+
+function setFonts(key){
+  CMS.fonts=key;
+  const f=FONTSETS[key]||FONTSETS.brand;
+  const r=document.documentElement.style;
+  r.setProperty('--f-display', f.display);
+  r.setProperty('--f', f.body);
+}
+
+const HUBS=[['downtown','Downtown'],['silicon','Silicon Oasis'],['alquoz','Al Quoz'],
+  ['barsha','Barsha'],['alnahda','Al Nahda'],['ranches','Arabian Ranches']];
+const CATS=['Workshops','Art','Cooking','Tech','Fitness','Business','Music','Kids & family'];
+
+const HOSTS=[
+  {id:'b1',name:'Alserkal Avenue',ini:'AA',status:'active',verified:true,followers:4820,
+   licence:'CN-1002881',expires:'2027-01-20',joined:'2026-04-02',payoutOk:true},
+  {id:'b2',name:'Cinema Akil',ini:'CA',status:'active',verified:true,followers:2140,
+   licence:'CN-1104553',expires:'2026-11-30',joined:'2026-04-14',payoutOk:true},
+  {id:'b3',name:'Nightjar Coffee',ini:'NJ',status:'active',verified:false,followers:960,
+   licence:'CN-1220087',expires:'2026-12-12',joined:'2026-05-03',payoutOk:true},
+  {id:'b4',name:'Studio Quoz',ini:'SQ',status:'active',verified:true,followers:1310,
+   licence:'CN-1330912',expires:'2027-05-04',joined:'2026-03-19',payoutOk:true},
+  {id:'b5',name:'Al Quoz Run Club',ini:'RC',status:'active',verified:false,followers:2380,
+   licence:'CN-1440238',expires:'2026-10-08',joined:'2026-06-01',payoutOk:false},
+  {id:'b6',name:'d3 Founders',ini:'D3',status:'active',verified:true,followers:3120,
+   licence:'CN-1551764',expires:'2027-02-17',joined:'2026-05-22',payoutOk:true},
+  {id:'b7',name:'Thrift Market DXB',ini:'TM',status:'active',verified:false,followers:1740,
+   licence:'CN-1662095',expires:'2026-09-25',joined:'2026-06-11',payoutOk:true},
+  {id:'b8',name:'Dubai AI Hub',ini:'AI',status:'active',verified:true,followers:5460,
+   licence:'CN-1773310',expires:'2027-04-01',joined:'2026-04-28',payoutOk:true},
+  {id:'b9',name:'Marina Clay Studio',ini:'MC',status:'pending',verified:false,followers:0,
+   licence:'CN-4471902',expires:'2027-03-14',joined:'2026-07-30',payoutOk:false,
+   bio:'Hand-building and wheel classes on the Marina walk.'},
+  {id:'b10',name:'Deira Supper Club',ini:'DS',status:'pending',verified:false,followers:0,
+   licence:'CN-3320118',expires:'2026-09-02',joined:'2026-07-31',payoutOk:false,
+   bio:'Long-table dinners in old Deira. Twelve seats, one menu.'},
+  {id:'b11',name:'Ghost Events DXB',ini:'GE',status:'suspended',verified:false,followers:120,
+   licence:'CN-1180044',expires:'2026-06-01',joined:'2026-05-02',payoutOk:false,
+   bio:'Licence lapsed \u2014 listings paused automatically.'}
+];
+
+const P=(id,t,h,c,hub,d,cap,bk,price,st,cov,views)=>
+  ({id,title:t,host:h,cat:c,hub,date:d,cap,booked:bk,price,status:st,cover:cov,views});
+
+const EVENTS=[
+  P('e1','Sonic Geometry Workshop','b4','Workshops','downtown','2026-08-04',24,24,150,'live','photo-1511379938547-c1f69419868d',940),
+  P('e2','Vinyasa Flow in Alserkal','b1','Fitness','alquoz','2026-08-04',30,12,0,'live','photo-1544367567-0f2fcb009e0b',410),
+  P('e3','Solana Coffee Meetup','b3','Tech','alquoz','2026-07-31',60,41,0,'live','photo-1511920170033-f8396924c348',1580),
+  P('e4','Retro-Future Film Lab','b2','Art','alquoz','2026-08-05',40,36,90,'live','photo-1478720568477-152d9b164e26',1120),
+  P('e5','Midnight Architecture Tour','b1','Art','downtown','2026-08-05',20,8,120,'live','photo-1512453979798-5ea266f8880c',630),
+  P('e6','Wheel-Throwing for Beginners','b4','Workshops','alquoz','2026-08-06',12,5,280,'live','photo-1565193298357-c5b46b0d6b1f',380),
+  P('e7','Origin Cupping: Yemen','b3','Cooking','alquoz','2026-08-07',16,14,75,'live','photo-1414235077428-338989a2e8c0',760),
+  P('e8','Founders Table: Pricing','b6','Business','downtown','2026-08-08',35,29,0,'live','photo-1600880292203-757bb62b4baf',2100),
+  P('e9','Sunrise 5K, Al Quoz Loop','b5','Fitness','alquoz','2026-08-07',80,52,0,'live','photo-1552674605-db6ffd4facb5',1840),
+  P('e10','Ranches Film Picnic','b2','Art','ranches','2026-08-09',120,74,50,'live','photo-1478720568477-152d9b164e26',1290),
+  P('e11','Al Nahda Thrift Exchange','b7','Business','alnahda','2026-08-08',200,63,0,'live','photo-1441984904996-e0b6ba687e04',870),
+  P('e12','Knife Skills Intensive','b3','Cooking','alquoz','2026-08-10',10,9,220,'live','photo-1517245386807-bb43f82c33c4',520),
+  P('e13','Little Potters: Ages 6\u201310','b4','Kids & family','alquoz','2026-08-08',10,6,120,'live','photo-1503454537195-1dcabb73ffb9',1460),
+  P('e14','Saturday Science Lab','b6','Kids & family','downtown','2026-08-08',18,15,90,'live','photo-1567168544813-cc03465b4fa8',2240),
+  P('e15','Family Print Morning','b1','Kids & family','alquoz','2026-08-09',24,9,0,'live','photo-1499195333224-3ce974eecb47',980),
+  P('e16','Build Night: Ship Something','b6','Tech','silicon','2026-08-11',40,27,0,'live','photo-1511920170033-f8396924c348',1620),
+  P('e17','Barsha Makers Market','b7','Business','barsha','2026-08-09',150,61,0,'live','photo-1441984904996-e0b6ba687e04',1180),
+  P('e18','Barsha Sunset Run','b5','Fitness','barsha','2026-08-12',60,33,0,'live','photo-1552674605-db6ffd4facb5',940),
+  P('e19','Sensory Play: Ages 2\u20134','b4','Kids & family','silicon','2026-08-10',12,10,80,'live','photo-1503454537195-1dcabb73ffb9',1340),
+  P('e20','Indigo Dye Workshop','b9','Workshops','downtown','2026-08-16',14,0,190,'review','photo-1565193298357-c5b46b0d6b1f',0),
+  P('e21','Deira Long Table #1','b10','Cooking','alnahda','2026-08-18',12,0,340,'review','photo-1414235077428-338989a2e8c0',0),
+  P('e22','Night Market Sessions','b7','Music','downtown','2026-08-22',300,0,0,'draft','photo-1511379938547-c1f69419868d',0),
+  P('e23','Rooftop Sound Bath','b1','Fitness','downtown','2026-07-24',30,30,110,'ended','photo-1544367567-0f2fcb009e0b',2010),
+  P('e24','Analogue Photo Walk','b2','Art','alquoz','2026-07-19',18,17,140,'ended','photo-1512453979798-5ea266f8880c',1450)
+];
+
+const BK=(id,ev,who,ini,q,total,st,when,method)=>
+  ({id,ev,who,ini,q,total,status:st,when,method});
+
+const BOOKINGS=[
+  BK('bk_9F2A','e6','Maya Korhonen','MK',1,280,'confirmed','2026-07-28','card'),
+  BK('bk_7X1M','e6','Rami Adel','RA',2,560,'confirmed','2026-07-29','apple'),
+  BK('bk_4K2P','e1','Jude Fernandes','JD',1,150,'confirmed','2026-07-27','card'),
+  BK('bk_2L8B','e1','Noor Vaidya','NV',1,150,'refunded','2026-07-26','card'),
+  BK('bk_5C6D','e4','Omar Idris','OI',2,180,'confirmed','2026-07-30','google'),
+  BK('bk_1A9Z','e12','Sara Nasser','SN',1,220,'confirmed','2026-07-31','card'),
+  BK('bk_3F4G','e13','Tarek Lahoud','TL',2,240,'confirmed','2026-07-30','credits'),
+  BK('bk_8H2J','e14','Priya Kaur','PK',1,90,'confirmed','2026-07-31','card'),
+  BK('bk_6B1N','e7','Hana Baig','HB',1,75,'cancelled','2026-07-25','card'),
+  BK('bk_0Q7R','e19','Leila Osman','LO',1,80,'confirmed','2026-07-31','apple'),
+  BK('bk_4T5V','e10','Dana Kamal','DK',3,150,'confirmed','2026-07-29','card'),
+  BK('bk_9W3X','e5','Yusuf Rahman','YR',2,240,'confirmed','2026-07-28','card')
+];
+
+const PAYOUTS=[
+  {id:'po_1',host:'b4',period:'Jul wk 4',gross:1840,fee:92,stripe:56,net:1692,status:'paid',due:'2026-07-24'},
+  {id:'po_2',host:'b2',period:'Jul wk 4',gross:1260,fee:63,stripe:39,net:1158,status:'paid',due:'2026-07-24'},
+  {id:'po_3',host:'b3',period:'Jul wk 5',gross:970,fee:49,stripe:31,net:890,status:'scheduled',due:'2026-08-07'},
+  {id:'po_4',host:'b1',period:'Jul wk 5',gross:2400,fee:120,stripe:71,net:2209,status:'scheduled',due:'2026-08-07'},
+  {id:'po_5',host:'b5',period:'Jul wk 5',gross:0,fee:0,stripe:0,net:0,status:'pending',due:'2026-08-07'}
+];
+
+const ATTENDEES=[
+  {id:'u1',name:'Maya Korhonen',ini:'MK',email:'m****@example.com',bookings:4,spend:820,joined:'2026-05-11',credits:15},
+  {id:'u2',name:'Rami Adel',ini:'RA',email:'r****@example.com',bookings:6,spend:1340,joined:'2026-04-22',credits:45},
+  {id:'u3',name:'Jude Fernandes',ini:'JD',email:'j****@example.com',bookings:2,spend:300,joined:'2026-06-30',credits:0},
+  {id:'u4',name:'Noor Vaidya',ini:'NV',email:'n****@example.com',bookings:3,spend:390,joined:'2026-06-02',credits:15},
+  {id:'u5',name:'Omar Idris',ini:'OI',email:'o****@example.com',bookings:5,spend:640,joined:'2026-05-28',credits:30},
+  {id:'u6',name:'Sara Nasser',ini:'SN',email:'s****@example.com',bookings:1,spend:220,joined:'2026-07-19',credits:0},
+  {id:'u7',name:'Priya Kaur',ini:'PK',email:'p****@example.com',bookings:7,spend:1580,joined:'2026-03-30',credits:60},
+  {id:'u8',name:'Tarek Lahoud',ini:'TL',email:'t****@example.com',bookings:2,spend:240,joined:'2026-07-04',credits:15}
+];
+
+let AUDIT = Store.read(LS.audit,[
+  {at:'2026-07-31T14:20:00+04:00',who:'admin',what:'Approved host',target:'Al Quoz Run Club'},
+  {at:'2026-07-31T11:05:00+04:00',who:'admin',what:'Published event',target:'Sunrise 5K'},
+  {at:'2026-07-30T16:42:00+04:00',who:'admin',what:'Changed platform fee',target:'5%'},
+  {at:'2026-07-29T09:15:00+04:00',who:'admin',what:'Suspended host',target:'Ghost Events DXB'},
+  {at:'2026-07-28T13:02:00+04:00',who:'admin',what:'Issued refund',target:'bk_2L8B \u00b7 AED 150'}
+]);
+
+/* Operational overrides the public site honours. Only what admin
+   changes is written — a full copy of the catalogue would go stale
+   the moment a host edits their own listing. */
+const OPS = Store.read(LS.ops, {events:{}, hosts:{}, featured:[]});
+
+function pushOps(){
+  OPS.events={}; OPS.hosts={};
+  EVENTS.forEach(e=>{ OPS.events[e.id]=e.status; });
+  HOSTS.forEach(h=>{ OPS.hosts[h.id]=h.status; });
+  const ok=Store.write(LS.ops, OPS);
+  if(!ok) toast('Storage blocked \u2014 the public site will not see this');
+  return ok;
+}
+
+/* ------------------------------------------------------------
+   INTEGRATIONS
+   `secret:true` marks a credential that must never be entered in a
+   browser. Those live in Vercel env vars and are read server-side;
+   the panel shows only whether they are present.
+   ------------------------------------------------------------ */
+const INTEGRATIONS = [
+  /* --- payments --- */
+  {id:'stripe', name:'Stripe Connect', group:'Payments', mark:'S', tone:'#635BFF',
+   state:'connected', required:true,
+   what:'Card payments, Apple Pay, Google Pay, host payouts and KYC.',
+   breaks:'No paid bookings. Free events still work.',
+   fields:[{k:'Publishable key',v:'pk_live_51H…Qa4',secret:false},
+           {k:'Secret key',v:'STRIPE_SECRET_KEY',secret:true},
+           {k:'Webhook signing secret',v:'STRIPE_WEBHOOK_SECRET',secret:true},
+           {k:'Connect account type',v:'Destination charges',secret:false}],
+   docs:'Destination charges keep the host as merchant of record. KREO takes '+
+        'an application fee and never holds their funds.'},
+  {id:'tabby', name:'Tabby', group:'Payments', mark:'T', tone:'#3BFFC3',
+   state:'available',
+   what:'Buy-now-pay-later in four instalments. Common in the UAE for higher tickets.',
+   breaks:'Nothing. Attendees just see fewer options at checkout.',
+   fields:[{k:'Merchant code',v:'',secret:false},{k:'Secret key',v:'TABBY_SECRET',secret:true}],
+   docs:'Worth enabling only above roughly AED 300 a ticket — below that the fee '+
+        'outweighs the conversion lift.'},
+
+  /* --- messaging --- */
+  {id:'resend', name:'Resend', group:'Messaging', mark:'R', tone:'#0F0E0C',
+   state:'connected', required:true,
+   what:'Transactional email: booking confirmation, QR ticket, 48-hour reminder, review prompt.',
+   breaks:'Attendees book but never receive a ticket. Treat as a hard dependency.',
+   fields:[{k:'From address',v:'tickets@kreo.ae',secret:false},
+           {k:'API key',v:'RESEND_API_KEY',secret:true},
+           {k:'Domain verified',v:'kreo.ae · SPF, DKIM, DMARC',secret:false}],
+   docs:'Domain authentication is what keeps confirmations out of spam. Without '+
+        'DMARC, delivery to Gmail degrades within weeks.'},
+  {id:'twilio', name:'Twilio SMS', group:'Messaging', mark:'Tw', tone:'#F22F46',
+   state:'available',
+   what:'SMS reminders and OTP fallback. Offered as a premium host add-on.',
+   breaks:'Nothing. Email and push carry the same messages.',
+   fields:[{k:'Account SID',v:'',secret:false},{k:'Auth token',v:'TWILIO_AUTH_TOKEN',secret:true},
+           {k:'Sender ID',v:'KREO',secret:false}],
+   docs:'UAE requires a registered sender ID through the operator. Budget two '+
+        'weeks for approval before promising it to hosts.'},
+  {id:'whatsapp', name:'WhatsApp Business', group:'Messaging', mark:'Wa', tone:'#25D366',
+   state:'available',
+   what:'Reminders and host-to-attendee messages on the channel most of Dubai actually reads.',
+   breaks:'Nothing today.',
+   fields:[{k:'Phone number ID',v:'',secret:false},
+           {k:'Access token',v:'WHATSAPP_TOKEN',secret:true}],
+   docs:'Every message must use a pre-approved template. Free-form replies are '+
+        'only allowed inside a 24-hour window after the attendee writes first.'},
+  {id:'push', name:'Web Push', group:'Messaging', mark:'P', tone:'#6D28D9',
+   state:'connected',
+   what:'Browser push for waitlist alerts and day-of reminders.',
+   breaks:'Waitlist alerts fall back to email, which is slower.',
+   fields:[{k:'VAPID public key',v:'BEl62iUYgUiv…',secret:false},
+           {k:'VAPID private key',v:'VAPID_PRIVATE_KEY',secret:true}],
+   docs:'No native apps yet, so this covers iOS only when the site is added to '+
+        'the home screen.'},
+
+  /* --- analytics --- */
+  {id:'plausible', name:'Plausible', group:'Analytics', mark:'Pl', tone:'#5850EC',
+   state:'connected',
+   what:'Page and funnel analytics without cookies.',
+   breaks:'You stop seeing where drop-off happens.',
+   fields:[{k:'Site domain',v:'kreo.ae',secret:false}],
+   docs:'Cookieless, so it needs no consent banner under PDPL. That is the reason '+
+        'it is here instead of GA4.'},
+  {id:'posthog', name:'PostHog', group:'Analytics', mark:'Ph', tone:'#F54E00',
+   state:'available',
+   what:'Product analytics, session replay, feature flags.',
+   breaks:'Nothing. Plausible covers the basics.',
+   fields:[{k:'Project API key',v:'',secret:false},{k:'Host',v:'eu.posthog.com',secret:false}],
+   docs:'Session replay records real user sessions. Under PDPL that needs explicit '+
+        'consent and input masking before you turn it on.'},
+  {id:'ga4', name:'Google Analytics 4', group:'Analytics', mark:'G', tone:'#E37400',
+   state:'available',
+   what:'Audience reporting and Google Ads attribution.',
+   breaks:'Nothing.',
+   fields:[{k:'Measurement ID',v:'',secret:false}],
+   docs:'Sets cookies, so enabling it obliges you to add a consent banner. Weigh '+
+        'that against what it tells you that Plausible does not.'},
+  {id:'meta', name:'Meta Pixel', group:'Analytics', mark:'M', tone:'#0866FF',
+   state:'available',
+   what:'Conversion tracking for Instagram and Facebook campaigns.',
+   breaks:'Nothing until you run paid social.',
+   fields:[{k:'Pixel ID',v:'',secret:false},
+           {k:'Conversions API token',v:'META_CAPI_TOKEN',secret:true}],
+   docs:'Only worth wiring once you are actually buying ads — it is the single '+
+        'largest source of consent-banner complexity.'},
+
+  /* --- infrastructure --- */
+  {id:'supabase', name:'Supabase', group:'Infrastructure', mark:'Sb', tone:'#3ECF8E',
+   state:'connected', required:true,
+   what:'Postgres database, auth, row-level security and file storage.',
+   breaks:'Everything. This is the system of record.',
+   fields:[{k:'Project URL',v:'https://….supabase.co',secret:false},
+           {k:'Anon key',v:'eyJhbGciOi…',secret:false},
+           {k:'Service role key',v:'SUPABASE_SERVICE_ROLE_KEY',secret:true},
+           {k:'Region',v:'Choose a UAE region if you claim UAE residency',secret:false}],
+   docs:'The service-role key bypasses every RLS policy. It must never reach the '+
+        'browser — server routes only.'},
+  {id:'sentry', name:'Sentry', group:'Infrastructure', mark:'Se', tone:'#362D59',
+   state:'available',
+   what:'Error tracking and release health.',
+   breaks:'Nothing, but you find out about breakage from users instead of alerts.',
+   fields:[{k:'DSN',v:'',secret:false},{k:'Auth token',v:'SENTRY_AUTH_TOKEN',secret:true}],
+   docs:'Scrub PII before sending. Booking payloads contain names and emails.'},
+  {id:'osm', name:'OpenStreetMap', group:'Infrastructure', mark:'Os', tone:'#7EBC6F',
+   state:'connected',
+   what:'Map tiles for the discovery map and event location blocks.',
+   breaks:'Maps go blank. Everything else is unaffected.',
+   fields:[{k:'Provider',v:'Leaflet + OSM tiles',secret:false},
+           {k:'API key',v:'None required',secret:false}],
+   docs:'Chosen over Google Maps because it needs no key or billing account. '+
+        'Swap to Google only if you need Places autocomplete.'},
+  {id:'gmaps', name:'Google Maps', group:'Infrastructure', mark:'Gm', tone:'#4285F4',
+   state:'available',
+   what:'Places autocomplete for venue entry, richer map styling.',
+   breaks:'Nothing. OSM is serving maps today.',
+   fields:[{k:'Maps API key',v:'',secret:false},
+           {k:'Restrict by referrer',v:'kreo.ae/*',secret:false}],
+   docs:'A Maps key is public by design, so referrer restriction is the only thing '+
+        'stopping someone else spending your quota.'},
+
+  /* --- identity --- */
+  {id:'google-auth', name:'Google Sign-in', group:'Identity', mark:'Ga', tone:'#4285F4',
+   state:'connected',
+   what:'One-tap sign-up. Most attendees arrive on Android in this market.',
+   breaks:'Email and password still work, but sign-up conversion drops.',
+   fields:[{k:'Client ID',v:'…apps.googleusercontent.com',secret:false},
+           {k:'Client secret',v:'GOOGLE_OAUTH_SECRET',secret:true}],
+   docs:'Handled through Supabase Auth, so tokens are validated server-side.'},
+  {id:'apple-auth', name:'Apple Sign-in', group:'Identity', mark:'Ap', tone:'#0F0E0C',
+   state:'available',
+   what:'Required by Apple if you ship an iOS app offering other social logins.',
+   breaks:'Nothing on web. Blocks App Store review later.',
+   fields:[{k:'Services ID',v:'',secret:false},{k:'Private key',v:'APPLE_AUTH_KEY',secret:true}],
+   docs:'Not needed until there is a native app, but the certificate takes days '+
+        'to issue — start before you need it.'},
+
+  /* --- operations --- */
+  {id:'slack', name:'Slack', group:'Operations', mark:'Sl', tone:'#4A154B',
+   state:'available',
+   what:'Alerts for new host applications, refunds and failed payouts.',
+   breaks:'Nothing. You check the moderation queue manually.',
+   fields:[{k:'Incoming webhook URL',v:'SLACK_WEBHOOK_URL',secret:true},
+           {k:'Channel',v:'#kreo-ops',secret:false}],
+   docs:'Most useful for the moderation queue — a 24-hour SLA is hard to hold '+
+        'if nobody is watching the tab.'},
+  {id:'wallet', name:'Apple & Google Wallet', group:'Operations', mark:'W', tone:'#0F0E0C',
+   state:'available',
+   what:'Add the QR ticket to the phone wallet instead of an email attachment.',
+   breaks:'Nothing. The QR still works from My events.',
+   fields:[{k:'Pass type ID',v:'',secret:false},
+           {k:'Signing certificate',v:'WALLET_CERT',secret:true}],
+   docs:'Meaningfully improves door check-in: no hunting through email at the '+
+        'entrance with poor signal.'}
+];
+
+/* Only the connection state is persisted. Credentials are not stored
+   here at all — the browser is the wrong place for them. */
+const INTEG_STATE = Store.read('kreo-integrations', {});
+INTEGRATIONS.forEach(i=>{ if(INTEG_STATE[i.id]) i.state=INTEG_STATE[i.id]; });
+function saveIntegrations(){
+  const m={}; INTEGRATIONS.forEach(i=>{ m[i.id]=i.state; });
+  Store.write('kreo-integrations', m);
+}
+const integ = id => INTEGRATIONS.find(i=>i.id===id);
+
+/* ------------------------------------------------------------
+   MASTERS
+   Reference data every other table points at. Kept in one place so
+   a rename happens once, and `locked` marks a list the platform's
+   own logic depends on — renaming those is a migration, not a
+   settings change.
+   ------------------------------------------------------------ */
+const MASTERS = {
+  categories:{label:'Categories', locked:false,
+    note:'Drives discovery browse and the create-event form.',
+    items:CATS.map(c=>({id:c,name:c}))},
+  areas:{label:'Areas', locked:false,
+    note:'Dubai hubs. V1 is single-city, so this is the geography.',
+    items:HUBS.map(h=>({id:h[0],name:h[1]}))},
+  policies:{label:'Cancellation policies', locked:false,
+    note:'Offered to hosts when they create an event.',
+    items:[{id:'flexible',name:'Flexible',detail:'Full refund up to 24 hrs before'},
+           {id:'moderate',name:'Moderate',detail:'Full refund up to 5 days before'},
+           {id:'strict',name:'Strict',detail:'50% refund up to 7 days before'}]},
+  ageBands:{label:'Age bands', locked:false,
+    note:'Children\u2019s sessions use a range, adult events a floor.',
+    items:[{id:'all',name:'All ages'},{id:'2-4',name:'Ages 2\u20134'},
+           {id:'4-10',name:'Ages 4\u201310'},{id:'6-10',name:'Ages 6\u201310'},
+           {id:'8-12',name:'Ages 8\u201312'},{id:'12',name:'12+'},
+           {id:'16',name:'16+'},{id:'18',name:'18+'}]},
+  tiers:{label:'Ticket tier templates', locked:false,
+    note:'Presets hosts can pick instead of writing their own.',
+    items:[{id:'standard',name:'Standard'},{id:'pair',name:'Bring a friend'},
+           {id:'front',name:'Front row'},{id:'early',name:'Early bird'}]},
+  methods:{label:'Payment methods', locked:true,
+    note:'Determined by connected payment integrations, not editable here.',
+    items:[{id:'card',name:'Card'},{id:'apple',name:'Apple Pay'},
+           {id:'google',name:'Google Pay'},{id:'credits',name:'KREO credits'}]},
+  eventStatus:{label:'Event statuses', locked:true,
+    note:'Platform logic branches on these. Renaming one is a migration.',
+    items:[{id:'draft',name:'Draft'},{id:'review',name:'In review'},
+           {id:'live',name:'Live'},{id:'ended',name:'Ended'}]},
+  hostStatus:{label:'Host statuses', locked:true,
+    note:'Controls whether a host\u2019s listings appear publicly.',
+    items:[{id:'pending',name:'Pending'},{id:'active',name:'Active'},
+           {id:'suspended',name:'Suspended'},{id:'rejected',name:'Rejected'}]}
+};
+
+const MASTER_USE = {
+  categories:id=>EVENTS.filter(e=>e.cat===id).length,
+  areas:id=>EVENTS.filter(e=>e.hub===id).length,
+  methods:id=>BOOKINGS.filter(b=>b.method===id).length,
+  eventStatus:id=>EVENTS.filter(e=>e.status===id).length,
+  hostStatus:id=>HOSTS.filter(h=>h.status===id).length
+};
+
+/* ------------------------------------------------------------
+   ROLES
+   Permission is a grid, not a title. Each role is a set of scopes
+   so "who can issue a refund" has one answer you can point at.
+   ------------------------------------------------------------ */
+const SCOPES = [
+  ['events.read','View events'], ['events.write','Edit & publish events'],
+  ['moderation','Approve hosts & events'],
+  ['bookings.read','View bookings'], ['bookings.refund','Issue refunds'],
+  ['attendees.read','View attendee records'],
+  ['payouts.read','View payouts'], ['payouts.run','Run payout batches'],
+  ['content','Edit site content'], ['masters','Edit master data'],
+  ['integrations','Manage integrations'], ['settings','Change fees & policy'],
+  ['roles','Manage admin access'], ['audit','View audit log']
+];
+
+const ROLES = {
+  owner:{label:'Owner', note:'Full control, including who else has access.',
+    scopes:SCOPES.map(s=>s[0])},
+  ops:{label:'Operations', note:'Runs the day: moderation, events, bookings.',
+    scopes:['events.read','events.write','moderation','bookings.read','bookings.refund',
+            'attendees.read','content','masters','audit']},
+  finance:{label:'Finance', note:'Money only. Cannot change what is published.',
+    scopes:['events.read','bookings.read','payouts.read','payouts.run','settings','audit']},
+  support:{label:'Support', note:'Helps attendees. Sees records, changes little.',
+    scopes:['events.read','bookings.read','bookings.refund','attendees.read','audit']},
+  viewer:{label:'Read only', note:'Sees everything, changes nothing.',
+    scopes:SCOPES.map(s=>s[0]).filter(x=>/\.read$|^audit$/.test(x))}
+};
+
+const ADMINS = [
+  {id:'a1',name:'Sid',email:'sid@kreo.ae',role:'owner',
+   last:'2026-07-31T15:40:00+04:00',mfa:true},
+  {id:'a2',name:'Layla Haddad',email:'layla@kreo.ae',role:'ops',
+   last:'2026-07-31T09:12:00+04:00',mfa:true},
+  {id:'a3',name:'Ravi Menon',email:'ravi@kreo.ae',role:'finance',
+   last:'2026-07-29T17:05:00+04:00',mfa:false},
+  {id:'a4',name:'Amira Fakhri',email:'amira@kreo.ae',role:'support',
+   last:'2026-07-31T13:22:00+04:00',mfa:true},
+  {id:'a5',name:'Board access',email:'board@kreo.ae',role:'viewer',
+   last:'2026-07-18T10:00:00+04:00',mfa:true}
+];
+
+/* Six-month series behind the overview charts. */
+const TREND = [
+  {m:'Mar', gmv:9200,  bookings:118, events:9},
+  {m:'Apr', gmv:14800, bookings:186, events:12},
+  {m:'May', gmv:21400, bookings:249, events:15},
+  {m:'Jun', gmv:26900, bookings:305, events:17},
+  {m:'Jul', gmv:33600, bookings:372, events:21},
+  {m:'Aug', gmv:38940, bookings:412, events:24}
+];
+
+let SESSION = Store.read(LS.session,{authed:false});
+
+/* ============================================================
+   HELPERS + SHARED COMPONENTS
+   ============================================================ */
+const $  = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const host = id => HOSTS.find(h=>h.id===id);
+const ev   = id => EVENTS.find(e=>e.id===id);
+const hubName = k => (HUBS.find(h=>h[0]===k)||[,k])[1];
+const TODAY = new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dubai'});
+const aed = n => 'AED '+Math.round(n).toLocaleString('en-GB');
+const dshort = d => new Date(d+'T12:00:00+04:00')
+  .toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'Asia/Dubai'});
+const tstamp = iso => new Date(iso)
+  .toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'});
+
+function toast(m){
+  const t=$('toast'); t.textContent=m; t.dataset.on='true';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.dataset.on='false',2000);
+}
+
+/* Every mutation writes its own audit line. A state change with no
+   log entry should not be reachable from the UI. */
+function logIt(what,target){
+  AUDIT.unshift({at:new Date().toISOString(),who:'admin',what,target});
+  if(AUDIT.length>80) AUDIT.length=80;
+  Store.write(LS.audit,AUDIT);
+}
+function saveCms(){
+  const ok=Store.write(LS.cms,CMS);
+  const d=$('saved'); if(d){d.dataset.on='true'; setTimeout(()=>d.dataset.on='false',1300);}
+  if(!ok) toast('Storage blocked \u2014 changes apply this session only');
+}
+function setBrand(hex){
+  CMS.brandColor=hex;
+  document.documentElement.style.setProperty('--brand',hex);
+}
+
+/* ------------------------------------------------------------
+   CSV EXPORT
+   Escaping is the whole job: a title containing a comma, a quote
+   or a newline will corrupt the file otherwise, and event titles
+   are host-authored free text.
+   ------------------------------------------------------------ */
+function csvCell(v){
+  const s=String(v==null?'':v);
+  return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function toCsv(cols, rows){
+  const head=cols.map(c=>csvCell(c.label)).join(',');
+  const body=rows.map(r=>cols.map(c=>csvCell(c.get(r))).join(',')).join('\r\n');
+  return head+'\r\n'+body;
+}
+function download(name, text){
+  try{
+    /* BOM so Excel opens UTF-8 correctly rather than mangling
+       the en-dashes in event titles */
+    const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },0);
+    return true;
+  }catch(e){ return false; }
+}
+const stamp = () => new Date().toISOString().slice(0,10);
+
+const EXPORTS = {
+  events:()=>({name:'kreo-events-'+stamp()+'.csv', cols:[
+    {label:'ID',get:r=>r.id},{label:'Title',get:r=>r.title},
+    {label:'Host',get:r=>(host(r.host)||{}).name},
+    {label:'Category',get:r=>r.cat},{label:'Area',get:r=>hubName(r.hub)},
+    {label:'Date',get:r=>r.date},{label:'Capacity',get:r=>r.cap},
+    {label:'Booked',get:r=>r.booked},
+    {label:'Fill %',get:r=>Math.round(r.booked/r.cap*100)},
+    {label:'Price AED',get:r=>r.price},
+    {label:'Gross AED',get:r=>r.booked*r.price},
+    {label:'Fee AED',get:r=>Math.round(r.booked*r.price*CMS.feePct/100)},
+    {label:'Status',get:r=>r.status},{label:'Views',get:r=>r.views}
+  ], rows:filteredEvents()}),
+
+  bookings:()=>({name:'kreo-bookings-'+stamp()+'.csv', cols:[
+    {label:'Reference',get:r=>r.id},{label:'Attendee',get:r=>r.who},
+    {label:'Event',get:r=>(ev(r.ev)||{}).title},
+    {label:'Seats',get:r=>r.q},{label:'Total AED',get:r=>r.total},
+    {label:'Method',get:r=>r.method},{label:'Booked',get:r=>r.when},
+    {label:'Status',get:r=>r.status}
+  ], rows:filteredBookings()}),
+
+  hosts:()=>({name:'kreo-hosts-'+stamp()+'.csv', cols:[
+    {label:'ID',get:r=>r.id},{label:'Name',get:r=>r.name},
+    {label:'Status',get:r=>r.status},{label:'Verified',get:r=>r.verified?'yes':'no'},
+    {label:'Events',get:r=>EVENTS.filter(e=>e.host===r.id).length},
+    {label:'Followers',get:r=>r.followers},
+    {label:'Licence',get:r=>r.licence},{label:'Expires',get:r=>r.expires},
+    {label:'Payouts',get:r=>r.payoutOk?'connected':'not set up'},
+    {label:'Joined',get:r=>r.joined}
+  ], rows:HOSTS}),
+
+  attendees:()=>({name:'kreo-attendees-'+stamp()+'.csv', cols:[
+    {label:'Name',get:r=>r.name},{label:'Email',get:r=>r.email},
+    {label:'Bookings',get:r=>r.bookings},{label:'Spend AED',get:r=>r.spend},
+    {label:'Credits AED',get:r=>r.credits},{label:'Joined',get:r=>r.joined}
+  ], rows:ATTENDEES}),
+
+  payouts:()=>({name:'kreo-payouts-'+stamp()+'.csv', cols:[
+    {label:'Host',get:r=>(host(r.host)||{}).name},{label:'Period',get:r=>r.period},
+    {label:'Gross AED',get:r=>r.gross},{label:'Fee AED',get:r=>r.fee},
+    {label:'Processing AED',get:r=>r.stripe},{label:'Net AED',get:r=>r.net},
+    {label:'Due',get:r=>r.due},{label:'Status',get:r=>r.status}
+  ], rows:PAYOUTS})
+};
+
+/* ------------------------------------------------------------
+   CHARTS — hand-drawn SVG. A charting library would be 60KB to
+   render six data points, and every one of these is a fixed shape.
+   ------------------------------------------------------------ */
+function sparkArea(series, get, fmt){
+  const w=560, h=150, pl=44, pr=8, pt=14, pb=22;
+  const vals=series.map(get);
+  const max=Math.max(...vals)*1.12, min=0;
+  const x=i=>pl+(w-pl-pr)*(i/(series.length-1));
+  const y=v=>pt+(h-pt-pb)*(1-(v-min)/(max-min));
+  const pts=vals.map((v,i)=>[x(i),y(v)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=line+' L'+x(series.length-1).toFixed(1)+' '+(h-pb)+' L'+pl+' '+(h-pb)+' Z';
+  const ticks=[0,.5,1].map(t=>{
+    const v=min+(max-min)*t, yy=y(v);
+    return '<line class="ch__grid" x1="'+pl+'" x2="'+(w-pr)+'" y1="'+yy.toFixed(1)+
+      '" y2="'+yy.toFixed(1)+'"/>'+
+      '<text class="ch__lab" x="'+(pl-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+
+      fmt(v)+'</text>';
+  }).join('');
+  return '<div class="ch"><svg viewBox="0 0 '+w+' '+h+'" role="img" '+
+    'aria-label="Trend over '+series.length+' months">'+ticks+
+    '<path class="ch__area" d="'+area+'"/><path class="ch__line" d="'+line+'"/>'+
+    pts.map((p,i)=>'<circle class="ch__dot" cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+
+      '" r="3.5"/>').join('')+
+    series.map((d,i)=>'<text class="ch__lab" x="'+x(i).toFixed(1)+'" y="'+(h-6)+
+      '" text-anchor="middle">'+esc(d.m)+'</text>').join('')+
+    '<text class="ch__val" x="'+(x(series.length-1)-4).toFixed(1)+'" y="'+
+      (y(vals[vals.length-1])-9).toFixed(1)+'" text-anchor="end">'+
+      fmt(vals[vals.length-1])+'</text>'+
+    '</svg></div>';
+}
+
+function donut(rows){
+  const total=rows.reduce((n,r)=>n+r.v,0)||1;
+  const R=52, C=2*Math.PI*R;
+  let off=0;
+  const arcs=rows.map(r=>{
+    const frac=r.v/total, len=C*frac;
+    const seg='<circle r="'+R+'" cx="66" cy="66" fill="none" stroke="'+r.c+
+      '" stroke-width="20" stroke-dasharray="'+len.toFixed(1)+' '+(C-len).toFixed(1)+
+      '" stroke-dashoffset="'+(-off).toFixed(1)+'" transform="rotate(-90 66 66)"/>';
+    off+=len; return seg;
+  }).join('');
+  return '<div class="don"><svg viewBox="0 0 132 132" role="img" aria-label="Category mix">'+
+    arcs+'<text x="66" y="63" text-anchor="middle" class="ch__val" '+
+    'style="font-size:17px;font-weight:800">'+total+'</text>'+
+    '<text x="66" y="77" text-anchor="middle" class="ch__lab">events</text></svg>'+
+    '<div class="don__k">'+rows.map(r=>
+      '<span class="don__r"><i style="background:'+r.c+'"></i>'+esc(r.k)+
+      '<b>'+r.v+'</b></span>').join('')+'</div></div>';
+}
+
+function funnel(steps){
+  const top=steps[0].v||1;
+  return '<div class="fun">'+steps.map((s,i)=>{
+    const pct=s.v/top*100;
+    const drop=i?Math.round((1-s.v/steps[i-1].v)*100):0;
+    return '<div class="fun__r"><span>'+esc(s.k)+'</span>'+
+      '<span class="fun__b" style="width:'+Math.max(4,pct).toFixed(1)+'%"></span>'+
+      '<b>'+s.v.toLocaleString('en-GB')+
+      (i?' <span class="fun__d">\u2212'+drop+'%</span>':'')+'</b></div>';
+  }).join('')+'</div>';
+}
+
+const pill = s => '<span class="pill" data-s="'+esc(s)+'">'+esc(s)+'</span>';
+const mark = t => '<span class="mark">'+esc(t)+'</span>';
+
+function metric(value,label,delta,dir){
+  return '<div class="met"><b>'+value+'</b><span>'+esc(label)+'</span>'+
+    (delta?'<i data-d="'+(dir||'flat')+'">'+esc(delta)+'</i>':'')+'</div>';
+}
+
+function card(title, body, opts){
+  opts=opts||{};
+  return '<section class="cd">'+
+    (title ? '<div class="cd__h"><h2>'+esc(title)+'</h2>'+
+      (opts.sub?'<span class="meta">'+esc(opts.sub)+'</span>':'')+
+      (opts.actions?'<div class="btn-row">'+opts.actions+'</div>':'')+'</div>' : '')+
+    '<div class="cd__b'+(opts.flush?' cd__b--flush':'')+'">'+body+'</div>'+
+    (opts.foot?'<div class="cd__f">'+opts.foot+'</div>':'')+
+  '</section>';
+}
+
+const empty = (t,s) => '<div class="empty2"><b>'+esc(t)+'</b><p>'+esc(s||'')+'</p></div>';
+
+/* ------------------------------------------------------------
+   DataTable — one component behind every list in the console.
+   Sorting, filtering and selection live in TSTATE keyed by table
+   id, so switching sections never loses a filter.
+   ------------------------------------------------------------ */
+/* Saved views. A filter set an operator rebuilds every morning is
+   a filter set they should be able to name once. */
+const VIEWS_SAVED = Store.read('kreo-views', {});
+
+function saveView(tableId, name){
+  const st=tstate(tableId);
+  (VIEWS_SAVED[tableId] = VIEWS_SAVED[tableId] || [])
+    .push({name, q:st.q, filters:{...st.filters}, sort:st.sort, dir:st.dir});
+  Store.write('kreo-views', VIEWS_SAVED);
+}
+function applyView(tableId, i){
+  const v=(VIEWS_SAVED[tableId]||[])[i];
+  if(!v) return;
+  const st=tstate(tableId);
+  st.q=v.q; st.filters={...v.filters}; st.sort=v.sort; st.dir=v.dir; st.sel.clear();
+}
+function dropView(tableId, i){
+  (VIEWS_SAVED[tableId]||[]).splice(i,1);
+  Store.write('kreo-views', VIEWS_SAVED);
+}
+function viewBar(tableId){
+  const list=VIEWS_SAVED[tableId]||[];
+  const st=tstate(tableId);
+  const dirty = st.q || Object.values(st.filters||{}).some(Boolean);
+  if(!list.length && !dirty) return '';
+  return '<div class="views">'+
+    list.map((v,i)=>'<span class="vchip">'+
+      '<button data-useview="'+tableId+':'+i+'">'+esc(v.name)+'</button>'+
+      '<button data-dropview="'+tableId+':'+i+'" aria-label="Delete view">&times;</button></span>').join('')+
+    (dirty?'<button class="btn" data-v="quiet" style="padding:4px 10px" '+
+      'data-saveview="'+tableId+'">Save this view</button>':'')+
+  '</div>';
+}
+
+const TSTATE = {};
+function tstate(id){
+  if(!TSTATE[id]) TSTATE[id]={sort:null, dir:'asc', sel:new Set(), q:'', filters:{}};
+  return TSTATE[id];
+}
+
+function table(id, cols, rows, opts){
+  opts=opts||{};
+  const st=tstate(id);
+  if(st.sort){
+    const c=cols.find(c=>c.key===st.sort);
+    if(c && c.val) rows=[...rows].sort((a,b)=>{
+      const x=c.val(a), y=c.val(b);
+      const r = typeof x==='number' ? x-y : String(x).localeCompare(String(y));
+      return st.dir==='asc' ? r : -r;
+    });
+  }
+  const selectable = !!opts.select;
+  const allSel = selectable && rows.length && rows.every(r=>st.sel.has(r.id));
+
+  const head='<tr>'+
+    (selectable?'<th style="width:34px"><input type="checkbox" data-all="'+id+'"'+
+      (allSel?' checked':'')+' aria-label="Select all"></th>':'')+
+    cols.map(c=>{
+      const sorted = st.sort===c.key;
+      return '<th'+(c.val?' data-sort="'+c.key+'" data-table="'+id+'"':'')+
+        (sorted?' aria-sort="'+(st.dir==='asc'?'ascending':'descending')+'"':'')+
+        (c.align==='right'?' style="text-align:right"':'')+'>'+esc(c.label)+
+        (sorted?' <span>'+(st.dir==='asc'?'\u2191':'\u2193')+'</span>':'')+'</th>';
+    }).join('')+'</tr>';
+
+  const body = rows.length ? rows.map(r=>
+    '<tr data-sel="'+st.sel.has(r.id)+'"'+(opts.open?' data-open="'+id+':'+r.id+'"':'')+
+      ' style="cursor:'+(opts.open?'pointer':'default')+'">'+
+      (selectable?'<td><input type="checkbox" data-row="'+id+'" value="'+r.id+'"'+
+        (st.sel.has(r.id)?' checked':'')+' aria-label="Select row"></td>':'')+
+      cols.map(c=>'<td'+(c.cls?' class="'+c.cls+'"':'')+'>'+c.cell(r)+'</td>').join('')+
+    '</tr>').join('')
+    : '<tr><td colspan="'+(cols.length+(selectable?1:0))+'">'+
+      empty(opts.emptyTitle||'Nothing here', opts.emptySub||'')+'</td></tr>';
+
+  return '<div class="tw"><table class="dt"><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+}
+
+function bulkBar(id, actions){
+  const st=tstate(id);
+  if(!st.sel.size) return '';
+  return '<div class="bulk"><b>'+st.sel.size+' selected</b>'+
+    '<div class="btn-row">'+actions+
+      '<button class="btn" data-v="quiet" data-clearsel="'+id+'">Clear</button></div></div>';
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+const NAV=[
+  ['Operate',[
+    ['overview','Overview','\u25A0'],
+    ['events','Events','\u25C6'],
+    ['bookings','Bookings','\u25CF'],
+    ['moderation','Moderation','\u25B2']
+  ]],
+  ['People',[
+    ['hosts','Hosts','\u25CB'],
+    ['attendees','Attendees','\u25CC']
+  ]],
+  ['Money',[
+    ['payouts','Payouts','\u25A1']
+  ]],
+  ['Data',[
+    ['masters','Masters','\u25AB']
+  ]],
+  ['Configure',[
+    ['integrations','Integrations','\u25CE'],
+    ['content','Content','\u25AA'],
+
+    ['appearance','Appearance','\u25C7'],
+    ['settings','Settings','\u25BD'],
+    ['roles','Roles & access','\u25B3'],
+    ['audit','Audit log','\u25BE']
+  ]]
+];
+const TITLES={overview:'Overview',integrations:'Integrations',events:'Events',bookings:'Bookings',moderation:'Moderation',
+  hosts:'Hosts',attendees:'Attendees',payouts:'Payouts',content:'Content',
+  masters:'Masters',roles:'Roles & access',appearance:'Appearance',settings:'Settings',audit:'Audit log'};
+
+const queueCount = () =>
+  HOSTS.filter(h=>h.status==='pending').length + EVENTS.filter(e=>e.status==='review').length;
+
+let TAB='overview';
+
+function shell(inner, sub){
+  const q=queueCount();
+  return '<div class="ap">'+
+    '<aside class="side">'+
+      '<div class="side__b"><b>KREO</b><em>admin</em></div>'+
+      '<nav class="side__n">'+NAV.map(g=>
+        '<span class="side__g">'+esc(g[0])+'</span>'+
+        g[1].map(t=>
+          '<a href="#/'+t[0]+'"'+(t[0]===TAB?' aria-current="page"':'')+'>'+
+          '<i>'+t[2]+'</i>'+esc(t[1])+
+          (t[0]==='moderation'&&q?'<u>'+q+'</u>':'')+'</a>').join('')
+      ).join('')+'</nav>'+
+      '<div class="side__f">'+
+        '<a href="index.html" target="_blank" rel="noopener">View public site &#8599;</a>'+
+        '<a href="#" id="logout">Sign out</a></div>'+
+    '</aside>'+
+    '<div class="main">'+
+      '<header class="top2">'+
+        '<span class="crumb">KREO / <b>'+esc(TITLES[TAB]||TAB)+'</b></span>'+
+        '<div class="gsearch">'+
+          '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/>'+
+          '<line x1="16" y1="16" x2="21" y2="21"/></svg>'+
+          '<input id="gq" type="search" placeholder="Search events, hosts, bookings\u2026" '+
+            'autocomplete="off" aria-label="Global search"><kbd>\u2318K</kbd></div>'+
+        '<div class="top2__r">'+
+          '<span class="saved" id="saved">&#10003; Saved</span>'+
+          '<button class="theme" id="theme" aria-pressed="false" aria-label="Switch theme">&#9789;</button>'+
+        '</div>'+
+      '</header>'+
+      '<div class="page">'+
+        '<div class="ph"><div><h1>'+esc(TITLES[TAB]||TAB)+'</h1>'+
+          (sub?'<p>'+esc(sub)+'</p>':'')+'</div>'+
+          (PAGE_ACTIONS[TAB]?'<div class="btn-row">'+PAGE_ACTIONS[TAB]()+'</div>':'')+
+        '</div>'+
+        inner+
+      '</div>'+
+    '</div>'+
+  '</div>'+
+  drawer()+cmdk();
+}
+
+const PAGE_ACTIONS={
+  events:()=>'<button class="btn" data-v="outline" data-export="events">Export '+
+             filteredEvents().length+' as CSV</button>'+
+             '<button class="btn" data-v="primary" data-toast="Opens the host create flow">New event</button>',
+  bookings:()=>'<button class="btn" data-v="outline" data-export="bookings">Export '+
+               filteredBookings().length+' as CSV</button>',
+  hosts:()=>'<button class="btn" data-v="outline" data-export="hosts">Export CSV</button>',
+  attendees:()=>'<button class="btn" data-v="outline" data-export="attendees">Export CSV</button>',
+  payouts:()=>'<button class="btn" data-v="primary" data-toast="Payout run queued for the next cycle">Run payouts</button>'
+};
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+const V={};
+
+V.overview=()=>{
+  const live=EVENTS.filter(e=>e.status==='live');
+  const seats=live.reduce((n,e)=>n+e.booked,0);
+  const gmv=live.reduce((n,e)=>n+e.booked*e.price,0);
+  const fill=Math.round(live.reduce((n,e)=>n+e.booked/e.cap,0)/live.length*100);
+  const paid=live.filter(e=>e.price>0);
+  const aov=paid.length ? gmv/BOOKINGS.filter(b=>b.status==='confirmed').length : 0;
+  const prev=TREND[TREND.length-2], now=TREND[TREND.length-1];
+  const pct=(a,b)=>Math.round((a-b)/b*100);
+
+  /* category mix, biggest first, tail folded into Other so the
+     donut never becomes a colour-matching exercise */
+  const byCat={};
+  live.forEach(e=>{ byCat[e.cat]=(byCat[e.cat]||0)+1; });
+  const tones=['#6E9314','#8FD14F','#C7F464','#4285F4','#F54E00','#6D28D9'];
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const mix=sorted.slice(0,5).map(([k,v],i)=>({k,v,c:tones[i]}));
+  const tail=sorted.slice(5).reduce((n,x)=>n+x[1],0);
+  if(tail) mix.push({k:'Other',v:tail,c:tones[5]});
+
+  const topHosts=HOSTS.map(h=>({h, rev:EVENTS.filter(e=>e.host===h.id)
+      .reduce((n,e)=>n+e.booked*e.price,0)}))
+    .filter(x=>x.rev>0).sort((a,b)=>b.rev-a.rev).slice(0,5);
+
+  const views=live.reduce((n,e)=>n+e.views,0);
+
+  return '<div class="mets">'+
+      metric(aed(gmv),'Gross value', pct(now.gmv,prev.gmv)+'% vs Jul','up')+
+      metric(aed(gmv*CMS.feePct/100),'Net revenue', CMS.feePct+'% take rate','flat')+
+      metric(seats,'Seats sold', pct(now.bookings,prev.bookings)+'% vs Jul','up')+
+      metric(aed(aov),'Avg booking value')+
+      metric(fill+'%','Capacity filled', fill<60?'below target':'on target',
+        fill<60?'down':'up')+
+      metric(queueCount(),'Awaiting review', queueCount()?'needs action':'clear',
+        queueCount()?'down':'up')+
+    '</div>'+
+
+    (queueCount()
+      ? card('Needs action',
+          HOSTS.filter(h=>h.status==='pending').map(h=>
+            '<div class="tl__r"><time>Host</time>'+
+            '<span><b>'+esc(h.name)+'</b> applied '+dshort(h.joined)+'</span>'+
+            '<button class="btn" data-v="outline" data-openhost="'+h.id+'">Review</button></div>').join('')+
+          EVENTS.filter(e=>e.status==='review').map(e=>
+            '<div class="tl__r"><time>Event</time>'+
+            '<span><b>'+esc(e.title)+'</b> by '+esc((host(e.host)||{}).name)+'</span>'+
+            '<button class="btn" data-v="outline" data-openev="'+e.id+'">Review</button></div>').join(''),
+          {sub:queueCount()+' waiting',
+           actions:'<a class="btn" data-v="quiet" href="#/moderation">Open queue</a>'})
+      : '')+
+
+    '<div class="two-up">'+
+      card('Gross value, six months',
+        sparkArea(TREND, d=>d.gmv, v=>'AED '+Math.round(v/1000)+'k'),
+        {sub:'AED '+now.gmv.toLocaleString('en-GB')+' this month'})+
+      card('Bookings, six months',
+        sparkArea(TREND, d=>d.bookings, v=>Math.round(v)),
+        {sub:now.bookings+' this month'})+
+    '</div>'+
+
+    '<div class="two-up">'+
+      card('Category mix', donut(mix), {sub:'Live events by category'})+
+      card('Browse to booking',
+        funnel([
+          {k:'Event views', v:views},
+          {k:'Detail opened', v:Math.round(views*0.34)},
+          {k:'Checkout started', v:Math.round(views*0.09)},
+          {k:'Booked', v:seats}
+        ]),
+        {sub:'Last 30 days',
+         foot:'<span class="meta">The steepest drop is view to detail. That is a card '+
+              'problem \u2014 title, image or price \u2014 not a checkout problem.</span>'})+
+    '</div>'+
+
+    '<div class="two-up">'+
+      card('Top hosts by revenue',
+        '<div class="rank">'+topHosts.map((x,i)=>
+          '<div class="rank__r"><i>'+(i+1)+'</i>'+
+          '<span>'+esc(x.h.name)+'</span><b>'+aed(x.rev)+'</b></div>').join('')+'</div>')+
+      card('Recent activity',
+        '<div class="tl">'+AUDIT.slice(0,6).map(a=>
+          '<div class="tl__r"><time>'+tstamp(a.at)+'</time>'+
+          '<span>'+esc(a.what)+' \u2014 <b>'+esc(a.target)+'</b></span>'+
+          '<span class="meta">'+esc(a.who)+'</span></div>').join('')+'</div>',
+        {actions:'<a class="btn" data-v="quiet" href="#/audit">Full log</a>'})+
+    '</div>';
+};
+
+/* One predicate per list, used by the view AND the exporter. A CSV
+   that disagrees with the screen is worse than no CSV. */
+function filteredEvents(){
+  const st=tstate('t-ev'), f=st.filters;
+  return EVENTS.filter(e=>{
+    if(st.q){
+      const hay=(e.title+' '+(host(e.host)||{}).name+' '+e.cat+' '+hubName(e.hub)).toLowerCase();
+      if(!hay.includes(st.q.toLowerCase())) return false;
+    }
+    if(f.status && e.status!==f.status) return false;
+    if(f.cat && e.cat!==f.cat) return false;
+    if(f.hub && e.hub!==f.hub) return false;
+    if(f.host && e.host!==f.host) return false;
+    return true;
+  });
+}
+function filteredBookings(){
+  const st=tstate('t-bk'), f=st.filters;
+  return BOOKINGS.filter(b=>{
+    if(st.q){
+      const hay=(b.who+' '+b.id+' '+(ev(b.ev)||{}).title).toLowerCase();
+      if(!hay.includes(st.q.toLowerCase())) return false;
+    }
+    if(f.status && b.status!==f.status) return false;
+    if(f.method && b.method!==f.method) return false;
+    return true;
+  });
+}
+
+/* ---- Events: the core object of the platform ---------------- */
+V.events=()=>{
+  const st=tstate('t-ev');
+  const f=st.filters;
+  let rows=filteredEvents();
+
+  const toolbar='<div class="tb">'+
+    '<input type="search" data-tq="t-ev" value="'+esc(st.q)+'" placeholder="Search events">'+
+    '<select data-tf="t-ev:status"><option value="">Any status</option>'+
+      ['live','review','draft','ended'].map(s=>'<option'+(f.status===s?' selected':'')+'>'+s+'</option>').join('')+
+    '</select>'+
+    '<select data-tf="t-ev:cat"><option value="">Any category</option>'+
+      CATS.map(c=>'<option'+(f.cat===c?' selected':'')+'>'+esc(c)+'</option>').join('')+
+    '</select>'+
+    '<select data-tf="t-ev:hub"><option value="">Any area</option>'+
+      HUBS.map(h=>'<option value="'+h[0]+'"'+(f.hub===h[0]?' selected':'')+'>'+esc(h[1])+'</option>').join('')+
+    '</select>'+
+    '<select data-tf="t-ev:host"><option value="">Any host</option>'+
+      HOSTS.map(h=>'<option value="'+h.id+'"'+(f.host===h.id?' selected':'')+'>'+esc(h.name)+'</option>').join('')+
+    '</select>'+
+    '<div class="tb__r"><span class="meta">'+rows.length+' of '+EVENTS.length+'</span>'+
+      (st.q||f.status||f.cat||f.hub||f.host
+        ? '<button class="btn" data-v="quiet" data-treset="t-ev">Clear</button>' : '')+
+    '</div></div>';
+
+  return card(null,
+    toolbar+
+    viewBar('t-ev')+
+    bulkBar('t-ev',
+      '<button class="btn" data-v="quiet" data-bulk="t-ev:feature">Feature</button>'+
+      '<button class="btn" data-v="quiet" data-bulk="t-ev:publish">Publish</button>'+
+      '<button class="btn" data-v="quiet" data-bulk="t-ev:unpublish">Unpublish</button>')+
+    table('t-ev',[
+      {key:'title',label:'Event',val:r=>r.title,cell:r=>'<div class="cell">'+
+        '<img class="thumb" src="'+IMG+r.cover+'?w=80&q=60" alt="">'+
+        '<div><div class="ttl">'+esc(r.title)+'</div>'+
+        '<div class="sub">'+esc(r.cat)+' \u00b7 '+esc(hubName(r.hub))+'</div></div></div>'},
+      {key:'host',label:'Host',val:r=>(host(r.host)||{}).name,
+       cell:r=>esc((host(r.host)||{}).name||'')},
+      {key:'date',label:'Date',val:r=>r.date,cell:r=>dshort(r.date)},
+      {key:'fill',label:'Filled',val:r=>r.booked/r.cap,cls:'num',align:'right',
+       cell:r=>r.booked+'/'+r.cap},
+      {key:'price',label:'Price',val:r=>r.price,cls:'num',align:'right',
+       cell:r=>r.price?aed(r.price):'Free'},
+      {key:'rev',label:'Revenue',val:r=>r.booked*r.price,cls:'num',align:'right',
+       cell:r=>aed(r.booked*r.price)},
+      {key:'status',label:'Status',val:r=>r.status,
+       cell:r=>pill(r.status)+(OPS.featured.includes(r.id)
+         ? ' <span class="pill" data-s="scheduled">featured</span>' : '')}
+    ], rows, {select:true, open:'event',
+      emptyTitle:'No events match', emptySub:'Clear a filter or widen the search.'}),
+    {flush:true});
+};
+
+/* ---- Bookings ---------------------------------------------- */
+V.bookings=()=>{
+  const st=tstate('t-bk'); const f=st.filters;
+  let rows=filteredBookings();
+  const revenue=rows.filter(b=>b.status==='confirmed').reduce((n,b)=>n+b.total,0);
+
+  return '<div class="mets">'+
+      metric(BOOKINGS.length,'Total bookings')+
+      metric(BOOKINGS.filter(b=>b.status==='confirmed').length,'Confirmed')+
+      metric(BOOKINGS.filter(b=>b.status==='refunded').length,'Refunded')+
+      metric(aed(revenue),'Filtered revenue')+
+    '</div>'+
+    card(null,
+      '<div class="tb">'+
+        '<input type="search" data-tq="t-bk" value="'+esc(st.q)+'" placeholder="Search by name, ref or event">'+
+        '<select data-tf="t-bk:status"><option value="">Any status</option>'+
+          ['confirmed','cancelled','refunded'].map(s=>
+            '<option'+(f.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+        '<select data-tf="t-bk:method"><option value="">Any method</option>'+
+          ['card','apple','google','credits'].map(s=>
+            '<option'+(f.method===s?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+        '<div class="tb__r"><span class="meta">'+rows.length+' of '+BOOKINGS.length+'</span></div>'+
+      '</div>'+
+      viewBar('t-bk')+
+      table('t-bk',[
+        {key:'id',label:'Reference',val:r=>r.id,
+         cell:r=>'<span class="ttl" style="font-family:var(--m);font-size:var(--t-xs)">'+esc(r.id)+'</span>'},
+        {key:'who',label:'Attendee',val:r=>r.who,cell:r=>'<div class="cell">'+mark(r.ini)+
+          '<div><div class="ttl">'+esc(r.who)+'</div></div></div>'},
+        {key:'ev',label:'Event',val:r=>(ev(r.ev)||{}).title,
+         cell:r=>esc((ev(r.ev)||{}).title||'')},
+        {key:'q',label:'Seats',val:r=>r.q,cls:'num',align:'right',cell:r=>r.q},
+        {key:'total',label:'Total',val:r=>r.total,cls:'num',align:'right',
+         cell:r=>r.total?aed(r.total):'Free'},
+        {key:'m',label:'Method',val:r=>r.method,cell:r=>'<span class="meta">'+esc(r.method)+'</span>'},
+        {key:'when',label:'Booked',val:r=>r.when,cell:r=>dshort(r.when)},
+        {key:'status',label:'Status',val:r=>r.status,cell:r=>pill(r.status)}
+      ], rows, {open:'booking',
+        emptyTitle:'No bookings match', emptySub:'Try a different reference or status.'}),
+      {flush:true});
+};
+
+/* ---- Moderation: hosts and events in one queue -------------- */
+V.moderation=()=>{
+  const hq=HOSTS.filter(h=>h.status==='pending');
+  const eq=EVENTS.filter(e=>e.status==='review');
+  return card('Host applications',
+      hq.length ? hq.map(h=>
+        '<div class="tl__r" style="grid-template-columns:1fr auto">'+
+          '<div><div class="cell">'+mark(h.ini)+'<div>'+
+            '<div class="ttl">'+esc(h.name)+'</div>'+
+            '<div class="sub">'+esc(h.bio||'')+'</div>'+
+            '<div class="sub">Licence '+esc(h.licence)+' \u00b7 expires '+esc(h.expires)+
+              (h.expires<TODAY?' \u00b7 EXPIRED':'')+'</div></div></div></div>'+
+          '<div class="btn-row">'+
+            '<button class="btn" data-v="primary" data-openhost="'+h.id+'">Review</button>'+
+            '</div>'+
+        '</div>').join('')
+      : empty('No host applications','New sign-ups appear here within minutes.'),
+      {sub:hq.length+' waiting'})+
+    card('Events awaiting review',
+      eq.length ? table('t-mod',[
+        {key:'t',label:'Event',cell:r=>'<div class="cell">'+
+          '<img class="thumb" src="'+IMG+r.cover+'?w=80&q=60" alt="">'+
+          '<div><div class="ttl">'+esc(r.title)+'</div>'+
+          '<div class="sub">'+esc((host(r.host)||{}).name)+' \u00b7 '+esc(r.cat)+'</div></div></div>'},
+        {key:'d',label:'Date',cell:r=>dshort(r.date)},
+        {key:'p',label:'Price',cls:'num',align:'right',cell:r=>r.price?aed(r.price):'Free'},
+        {key:'a',label:'',cls:'act',cell:r=>'<div class="btn-row" style="justify-content:flex-end">'+
+          '<button class="btn" data-v="primary" data-openev="'+r.id+'">Review</button></div>'}
+      ], eq, {emptyTitle:'Queue empty'})
+      : empty('No events waiting','Host submissions land here before going live.'),
+      {flush:eq.length>0, sub:eq.length+' waiting'});
+};
+
+/* ---- Hosts -------------------------------------------------- */
+V.hosts=()=>{
+  const st=tstate('t-h'); const f=st.filters;
+  let rows=HOSTS.filter(h=>{
+    if(st.q && !h.name.toLowerCase().includes(st.q.toLowerCase())) return false;
+    if(f.status && h.status!==f.status) return false;
+    return true;
+  });
+  const lapsed=HOSTS.filter(h=>h.expires<TODAY).length;
+  return '<div class="mets">'+
+      metric(HOSTS.filter(h=>h.status==='active').length,'Active')+
+      metric(HOSTS.filter(h=>h.status==='pending').length,'Pending')+
+      metric(HOSTS.filter(h=>h.status==='suspended').length,'Suspended')+
+      metric(lapsed,'Licence lapsed', lapsed?'listings paused':'', lapsed?'down':'flat')+
+    '</div>'+
+    card(null,
+      '<div class="tb">'+
+        '<input type="search" data-tq="t-h" value="'+esc(st.q)+'" placeholder="Search hosts">'+
+        '<select data-tf="t-h:status"><option value="">Any status</option>'+
+          ['active','pending','suspended','rejected'].map(s=>
+            '<option'+(f.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+        '<div class="tb__r"><span class="meta">'+rows.length+' of '+HOSTS.length+'</span></div></div>'+
+      bulkBar('t-h',
+        '<button class="btn" data-v="quiet" data-bulk="t-h:approve">Approve</button>'+
+        '<button class="btn" data-v="quiet" data-bulk="t-h:suspend">Suspend</button>')+
+      table('t-h',[
+        {key:'name',label:'Host',val:r=>r.name,cell:r=>'<div class="cell">'+mark(r.ini)+
+          '<div><div class="ttl">'+esc(r.name)+(r.verified?' &#10003;':'')+'</div>'+
+          '<div class="sub">joined '+dshort(r.joined)+'</div></div></div>'},
+        {key:'ev',label:'Events',val:r=>EVENTS.filter(e=>e.host===r.id).length,cls:'num',align:'right',
+         cell:r=>EVENTS.filter(e=>e.host===r.id).length},
+        {key:'fol',label:'Followers',val:r=>r.followers,cls:'num',align:'right',
+         cell:r=>r.followers.toLocaleString('en-GB')},
+        {key:'lic',label:'Licence',val:r=>r.expires,
+         cell:r=>'<span class="meta">'+esc(r.expires)+(r.expires<TODAY?' \u00b7 lapsed':'')+'</span>'},
+        {key:'pay',label:'Payouts',val:r=>r.payoutOk?1:0,
+         cell:r=>r.payoutOk?'<span class="meta">connected</span>':'<span class="meta">not set up</span>'},
+        {key:'status',label:'Status',val:r=>r.status,cell:r=>pill(r.status)}
+      ], rows, {select:true, open:'host', emptyTitle:'No hosts match'}),
+      {flush:true});
+};
+
+/* ---- Attendees --------------------------------------------- */
+V.attendees=()=>{
+  const st=tstate('t-a');
+  let rows=ATTENDEES.filter(a=>!st.q || a.name.toLowerCase().includes(st.q.toLowerCase()));
+  return '<div class="mets">'+
+      metric(ATTENDEES.length,'Registered')+
+      metric(ATTENDEES.reduce((n,a)=>n+a.bookings,0),'Total bookings')+
+      metric(aed(ATTENDEES.reduce((n,a)=>n+a.spend,0)),'Lifetime spend')+
+      metric(aed(ATTENDEES.reduce((n,a)=>n+a.credits,0)),'Credits outstanding')+
+    '</div>'+
+    card(null,
+      '<div class="tb"><input type="search" data-tq="t-a" value="'+esc(st.q)+
+        '" placeholder="Search attendees">'+
+        '<div class="tb__r"><span class="meta">'+rows.length+' of '+ATTENDEES.length+'</span></div></div>'+
+      table('t-a',[
+        {key:'name',label:'Attendee',val:r=>r.name,cell:r=>'<div class="cell">'+mark(r.ini)+
+          '<div><div class="ttl">'+esc(r.name)+'</div>'+
+          '<div class="sub">'+esc(r.email)+'</div></div></div>'},
+        {key:'b',label:'Bookings',val:r=>r.bookings,cls:'num',align:'right',cell:r=>r.bookings},
+        {key:'s',label:'Spend',val:r=>r.spend,cls:'num',align:'right',cell:r=>aed(r.spend)},
+        {key:'c',label:'Credits',val:r=>r.credits,cls:'num',align:'right',
+         cell:r=>r.credits?aed(r.credits):'\u2014'},
+        {key:'j',label:'Joined',val:r=>r.joined,cell:r=>dshort(r.joined)}
+      ], rows, {emptyTitle:'No attendees match'}),
+      {flush:true,
+       foot:'<span class="meta">Email addresses are masked. Full contact details are never '+
+            'exposed to hosts, and are only revealed here on a logged support request.</span>'});
+};
+
+/* ---- Payouts ------------------------------------------------ */
+V.payouts=()=>{
+  const due=PAYOUTS.filter(p=>p.status!=='paid').reduce((n,p)=>n+p.net,0);
+  const paid=PAYOUTS.filter(p=>p.status==='paid').reduce((n,p)=>n+p.net,0);
+  const fees=PAYOUTS.reduce((n,p)=>n+p.fee,0);
+  return '<div class="mets">'+
+      metric(aed(paid),'Paid out')+
+      metric(aed(due),'Scheduled')+
+      metric(aed(fees),'Platform fees earned')+
+      metric(CMS.payoutDelayDays+'d','Payout delay','after each event','flat')+
+    '</div>'+
+    card('Payout runs',
+      table('t-p',[
+        {key:'h',label:'Host',val:r=>(host(r.host)||{}).name,
+         cell:r=>'<div class="cell">'+mark((host(r.host)||{}).ini||'')+
+           '<div class="ttl">'+esc((host(r.host)||{}).name||'')+'</div></div>'},
+        {key:'pe',label:'Period',val:r=>r.period,cell:r=>esc(r.period)},
+        {key:'g',label:'Gross',val:r=>r.gross,cls:'num',align:'right',cell:r=>aed(r.gross)},
+        {key:'f',label:'Fee',val:r=>r.fee,cls:'num',align:'right',cell:r=>'\u2212 '+aed(r.fee)},
+        {key:'s',label:'Processing',val:r=>r.stripe,cls:'num',align:'right',cell:r=>'\u2212 '+aed(r.stripe)},
+        {key:'n',label:'Net',val:r=>r.net,cls:'num',align:'right',
+         cell:r=>'<b>'+aed(r.net)+'</b>'},
+        {key:'d',label:'Due',val:r=>r.due,cell:r=>dshort(r.due)},
+        {key:'st',label:'Status',val:r=>r.status,cell:r=>pill(r.status)}
+      ], PAYOUTS, {emptyTitle:'No payout runs yet'}),
+      {flush:true,
+       foot:'<span class="meta">Gross minus the '+CMS.feePct+'% platform fee and Stripe '+
+            'processing. A host without a connected payout account stays pending.</span>'});
+};
+
+/* ---- Integrations ------------------------------------------- */
+V.integrations=()=>{
+  const st=tstate('t-ig');
+  const groups=[...new Set(INTEGRATIONS.map(i=>i.group))];
+  const f=st.filters.group||'';
+  const list=INTEGRATIONS.filter(i=>{
+    if(f && i.group!==f) return false;
+    if(st.q && !(i.name+' '+i.group+' '+i.what).toLowerCase().includes(st.q.toLowerCase()))
+      return false;
+    return true;
+  });
+  const on=INTEGRATIONS.filter(i=>i.state==='connected').length;
+  const missing=INTEGRATIONS.filter(i=>i.required && i.state!=='connected');
+
+  const cardFor=i=>
+    '<div class="ig__c" data-state="'+i.state+'" data-openint="'+i.id+'">'+
+      '<div class="ig__h">'+
+        '<span class="ig__m" style="background:'+i.tone+'">'+esc(i.mark)+'</span>'+
+        '<span class="ig__t"><b>'+esc(i.name)+'</b><span>'+esc(i.group)+'</span></span>'+
+        pill(i.state)+
+      '</div>'+
+      '<p class="ig__w">'+esc(i.what)+'</p>'+
+      '<div class="ig__f">'+
+        (i.required?'<span class="req">Required</span>':'')+
+        '<span class="meta">'+i.fields.filter(x=>x.secret).length+' server-side key'+
+          (i.fields.filter(x=>x.secret).length===1?'':'s')+'</span>'+
+      '</div>'+
+    '</div>';
+
+  return '<div class="mets">'+
+      metric(on+'/'+INTEGRATIONS.length,'Connected')+
+      metric(groups.length,'Categories')+
+      metric(missing.length,'Required, not connected',
+        missing.length?'blocks launch':'all set', missing.length?'down':'up')+
+      metric(INTEGRATIONS.reduce((n,i)=>n+i.fields.filter(f=>f.secret).length,0),
+        'Secrets in env vars')+
+    '</div>'+
+
+    (missing.length
+      ? card('Blocking launch',
+          missing.map(i=>'<div class="tl__r"><time>'+esc(i.group)+'</time>'+
+            '<span><b>'+esc(i.name)+'</b> \u2014 '+esc(i.breaks)+'</span>'+
+            '<button class="btn" data-v="primary" data-openint="'+i.id+'">Set up</button>'+
+            '</div>').join(''))
+      : '')+
+
+    card(null,
+      '<div class="tb">'+
+        '<input type="search" data-tq="t-ig" value="'+esc(st.q)+'" placeholder="Search integrations">'+
+        '<select data-tf="t-ig:group"><option value="">All categories</option>'+
+          groups.map(g=>'<option'+(f===g?' selected':'')+'>'+esc(g)+'</option>').join('')+
+        '</select>'+
+        '<div class="tb__r"><span class="meta">'+list.length+' of '+INTEGRATIONS.length+'</span>'+
+          (st.q||f?'<button class="btn" data-v="quiet" data-treset="t-ig">Clear</button>':'')+
+        '</div></div>'+
+      '<div style="padding:var(--s4)">'+
+        (list.length ? '<div class="ig">'+list.map(cardFor).join('')+'</div>'
+          : empty('No integrations match','Try a different category.'))+
+      '</div>',
+      {flush:true})+
+
+    card('Where credentials live',
+      '<div class="warn"><span>\u26A0</span><span><b>Secrets never belong in this panel.</b> '+
+        'Anything entered in a browser sits in the DOM and in local storage, readable by '+
+        'devtools or any injected script. Secret keys go in Vercel environment variables '+
+        'and are read server-side only \u2014 this page shows whether they are present, '+
+        'never their value.</span></div>'+
+      '<div style="margin-top:var(--s3)">'+
+        INTEGRATIONS.filter(i=>i.state==='connected')
+          .flatMap(i=>i.fields.filter(f=>f.secret).map(f=>({i,f})))
+          .map(({i,f})=>'<div class="keyrow"><div><b>'+esc(i.name)+'</b>'+
+            '<code>'+esc(f.v)+'</code></div><span class="lock">env var</span></div>').join('')+
+      '</div>',
+      {sub:'Security'});
+};
+
+/* ---- Content ------------------------------------------------ */
+V.content=()=>{
+  const c=CMS;
+  return card('Hero',
+      '<div class="field"><label class="label" for="cm-lead">Headline</label>'+
+        '<input class="input" id="cm-lead" data-cms="hero.lead" value="'+esc(c.hero.lead)+'">'+
+        '<span class="hint">Renders as \u201c'+esc(c.hero.lead)+' into [word].\u201d</span></div>'+
+      '<div class="field"><span class="label">Rotating words</span>'+
+        '<div class="chips2">'+c.hero.words.map((w,i)=>
+          '<span class="chip2">'+esc(w)+'<button data-delword="'+i+'" '+
+          'aria-label="Remove '+esc(w)+'">&times;</button></span>').join('')+'</div>'+
+        '<div style="display:flex;gap:var(--s2);margin-top:var(--s2)">'+
+          '<input class="input" id="cm-word" placeholder="Add a word" style="flex:1">'+
+          '<button class="btn" data-v="outline" id="addword">Add</button></div></div>'+
+      '<div class="field"><label class="label" for="cm-sub">Subline</label>'+
+        '<textarea class="input" id="cm-sub" data-cms="hero.sub" rows="2">'+esc(c.hero.sub)+'</textarea></div>'+
+      '<div class="two">'+
+        '<div class="field"><label class="label" for="cm-cta">Primary button</label>'+
+          '<input class="input" id="cm-cta" data-cms="hero.cta" value="'+esc(c.hero.cta)+'"></div>'+
+        '<div class="field"><label class="label" for="cm-alt">Secondary link</label>'+
+          '<input class="input" id="cm-alt" data-cms="hero.alt" value="'+esc(c.hero.alt)+'"></div>'+
+      '</div>',
+      {sub:'Landing page',
+       actions:'<a class="btn" data-v="outline" href="index.html" target="_blank" rel="noopener">Preview &#8599;</a>'})+
+    card('Closing section',
+      '<div class="field"><label class="label" for="cm-ct">Headline</label>'+
+        '<input class="input" id="cm-ct" data-cms="close.title" value="'+esc(c.close.title)+'"></div>'+
+      '<div class="field"><label class="label" for="cm-cs">Subline</label>'+
+        '<textarea class="input" id="cm-cs" data-cms="close.sub" rows="2">'+esc(c.close.sub)+'</textarea></div>'+
+      '<div class="two">'+
+        '<div class="field"><label class="label" for="cm-a1">Left button</label>'+
+          '<input class="input" id="cm-a1" data-cms="close.a1" value="'+esc(c.close.a1)+'"></div>'+
+        '<div class="field"><label class="label" for="cm-a2">Right button</label>'+
+          '<input class="input" id="cm-a2" data-cms="close.a2" value="'+esc(c.close.a2)+'"></div>'+
+      '</div>',
+      {foot:'<span class="meta">Saves on change. No publish step \u2014 the public site '+
+            'reads these values on next load.</span>'});
+};
+
+/* ---- Masters ------------------------------------------------ */
+V.masters=()=>{
+  const block=(key,m)=>{
+    const use=MASTER_USE[key];
+    return '<div class="ms__c">'+
+      '<div class="ms__h"><b>'+esc(m.label)+'</b>'+
+        (m.locked?'<span class="lock">system</span>':
+          '<span class="meta">'+m.items.length+'</span>')+'</div>'+
+      '<p class="ms__n">'+esc(m.note)+'</p>'+
+      '<div class="ms__l">'+m.items.map(it=>{
+        const n=use?use(it.id):null;
+        return '<div class="ms__i">'+
+          '<span style="color:var(--ink)">'+esc(it.name)+
+            (it.detail?'<br><span>'+esc(it.detail)+'</span>':'')+'</span>'+
+          '<span>'+(n===null?'':n+' in use')+'</span>'+
+          (m.locked
+            ? '<button disabled aria-label="System list">&times;</button>'
+            : '<button data-delmaster="'+key+':'+it.id+'"'+(n?' disabled':'')+
+              ' aria-label="Delete '+esc(it.name)+'"'+
+              (n?' title="In use by '+n+' records"':'')+'>&times;</button>')+
+        '</div>';
+      }).join('')+'</div>'+
+      (m.locked?'' :
+        '<div class="ms__add">'+
+          '<input placeholder="Add to '+esc(m.label.toLowerCase())+'" '+
+            'data-mkey="'+key+'" aria-label="New '+esc(m.label)+'">'+
+          '<button class="btn" data-v="outline" style="padding:6px 12px" '+
+            'data-addmaster="'+key+'">Add</button></div>')+
+    '</div>';
+  };
+  const editable=Object.entries(MASTERS).filter(([,m])=>!m.locked);
+  const system=Object.entries(MASTERS).filter(([,m])=>m.locked);
+  return card('Editable lists',
+      '<div class="ms">'+editable.map(([k,m])=>block(k,m)).join('')+'</div>',
+      {flush:false, sub:editable.length+' lists',
+       foot:'<span class="meta">Deletion is blocked while records still reference an '+
+            'entry \u2014 the count next to it is why. Rename with care: it re-labels '+
+            'every event that uses it.</span>'})+
+    card('System lists',
+      '<div class="ms">'+system.map(([k,m])=>block(k,m)).join('')+'</div>',
+      {sub:system.length+' lists',
+       foot:'<span class="meta">Platform logic branches on these values. Changing one '+
+            'is a database migration, not a settings edit, so they are read-only here.</span>'});
+};
+
+/* ---- Roles & access ----------------------------------------- */
+V.roles=()=>{
+  const noMfa=ADMINS.filter(a=>!a.mfa).length;
+  const owners=ADMINS.filter(a=>a.role==='owner').length;
+
+  return '<div class="mets">'+
+      metric(ADMINS.length,'Admin users')+
+      metric(Object.keys(ROLES).length,'Roles')+
+      metric(owners,'Owners', owners>2?'too many':'healthy', owners>2?'down':'up')+
+      metric(noMfa,'Without MFA', noMfa?'enforce it':'all covered', noMfa?'down':'up')+
+    '</div>'+
+
+    (noMfa ? card('Attention',
+      ADMINS.filter(a=>!a.mfa).map(a=>
+        '<div class="tl__r"><time>'+esc(ROLES[a.role].label)+'</time>'+
+        '<span><b>'+esc(a.name)+'</b> has no second factor</span>'+
+        '<button class="btn" data-v="outline" data-mfa="'+a.id+'">Require MFA</button></div>').join('')
+      ) : '')+
+
+    card('People',
+      table('t-adm',[
+        {key:'n',label:'Name',val:r=>r.name,cell:r=>'<div class="cell">'+
+          mark(r.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())+
+          '<div><div class="ttl">'+esc(r.name)+'</div>'+
+          '<div class="sub">'+esc(r.email)+'</div></div></div>'},
+        {key:'r',label:'Role',val:r=>r.role,cell:r=>
+          '<select class="input" style="padding:5px 8px;font-size:var(--t-xs)" '+
+          'data-setrole="'+r.id+'">'+
+          Object.entries(ROLES).map(([k,v])=>'<option value="'+k+'"'+
+            (r.role===k?' selected':'')+'>'+esc(v.label)+'</option>').join('')+'</select>'},
+        {key:'s',label:'Scopes',val:r=>ROLES[r.role].scopes.length,cls:'num',align:'right',
+         cell:r=>ROLES[r.role].scopes.length+' of '+SCOPES.length},
+        {key:'m',label:'MFA',val:r=>r.mfa?1:0,
+         cell:r=>r.mfa?pill('active'):pill('pending')},
+        {key:'l',label:'Last seen',val:r=>r.last,cell:r=>tstamp(r.last)},
+        {key:'a',label:'',cls:'act',cell:r=>r.role==='owner'
+          ? '<span class="meta">protected</span>'
+          : '<button class="btn" data-v="quiet" data-revoke="'+r.id+'">Revoke</button>'}
+      ], ADMINS, {emptyTitle:'No admin users'}),
+      {flush:true,
+       actions:'<button class="btn" data-v="primary" data-invite>Invite</button>'})+
+
+    card('What each role can do',
+      '<div class="matrix"><table><thead><tr><th>Permission</th>'+
+        Object.values(ROLES).map(r=>'<th>'+esc(r.label)+'</th>').join('')+
+      '</tr></thead><tbody>'+
+        SCOPES.map(sc=>'<tr><td>'+esc(sc[1])+
+          '<span class="scope">'+esc(sc[0])+'</span></td>'+
+          Object.values(ROLES).map(r=>
+            '<td class="'+(r.scopes.includes(sc[0])?'yes':'no')+'">'+
+            (r.scopes.includes(sc[0])?'\u2713':'\u00b7')+'</td>').join('')+
+        '</tr>').join('')+
+      '</tbody></table></div>',
+      {flush:false,
+       foot:'<span class="meta">Roles are scope sets, not job titles \u2014 "who can '+
+            'issue a refund" has one answer you can point at. Enforced server-side in '+
+            'production; this panel only reflects it.</span>'})+
+
+    card('Role definitions',
+      Object.entries(ROLES).map(([k,r])=>
+        '<div class="tl__r"><time>'+esc(r.label)+'</time>'+
+        '<span>'+esc(r.note)+'</span>'+
+        '<span class="meta">'+r.scopes.length+' scopes</span></div>').join(''));
+};
+
+/* ---- Appearance ---/* ---- Appearance --------------------------------------------- */
+V.appearance=()=>{
+  const sw=['#C7F464','#A8E063','#7ED957','#FFD166','#FF8A5B','#6D28D9','#0EA5E9'];
+  const cur=CMS.fonts||'brand';
+  const fontCard = card('Typeface',
+    '<div style="display:grid;gap:var(--s2)">'+
+      Object.entries(FONTSETS).map(([k,f])=>
+        '<button class="fs" data-font="'+k+'" aria-pressed="'+(k===cur)+'">'+
+          '<span class="fs__p" style="font-family:'+f.display.replace(/"/g,'&quot;')+'">Aa</span>'+
+          '<span class="fs__t"><b>'+esc(f.label)+'</b>'+
+            '<span class="meta">'+esc(f.note)+'</span></span>'+
+          '<span class="fs__r"></span></button>').join('')+
+    '</div>'+
+    '<div class="fs__demo">'+
+      '<p class="fs__big">Turn your curiosity into creativity.</p>'+
+      '<p class="fs__sub">Subtitles of the cards read at this weight.</p>'+
+      '<span class="btn" data-v="primary" style="pointer-events:none">Discover More</span>'+
+    '</div>',
+    {sub:'Live preview',
+     foot:'<span class="meta">Heading Now and TT Norms Pro are commercial faces. '+
+          'They are first in the stack, so once you buy a web licence and drop the '+
+          '.woff2 files into /fonts they replace the stand-ins with no code change.</span>'});
+  return fontCard + card('Brand colour',
+      '<div class="swatch">'+
+        '<input type="color" id="cm-color" value="'+CMS.brandColor+'">'+
+        '<code id="hexout">'+esc(CMS.brandColor)+'</code>'+
+        sw.map(h=>'<button class="sw" data-swatch="'+h+'" style="background:'+h+'" '+
+          'aria-label="'+h+'"></button>').join('')+
+        '<button class="btn" data-v="quiet" id="resetcolor">Reset</button></div>'+
+      '<p class="hint" style="margin-top:var(--s3)">Applies live here and on the public site. '+
+        'Labels on the brand colour are always dark ink, so a light hue is safe and a very '+
+        'dark one will not be \u2014 check a button before you keep it.</p>'+
+      '<div class="btn-row" style="margin-top:var(--s4)">'+
+        '<button class="btn" data-v="primary">Primary</button>'+
+        '<button class="btn" data-v="outline">Outline</button>'+
+        '<span class="pill" data-s="live">live</span>'+
+        '<span class="chip2">chip</span></div>',
+      {sub:'Live preview'});
+};
+
+/* ---- Settings ----------------------------------------------- */
+V.settings=()=>{
+  const c=CMS;
+  const num=(id,label,key,hint)=>
+    '<div class="field"><label class="label" for="'+id+'">'+esc(label)+'</label>'+
+    '<input class="input" id="'+id+'" type="number" min="0" data-cms="'+key+'" value="'+c[key]+'">'+
+    (hint?'<span class="hint">'+esc(hint)+'</span>':'')+'</div>';
+  return card('Commercial',
+      '<div class="two">'+
+        num('s-fee','Platform fee %','feePct','Charged to the host, never shown to attendees.')+
+        num('s-plus','KREO Plus, AED / month','plusPrice','Plus removes the platform fee.')+
+      '</div><div class="two">'+
+        num('s-ref','Referral credit, AED','referralAed','Paid to both sides on first booking.')+
+        num('s-pay','Payout delay, days','payoutDelayDays','After the event ends.')+
+      '</div>',
+      {foot:'<span class="meta">The fee appears on the pricing page, the FAQ and the host '+
+            'payout ledger. Changing it does not alter payouts already scheduled.</span>'})+
+    card('Policy',
+      '<div class="two">'+
+        num('s-mod','Moderation SLA, hours','moderationHours','Shown to hosts on sign-up.')+
+        num('s-can','Free cancellation window, hours','cancelWindowHrs','Platform minimum.')+
+      '</div><div class="two">'+
+        num('s-grp','Max seats per booking','groupMax','')+
+        '<div class="field"><span class="label">City</span>'+
+          '<input class="input" value="Dubai" disabled>'+
+          '<span class="hint">V1 is single-city. Adding one needs new supply, not a setting.</span></div>'+
+      '</div>')+
+    card('Data',
+      '<div class="btn-row">'+
+        '<button class="btn" data-v="outline" id="exportcms">Copy settings JSON</button>'+
+        '<button class="btn" data-v="quiet" id="resetcms">Reset to defaults</button></div>');
+};
+
+/* ---- Audit -------------------------------------------------- */
+V.audit=()=>card('Activity',
+  '<div class="tl">'+AUDIT.map(a=>
+    '<div class="tl__r"><time>'+tstamp(a.at)+'</time>'+
+    '<span>'+esc(a.what)+' \u2014 <b>'+esc(a.target)+'</b></span>'+
+    '<span class="meta">'+esc(a.who)+'</span></div>').join('')+'</div>',
+  {sub:AUDIT.length+' entries',
+   foot:'<span class="meta">Every state change is written here with actor and time. In '+
+        'production this is an append-only server-side table, not a client list.</span>'});
+
+/* ============================================================
+   DETAIL DRAWER
+   Row click opens the record. Reading a row should never require
+   leaving the list you were scanning.
+   ============================================================ */
+let DRAWER=null;
+
+function drawer(){
+  if(!DRAWER) return '<div class="dw" id="dw"><div class="dw__s" data-dwclose></div></div>';
+  const [kind,id]=DRAWER;
+  let title='', sub='', body='', foot='';
+
+  if(kind==='event'){
+    const e=ev(id); if(!e) return '';
+    const h=host(e.host)||{};
+    const rev=e.booked*e.price;
+    title=e.title; sub=h.name+' \u00b7 '+hubName(e.hub);
+    body=(e.status==='review'
+      ? '<div class="warn" style="background:var(--brand-soft);color:var(--brand-ink)">'+
+        '<span>\u25CF</span><span><b>Awaiting review.</b> Publishing makes this bookable '+
+        'immediately and emails the host\u2019s followers.</span></div>'
+      : '')+
+      '<img src="'+IMG+e.cover+'?w=800&q=70" alt="" '+
+        'style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r2)">'+
+      '<dl class="kv2">'+
+        '<dt>Status</dt><dd>'+pill(e.status)+'</dd>'+
+        '<dt>Date</dt><dd>'+dshort(e.date)+'</dd>'+
+        '<dt>Category</dt><dd>'+esc(e.cat)+'</dd>'+
+        '<dt>Area</dt><dd>'+esc(hubName(e.hub))+'</dd>'+
+        '<dt>Capacity</dt><dd>'+e.booked+' of '+e.cap+' \u00b7 '+
+          Math.round(e.booked/e.cap*100)+'% full</dd>'+
+        '<dt>Price</dt><dd>'+(e.price?aed(e.price):'Free')+'</dd>'+
+        '<dt>Gross</dt><dd>'+aed(rev)+'</dd>'+
+        '<dt>Platform fee</dt><dd>'+aed(rev*CMS.feePct/100)+' ('+CMS.feePct+'%)</dd>'+
+        '<dt>Views</dt><dd>'+e.views.toLocaleString('en-GB')+'</dd>'+
+      '</dl>'+
+      (BOOKINGS.filter(b=>b.ev===e.id).length
+        ? '<div><p class="label" style="margin-bottom:6px">Recent bookings</p>'+
+          BOOKINGS.filter(b=>b.ev===e.id).map(b=>
+            '<div class="tl__r"><time>'+esc(b.id)+'</time>'+
+            '<span>'+esc(b.who)+' \u00b7 '+b.q+' seat'+(b.q>1?'s':'')+'</span>'+
+            pill(b.status)+'</div>').join('')+'</div>'
+        : '');
+    foot = e.status==='review'
+      ? '<button class="btn" data-v="primary" data-pubev="'+e.id+'">Publish</button>'+
+        '<button class="btn" data-v="quiet" data-rejev="'+e.id+'">Reject</button>'
+      : '<button class="btn" data-v="outline" data-toast="Opens the host edit flow">Edit</button>'+
+        '<button class="btn" data-v="quiet" data-unpub="'+e.id+'">'+
+        (e.status==='live'?'Unpublish':'Publish')+'</button>';
+  }
+
+  if(kind==='integration'){
+    const i=integ(id); if(!i) return '';
+    const on=i.state==='connected';
+    title=i.name; sub=i.group+(i.required?' \u00b7 required':'');
+    body='<div style="display:flex;align-items:center;gap:var(--s3)">'+
+        '<span class="ig__m" style="background:'+i.tone+';width:44px;height:44px">'+
+          esc(i.mark)+'</span>'+pill(i.state)+
+        (i.required?'<span class="req">Required</span>':'')+'</div>'+
+      '<dl class="kv2">'+
+        '<dt>What it does</dt><dd>'+esc(i.what)+'</dd>'+
+        '<dt>If disconnected</dt><dd>'+esc(i.breaks)+'</dd>'+
+      '</dl>'+
+      '<div><p class="label" style="margin-bottom:6px">Configuration</p>'+
+        i.fields.map(f=>'<div class="keyrow"><div><b>'+esc(f.k)+'</b>'+
+          '<code>'+esc(f.v || 'not set')+'</code></div>'+
+          (f.secret?'<span class="lock">env var</span>':'')+'</div>').join('')+
+      '</div>'+
+      (i.fields.some(f=>f.secret)
+        ? '<div class="warn"><span>\u26A0</span><span>Secret values are read from '+
+          'server-side environment variables. They are never entered or stored here.</span></div>'
+        : '')+
+      '<p class="hint">'+esc(i.docs)+'</p>';
+    foot = on
+      ? '<button class="btn" data-v="quiet" data-integoff="'+i.id+'">Disconnect</button>'+
+        '<button class="btn" data-v="outline" data-toast="Test event sent">Send test</button>'
+      : '<button class="btn" data-v="primary" data-integon="'+i.id+'">Connect</button>';
+  }
+
+  if(kind==='booking'){
+    const b=BOOKINGS.find(x=>x.id===id); if(!b) return '';
+    const e=ev(b.ev)||{};
+    title=b.who; sub='Booking '+b.id;
+    body='<dl class="kv2">'+
+      '<dt>Status</dt><dd>'+pill(b.status)+'</dd>'+
+      '<dt>Event</dt><dd>'+esc(e.title||'')+'</dd>'+
+      '<dt>Date</dt><dd>'+dshort(e.date||b.when)+'</dd>'+
+      '<dt>Seats</dt><dd>'+b.q+'</dd>'+
+      '<dt>Total</dt><dd>'+(b.total?aed(b.total):'Free')+'</dd>'+
+      '<dt>Method</dt><dd>'+esc(b.method)+'</dd>'+
+      '<dt>Booked</dt><dd>'+dshort(b.when)+'</dd>'+
+      '</dl>'+
+      '<p class="hint">Attendee contact details are held by KREO and never shared with the '+
+      'host. Support access is logged.</p>';
+    foot = b.status==='confirmed'
+      ? '<button class="btn" data-v="outline" data-refund="'+b.id+'">Issue refund</button>'+
+        '<button class="btn" data-v="quiet" data-toast="Ticket resent">Resend ticket</button>'
+      : '<button class="btn" data-v="quiet" data-toast="Nothing to do on a closed booking">No actions</button>';
+  }
+
+  if(kind==='host'){
+    const h=host(id); if(!h) return '';
+    const evs=EVENTS.filter(e=>e.host===h.id);
+    const gross=evs.reduce((n,e)=>n+e.booked*e.price,0);
+    title=h.name; sub='Host since '+dshort(h.joined);
+    const lapsed=h.expires<TODAY;
+    body=(h.status==='pending'
+      ? '<div class="warn" style="background:var(--brand-soft);color:var(--brand-ink)">'+
+        '<span>\u25CF</span><span><b>Awaiting your decision.</b> Check the licence is '+
+        'current and the description matches a real business before approving \u2014 '+
+        'approval publishes them and their listings at once.</span></div>'+
+        (h.bio?'<p class="hint" style="font-size:var(--t-sm);color:var(--ink)">'+
+          esc(h.bio)+'</p>':'')+
+        '<div><p class="label" style="margin-bottom:6px">Checks</p>'+
+          [['Trade licence supplied', !!h.licence],
+           ['Licence in date', !lapsed],
+           ['Description present', !!h.bio],
+           ['Payout account connected', !!h.payoutOk]]
+          .map(c=>'<div class="keyrow"><div><b>'+c[0]+'</b></div>'+
+            '<span class="'+(c[1]?'matrix':'')+'" style="font-family:var(--m);font-size:11px;'+
+            'color:var(--'+(c[1]?'good':'live')+')">'+(c[1]?'\u2713 ok':'\u2717 missing')+
+            '</span></div>').join('')+
+        '</div>'
+      : '')+
+      '<dl class="kv2">'+
+      '<dt>Status</dt><dd>'+pill(h.status)+'</dd>'+
+      '<dt>Verified</dt><dd>'+(h.verified?'Yes':'No')+'</dd>'+
+      '<dt>Licence</dt><dd>'+esc(h.licence)+'</dd>'+
+      '<dt>Expires</dt><dd>'+esc(h.expires)+(h.expires<TODAY?' \u00b7 lapsed':'')+'</dd>'+
+      '<dt>Events</dt><dd>'+evs.length+'</dd>'+
+      '<dt>Followers</dt><dd>'+h.followers.toLocaleString('en-GB')+'</dd>'+
+      '<dt>Gross</dt><dd>'+aed(gross)+'</dd>'+
+      '<dt>Payouts</dt><dd>'+(h.payoutOk?'Connected':'Not set up')+'</dd>'+
+      '</dl>'+
+      (evs.length ? '<div><p class="label" style="margin-bottom:6px">Their events</p>'+
+        evs.map(e=>'<div class="tl__r"><time>'+dshort(e.date)+'</time>'+
+          '<span>'+esc(e.title)+'</span>'+pill(e.status)+'</div>').join('')+'</div>' : '');
+    foot = h.status==='pending'
+      ? '<button class="btn" data-v="primary" data-approve="'+h.id+'">Approve</button>'+
+        '<button class="btn" data-v="quiet" data-reject="'+h.id+'">Reject</button>'
+      : '<button class="btn" data-v="quiet" data-suspend="'+h.id+'">'+
+        (h.status==='suspended'?'Reinstate':'Suspend')+'</button>';
+  }
+
+  return '<div class="dw" id="dw" data-open="true" role="dialog" aria-modal="true">'+
+    '<div class="dw__s" data-dwclose></div>'+
+    '<div class="dw__p">'+
+      '<div class="dw__h"><div><h3>'+esc(title)+'</h3>'+
+        '<p class="meta">'+esc(sub)+'</p></div>'+
+        '<button class="dw__x" data-dwclose aria-label="Close">&times;</button></div>'+
+      '<div class="dw__b">'+body+'</div>'+
+      (foot?'<div class="dw__f">'+foot+'</div>':'')+
+    '</div></div>';
+}
+
+/* ============================================================
+   COMMAND PALETTE
+   One index over sections, events, hosts and bookings. Ranked so an
+   exact prefix beats a mid-string hit — typing "sun" should surface
+   Sunrise 5K before Barsha Sunset Run.
+   ============================================================ */
+let CMDK={open:false, q:'', hi:0};
+
+function cmdkIndex(){
+  const out=[];
+  NAV.forEach(g=>g[1].forEach(t=>
+    out.push({label:t[1], kind:'Go to', hash:'#/'+t[0], key:t[1]})));
+  EVENTS.forEach(e=>out.push({label:e.title, kind:'Event',
+    sub:(host(e.host)||{}).name, hash:'#/events', open:['event',e.id], key:e.title}));
+  HOSTS.forEach(h=>out.push({label:h.name, kind:'Host',
+    sub:h.status, hash:'#/hosts', open:['host',h.id], key:h.name}));
+  INTEGRATIONS.forEach(i=>out.push({label:i.name, kind:'Integration',
+    sub:i.state, hash:'#/integrations', open:['integration',i.id], key:i.name+' '+i.group}));
+  BOOKINGS.forEach(b=>out.push({label:b.who, kind:'Booking',
+    sub:b.id, hash:'#/bookings', open:['booking',b.id], key:b.who+' '+b.id}));
+  return out;
+}
+
+function cmdkHits(){
+  const q=CMDK.q.trim().toLowerCase();
+  const all=cmdkIndex();
+  if(!q) return all.filter(x=>x.kind==='Go to');
+  return all
+    .map(x=>{
+      const k=x.key.toLowerCase();
+      const i=k.indexOf(q);
+      if(i<0) return null;
+      /* prefix beats word-start beats anywhere */
+      const rank = i===0 ? 0 : (k[i-1]===' ' ? 1 : 2);
+      return {...x, rank, i};
+    })
+    .filter(Boolean)
+    .sort((a,b)=>a.rank-b.rank || a.i-b.i || a.label.localeCompare(b.label))
+    .slice(0,12);
+}
+
+function cmdk(){
+  if(!CMDK.open) return '<div class="cmdk" id="cmdk"></div>';
+  const hits=cmdkHits();
+  if(CMDK.hi>=hits.length) CMDK.hi=Math.max(0,hits.length-1);
+  return '<div class="cmdk" id="cmdk" data-open="true" role="dialog" aria-modal="true">'+
+    '<div class="cmdk__s" data-cmdkclose></div>'+
+    '<div class="cmdk__p">'+
+      '<input class="cmdk__i" id="cmdki" placeholder="Search events, hosts, bookings\u2026" '+
+        'value="'+esc(CMDK.q)+'" autocomplete="off" aria-label="Command palette">'+
+      '<div class="cmdk__l">'+
+        (hits.length ? hits.map((x,i)=>
+          '<a href="#" data-cmdk="'+i+'" data-hi="'+(i===CMDK.hi)+'">'+
+            '<span>'+esc(x.label)+(x.sub?' <span class="meta">'+esc(x.sub)+'</span>':'')+'</span>'+
+            '<small>'+esc(x.kind)+'</small></a>').join('')
+          : '<a data-hi="false"><span class="meta">No matches</span></a>')+
+      '</div>'+
+      '<div style="padding:8px var(--s4);border-top:1px solid var(--line)">'+
+        '<span class="meta">\u2191\u2193 move \u00b7 \u21B5 open \u00b7 esc close</span></div>'+
+    '</div></div>';
+}
+
+function cmdkGo(i){
+  const hits=cmdkHits();
+  const x=hits[i];
+  if(!x) return;
+  CMDK.open=false; CMDK.q=''; CMDK.hi=0;
+  if(x.open){ DRAWER=x.open; }
+  if(location.hash!==x.hash){ location.hash=x.hash; }
+  render();
+}
+
+/* ============================================================
+   ROUTER + EVENT WIRING
+   ============================================================ */
+function gate(){
+  return '<div class="gate2"><div class="gate2__c">'+
+    '<div class="side__b" style="padding:0 0 var(--s5)"><b>KREO</b><em>admin</em></div>'+
+    '<section class="cd"><div class="cd__b">'+
+      '<h2 style="margin:0 0 6px;font-size:var(--t-lg);font-weight:700;letter-spacing:-.02em">Sign in</h2>'+
+      '<p class="meta" style="margin:0 0 var(--s4)">Operations console. Not linked from the public site.</p>'+
+      '<div class="field"><label class="label" for="ae">Email</label>'+
+        '<input class="input" id="ae" type="email" value="admin@kreo.ae" autocomplete="username"></div>'+
+      '<div class="field"><label class="label" for="ap">Password</label>'+
+        '<input class="input" id="ap" type="password" value="demo1234" autocomplete="current-password"></div>'+
+      '<button class="btn" data-v="primary" data-size="lg" id="dologin">Sign in</button>'+
+      '<p class="hint" style="margin-top:var(--s4)">Demo build \u2014 credentials are not checked. '+
+        'In production this is server-enforced with row-level security, not a client guard.</p>'+
+    '</div></section>'+
+    '<p class="meta" style="text-align:center;margin-top:var(--s4)">'+
+      '<a href="index.html" style="text-decoration:underline">Back to the public site</a></p>'+
+  '</div></div>';
+}
+
+function render(){
+  TAB=(location.hash||'#/overview').slice(2)||'overview';
+  if(!V[TAB]) TAB='overview';
+  const subs={
+    overview:'Dubai \u00b7 live platform state',
+    events:EVENTS.length+' total',
+    bookings:BOOKINGS.length+' total',
+    moderation:queueCount()+' awaiting review',
+    hosts:HOSTS.length+' registered',
+    attendees:ATTENDEES.length+' registered',
+    payouts:'Stripe Connect \u00b7 '+CMS.payoutDelayDays+'-day delay',
+    content:'Copy on the public landing page',
+    taxonomy:'Categories and areas',
+    appearance:'Brand',
+    settings:'Commercial and policy',
+    audit:AUDIT.length+' entries'
+  };
+  $('app').innerHTML = SESSION.authed ? shell(V[TAB](), subs[TAB]) : gate();
+  window.scrollTo(0,0);
+  if(SESSION.authed) wire();
+}
+
+/* Inputs carrying data-cms write into the store on change, so
+   there is no save button to forget. */
+function wire(){
+  document.querySelectorAll('[data-cms]').forEach(el=>{
+    if(el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('change',()=>{
+      const path=el.dataset.cms.split('.');
+      let n=CMS; while(path.length>1) n=n[path.shift()];
+      n[path[0]] = el.type==='number' ? (+el.value||0) : el.value;
+      saveCms(); logIt('Edited '+el.dataset.cms, String(el.value).slice(0,40));
+    });
+  });
+  const col=$('cm-color');
+  if(col && !col.dataset.bound){
+    col.dataset.bound='1';
+    col.addEventListener('input',()=>{
+      setBrand(col.value);
+      const o=$('hexout'); if(o) o.textContent=col.value.toUpperCase();
+    });
+    col.addEventListener('change',()=>{ saveCms(); logIt('Changed brand colour',col.value); });
+  }
+  /* table search is debounced through the same state object the
+     view reads, so a re-render never loses what was typed */
+  document.querySelectorAll('[data-tq]').forEach(el=>{
+    if(el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('input',()=>{
+      tstate(el.dataset.tq).q=el.value;
+      clearTimeout(el._t);
+      el._t=setTimeout(()=>{ render();
+        const again=document.querySelector('[data-tq="'+el.dataset.tq+'"]');
+        if(again){ again.focus(); again.setSelectionRange(again.value.length,again.value.length); }
+      },180);
+    });
+  });
+  document.querySelectorAll('[data-setrole]').forEach(el=>{
+    if(el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('change',()=>{
+      const a=ADMINS.find(x=>x.id===el.dataset.setrole);
+      if(!a) return;
+      a.role=el.value;
+      logIt('Changed role', a.name+' \u2192 '+ROLES[a.role].label);
+      toast(a.name+' is now '+ROLES[a.role].label);
+      render();
+    });
+  });
+  document.querySelectorAll('[data-tf]').forEach(el=>{
+    if(el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('change',()=>{
+      const [id,key]=el.dataset.tf.split(':');
+      tstate(id).filters[key]=el.value;
+      render();
+    });
+  });
+  const gq=$('gq');
+  if(gq && !gq.dataset.bound){
+    gq.dataset.bound='1';
+    /* the top-bar field is an entry point to the palette, not a
+       second search with different rules */
+    gq.addEventListener('focus',()=>{ CMDK.open=true; CMDK.q=gq.value; render(); });
+  }
+  const ci=$('cmdki');
+  if(ci && !ci.dataset.bound){
+    ci.dataset.bound='1';
+    ci.focus();
+    ci.setSelectionRange(ci.value.length, ci.value.length);
+    ci.addEventListener('input',()=>{
+      CMDK.q=ci.value; CMDK.hi=0; render();
+    });
+  }
+}
+
+document.addEventListener('click', e=>{
+  const t=e.target;
+
+  if(t.closest('#dologin')){
+    SESSION={authed:true,who:'admin@kreo.ae'}; Store.write(LS.session,SESSION);
+    location.hash='#/overview'; render(); toast('Signed in'); return;
+  }
+  if(t.closest('#logout')){
+    e.preventDefault();
+    SESSION={authed:false}; Store.clear(LS.session); render(); toast('Signed out'); return;
+  }
+
+  /* sorting */
+  const th=t.closest('th[data-sort]');
+  if(th){
+    const st=tstate(th.dataset.table);
+    if(st.sort===th.dataset.sort) st.dir = st.dir==='asc' ? 'desc' : 'asc';
+    else { st.sort=th.dataset.sort; st.dir='asc'; }
+    render(); return;
+  }
+
+  /* selection */
+  const cb=t.closest('input[data-row]');
+  if(cb){
+    e.stopPropagation();
+    const st=tstate(cb.dataset.row);
+    cb.checked ? st.sel.add(cb.value) : st.sel.delete(cb.value);
+    render(); return;
+  }
+  const all=t.closest('input[data-all]');
+  if(all){
+    e.stopPropagation();
+    const id=all.dataset.all, st=tstate(id);
+    const ids=[...document.querySelectorAll('input[data-row="'+id+'"]')].map(x=>x.value);
+    all.checked ? ids.forEach(i=>st.sel.add(i)) : ids.forEach(i=>st.sel.delete(i));
+    render(); return;
+  }
+  const cs=t.closest('[data-clearsel]');
+  if(cs){ tstate(cs.dataset.clearsel).sel.clear(); render(); return; }
+
+  const bulk=t.closest('[data-bulk]');
+  if(bulk){
+    const [id,action]=bulk.dataset.bulk.split(':');
+    const st=tstate(id);
+    const ids=[...st.sel];
+    const n=ids.length;
+    if(!n){ toast('Nothing selected'); return; }
+    let verb='';
+
+    if(action==='unpublish'){
+      ids.forEach(i=>{ const x=ev(i); if(x) x.status='draft'; });
+      verb='Unpublished events';
+    }
+    if(action==='publish'){
+      ids.forEach(i=>{ const x=ev(i); if(x) x.status='live'; });
+      verb='Published events';
+    }
+    if(action==='feature'){
+      /* toggle: selecting an already-featured set should clear it,
+         otherwise there is no way to un-feature in bulk */
+      const allOn=ids.every(i=>OPS.featured.includes(i));
+      OPS.featured = allOn
+        ? OPS.featured.filter(i=>!ids.includes(i))
+        : [...new Set([...OPS.featured, ...ids])];
+      verb = allOn ? 'Un-featured events' : 'Featured events';
+    }
+    if(action==='suspend'){
+      ids.forEach(i=>{ const h=host(i); if(h && h.status!=='pending') h.status='suspended'; });
+      verb='Suspended hosts';
+    }
+    if(action==='approve'){
+      ids.forEach(i=>{ const h=host(i); if(h){ h.status='active'; h.verified=true; } });
+      verb='Approved hosts';
+    }
+
+    pushOps();
+    logIt(verb, n+' selected');
+    st.sel.clear();
+    toast(n+' updated');
+    render(); return;
+  }
+
+  const mf=t.closest('[data-mfa]');
+  if(mf){ const a=ADMINS.find(x=>x.id===mf.dataset.mfa);
+    if(a){ a.mfa=true; logIt('Required MFA', a.name); toast('MFA required for '+a.name);
+      render(); } return; }
+  const rv=t.closest('[data-revoke]');
+  if(rv){ const i=ADMINS.findIndex(x=>x.id===rv.dataset.revoke);
+    if(i>-1){ const a=ADMINS[i];
+      if(a.role==='owner'){ toast('Owners cannot be revoked here'); return; }
+      ADMINS.splice(i,1); logIt('Revoked admin access', a.name);
+      toast(a.name+' removed'); render(); } return; }
+  if(t.closest('[data-invite]')){
+    const em=prompt('Email address to invite');
+    if(em && em.includes('@')){
+      ADMINS.push({id:'a'+Date.now(), name:em.split('@')[0], email:em,
+        role:'viewer', last:new Date().toISOString(), mfa:false});
+      logIt('Invited admin', em); toast('Invite sent as Read only'); render();
+    }
+    return;
+  }
+
+  /* masters */
+  const dm2=t.closest('[data-delmaster]');
+  if(dm2){
+    const [k,id]=dm2.dataset.delmaster.split(':');
+    const m=MASTERS[k]; if(!m) return;
+    const i=m.items.findIndex(x=>x.id===id);
+    if(i>-1){ const nm=m.items[i].name; m.items.splice(i,1);
+      logIt('Removed master', m.label+' \u00b7 '+nm); toast(nm+' removed'); render(); }
+    return;
+  }
+  const am=t.closest('[data-addmaster]');
+  if(am){
+    const k=am.dataset.addmaster;
+    const el=document.querySelector('[data-mkey="'+k+'"]');
+    const v=(el && el.value || '').trim();
+    if(!v){ toast('Type a name first'); return; }
+    const m=MASTERS[k];
+    const id=v.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+    if(m.items.some(x=>x.id===id)){ toast('That already exists'); return; }
+    m.items.push({id,name:v});
+    logIt('Added master', m.label+' \u00b7 '+v); toast(v+' added'); render();
+    return;
+  }
+
+  const sv=t.closest('[data-saveview]');
+  if(sv){
+    const id=sv.dataset.saveview;
+    const n=prompt('Name this view', 'Untitled view');
+    if(n && n.trim()){ saveView(id, n.trim());
+      logIt('Saved view', n.trim()); toast('View saved'); render(); }
+    return;
+  }
+  const uv=t.closest('[data-useview]');
+  if(uv){ const [id,i]=uv.dataset.useview.split(':'); applyView(id,+i); render(); return; }
+  const dv=t.closest('[data-dropview]');
+  if(dv){ const [id,i]=dv.dataset.dropview.split(':'); dropView(id,+i); render(); return; }
+
+  const tr=t.closest('[data-treset]');
+  if(tr){ const st=tstate(tr.dataset.treset); st.q=''; st.filters={}; render(); return; }
+
+  /* drawer */
+  const row=t.closest('[data-open]');
+  if(row && !t.closest('input') && !t.closest('button') && !t.closest('a')){
+    DRAWER=row.dataset.open.split(':').slice(-2);
+    const parts=row.dataset.open.split(':');
+    DRAWER=[parts[0].startsWith('t-')?'event':parts[0], parts[1]];
+    if(parts[0]==='t-bk') DRAWER=['booking',parts[1]];
+    if(parts[0]==='t-h')  DRAWER=['host',parts[1]];
+    if(parts[0]==='t-ev'||parts[0]==='t-soon') DRAWER=['event',parts[1]];
+    render(); return;
+  }
+  if(t.closest('[data-dwclose]')){ DRAWER=null; render(); return; }
+
+  const oh=t.closest('[data-openhost]');
+  if(oh){ DRAWER=['host', oh.dataset.openhost]; render(); return; }
+  const oe=t.closest('[data-openev]');
+  if(oe){ DRAWER=['event', oe.dataset.openev]; render(); return; }
+
+  const oi=t.closest('[data-openint]');
+  if(oi){ DRAWER=['integration', oi.dataset.openint]; render(); return; }
+  const ion=t.closest('[data-integon]');
+  if(ion){
+    const i=integ(ion.dataset.integon);
+    if(i){
+      /* A required integration cannot be "connected" from a browser —
+         it needs its env vars set and a deploy. Say so plainly. */
+      i.state='connected'; saveIntegrations();
+      logIt('Connected integration', i.name);
+      toast(i.fields.some(f=>f.secret)
+        ? i.name+' marked connected \u2014 set its env vars and redeploy'
+        : i.name+' connected');
+      DRAWER=null; render();
+    }
+    return;
+  }
+  const ioff=t.closest('[data-integoff]');
+  if(ioff){
+    const i=integ(ioff.dataset.integoff);
+    if(i){ i.state='available'; saveIntegrations();
+      logIt('Disconnected integration', i.name);
+      toast(i.name+' disconnected'); DRAWER=null; render(); }
+    return;
+  }
+
+  if(t.closest('[data-cmdkclose]')){ CMDK.open=false; CMDK.q=''; render(); return; }
+  const ck=t.closest('[data-cmdk]');
+  if(ck){ e.preventDefault(); cmdkGo(+ck.dataset.cmdk); return; }
+
+  /* moderation */
+  const ap=t.closest('[data-approve]');
+  if(ap){ const h=host(ap.dataset.approve);
+    if(h){ h.status='active'; h.verified=true; pushOps(); logIt('Approved host',h.name);
+      toast(h.name+' approved'); DRAWER=null; render(); } return; }
+  const rj=t.closest('[data-reject]');
+  if(rj){ const h=host(rj.dataset.reject);
+    if(h){ h.status='rejected'; pushOps(); logIt('Rejected host',h.name);
+      toast(h.name+' rejected'); DRAWER=null; render(); } return; }
+  const sp=t.closest('[data-suspend]');
+  if(sp){ const h=host(sp.dataset.suspend);
+    if(h){ const was=h.status==='suspended'; h.status=was?'active':'suspended';
+      pushOps(); logIt(was?'Reinstated host':'Suspended host',h.name);
+      toast(h.name+(was?' reinstated':' suspended')); DRAWER=null; render(); } return; }
+
+  const pe=t.closest('[data-pubev]');
+  if(pe){ const x=ev(pe.dataset.pubev);
+    if(x){ x.status='live'; pushOps(); logIt('Published event',x.title);
+      toast(x.title+' is live'); DRAWER=null; render(); } return; }
+  const re=t.closest('[data-rejev]');
+  if(re){ const x=ev(re.dataset.rejev);
+    if(x){ x.status='draft'; pushOps(); logIt('Rejected event',x.title);
+      toast(x.title+' sent back'); DRAWER=null; render(); } return; }
+  const up=t.closest('[data-unpub]');
+  if(up){ const x=ev(up.dataset.unpub);
+    if(x){ const was=x.status==='live'; x.status=was?'draft':'live';
+      pushOps(); logIt(was?'Unpublished event':'Published event',x.title);
+      toast(x.title+(was?' unpublished':' published')); DRAWER=null; render(); } return; }
+
+  const rf=t.closest('[data-refund]');
+  if(rf){ const b=BOOKINGS.find(x=>x.id===rf.dataset.refund);
+    if(b){ b.status='refunded'; logIt('Issued refund',b.id+' \u00b7 '+aed(b.total));
+      toast('Refunded '+aed(b.total)); DRAWER=null; render(); } return; }
+
+  /* content */
+  const dw2=t.closest('[data-delword]');
+  if(dw2){ CMS.hero.words.splice(+dw2.dataset.delword,1);
+    if(!CMS.hero.words.length) CMS.hero.words.push('creativity');
+    saveCms(); logIt('Removed hero word','hero'); render(); return; }
+  if(t.closest('#addword')){
+    const el=$('cm-word'); const v=(el&&el.value||'').trim();
+    if(!v){ toast('Type a word first'); return; }
+    CMS.hero.words.push(v); saveCms(); logIt('Added hero word',v); render(); return;
+  }
+  const fb=t.closest('[data-font]');
+  if(fb){
+    setFonts(fb.dataset.font); saveCms();
+    logIt('Changed typeface', (FONTSETS[fb.dataset.font]||{}).label||fb.dataset.font);
+    render(); return;
+  }
+
+  const swb=t.closest('[data-swatch]');
+  if(swb){ setBrand(swb.dataset.swatch); saveCms();
+    logIt('Changed brand colour',swb.dataset.swatch); render(); return; }
+  if(t.closest('#resetcolor')){ setBrand(DEFAULT_CMS.brandColor); saveCms();
+    logIt('Reset brand colour',DEFAULT_CMS.brandColor); render(); return; }
+  if(t.closest('#exportcms')){
+    const j=JSON.stringify(CMS,null,2);
+    if(navigator.clipboard && window.isSecureContext)
+      navigator.clipboard.writeText(j).then(()=>toast('Copied'),()=>toast('Copy failed'));
+    else toast('Clipboard needs HTTPS');
+    return;
+  }
+  if(t.closest('#resetcms')){
+    Object.assign(CMS,structuredClone(DEFAULT_CMS)); setBrand(CMS.brandColor);
+    saveCms(); logIt('Reset all settings','defaults'); toast('Reset'); render(); return;
+  }
+  const ex=t.closest('[data-export]');
+  if(ex){
+    const spec=EXPORTS[ex.dataset.export];
+    if(!spec){ toast('Nothing to export'); return; }
+    const {name,cols,rows}=spec();
+    if(!rows.length){ toast('No rows match the current filters'); return; }
+    const ok=download(name, toCsv(cols,rows));
+    if(ok){ logIt('Exported CSV', name+' \u00b7 '+rows.length+' rows');
+      toast(rows.length+' rows exported'); }
+    else toast('Download blocked by the browser');
+    return;
+  }
+  const tt=t.closest('[data-toast]');
+  if(tt){ toast(tt.dataset.toast); return; }
+});
+
+document.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){
+    e.preventDefault();
+    CMDK.open=!CMDK.open; CMDK.q=''; CMDK.hi=0; render();
+    return;
+  }
+  if(CMDK.open){
+    const n=cmdkHits().length;
+    if(e.key==='Escape'){ e.preventDefault(); CMDK.open=false; CMDK.q=''; render(); return; }
+    if(e.key==='ArrowDown'){ e.preventDefault(); CMDK.hi=(CMDK.hi+1)%Math.max(1,n); render(); return; }
+    if(e.key==='ArrowUp'){ e.preventDefault(); CMDK.hi=(CMDK.hi-1+n)%Math.max(1,n); render(); return; }
+    if(e.key==='Enter'){ e.preventDefault(); cmdkGo(CMDK.hi); return; }
+    return;
+  }
+  if(e.key==='Escape' && DRAWER){ DRAWER=null; render(); }
+});
+
+/* ============================================================
+   THEME — same contract as the public site
+   ============================================================ */
+const THEME={
+  read(){ try{return localStorage.getItem(LS.theme);}catch(e){return null;} },
+  write(v){ try{localStorage.setItem(LS.theme,v);}catch(e){} },
+  apply(v){
+    document.documentElement.dataset.theme=v;
+    const b=$('theme');
+    if(b){ b.innerHTML = v==='dark'?'&#9788;':'&#9789;';
+      b.setAttribute('aria-pressed',String(v==='dark')); }
+    const m=document.querySelector('meta[name=theme-color]');
+    if(m) m.setAttribute('content', v==='dark'?'#0D0C0B':'#FAF8F4');
+  },
+  init(){
+    this.apply(this.read() || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+    document.addEventListener('click',e=>{
+      if(!e.target.closest('#theme')) return;
+      const n=document.documentElement.dataset.theme==='dark'?'light':'dark';
+      this.write(n); this.apply(n);
+    });
+  }
+};
+
+/* Adopt overrides written by an earlier session so the console and
+   the public site never disagree about what is live. */
+Object.entries(OPS.events||{}).forEach(([id,st])=>{ const e=ev(id); if(e) e.status=st; });
+Object.entries(OPS.hosts||{}).forEach(([id,st])=>{ const h=host(id); if(h) h.status=st; });
+
+setBrand(CMS.brandColor);
+setFonts(CMS.fonts||'brand');
+window.addEventListener('hashchange',()=>{ DRAWER=null; render(); });
+render();
+THEME.init();
+
+</script>
+</body>
+</html>
