@@ -892,6 +892,28 @@ textarea.input{min-height:96px;resize:vertical}
   padding:var(--s4);display:none}
 .pick__p[data-open=true]{display:block;animation:rise .18s var(--ez)}
 
+/* Location picker — same shell pattern as .pick__p, but anchored
+   under a form field rather than a header button, full width of
+   its own field, and structured in named sections (Recent /
+   Virtual) rather than a single flat list. */
+.locpick{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);
+  box-shadow:0 4px 12px -4px rgba(15,14,12,.12),0 24px 60px -18px rgba(15,14,12,.32);
+  max-height:320px;overflow-y:auto;display:none}
+.locpick[data-open=true]{display:block;animation:rise .15s var(--ez)}
+.locpick__sec{padding:var(--s3) var(--s4)}
+.locpick__sec+.locpick__sec{border-top:1px solid var(--line)}
+.locpick__label{font-family:var(--m);font-size:10px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--grey);margin-bottom:6px}
+.locpick__empty{font-size:var(--t-sm);color:var(--grey)}
+.locpick__row{display:flex;align-items:center;gap:var(--s3);width:100%;
+  padding:8px 6px;border-radius:var(--r1);cursor:pointer;font-size:var(--t-sm);text-align:left}
+.locpick__row:hover{background:var(--brand-soft)}
+.locpick__row svg{width:16px;height:16px;flex:none;color:var(--grey)}
+.locpick__hint{display:flex;gap:8px;align-items:flex-start;font-size:var(--t-xs);
+  color:var(--grey-2);padding:var(--s3) var(--s4);border-top:1px solid var(--line)}
+.locpick__hint svg{width:14px;height:14px;flex:none;margin-top:2px}
+
 .pick__tabs{display:flex;gap:var(--s1);margin-bottom:var(--s4);flex-wrap:wrap}
 .pick__tabs button{padding:8px var(--s3);border-radius:var(--pill);font-size:var(--t-sm);
   font-weight:600;color:var(--grey);cursor:pointer;min-height:40px}
@@ -1929,7 +1951,7 @@ const DB = {
     },
     brandColor:'#C7F464',
     feePct:5, plusPrice:249, referralAed:15,
-    moderationHours:24
+    moderationHours:24, minPriceAed:20
   },
 
   audit: [
@@ -3451,6 +3473,9 @@ const timeSel=(id,def)=>'<select class="input" id="'+id+'">'+
   TIMES.map(t=>'<option'+(t===def?' selected':'')+'>'+t+'</option>').join('')+'</select>';
 
 views.create = () => {
+  const recentLocs=[...new Set(DB.events
+    .filter(e=>e.brand_id===DB.session.brand_id)
+    .map(e=>e.location_name))].slice(0,4);
   return '<div class="wrap view"><div class="sec" '+
     'style="padding-top:var(--s5);padding-bottom:var(--s4)">'+
     '<div class="sec__h" style="margin-bottom:var(--s3)">'+
@@ -3480,11 +3505,43 @@ views.create = () => {
           '<div class="field" style="margin-top:var(--s3)">'+
             '<label class="label" for="c-d">Description</label>'+
             '<textarea class="input" id="c-d" placeholder="What happens, what to bring, who it\u2019s for."></textarea></div>'+
-          '<div class="field" style="margin-top:var(--s3)">'+
+          '<div class="field" style="margin-top:var(--s3);position:relative">'+
             '<label class="label" for="c-loc">Location</label>'+
-            '<input class="input" id="c-loc" placeholder="Warehouse 12, Al Quoz \u2014 or a building name">'+
+            '<input class="input" id="c-loc" autocomplete="off" '+
+              'placeholder="Enter location or virtual link">'+
             '<span class="hint" id="hub-detect">Type an address or building \u2014 we\u2019ll match it to '+
               'the nearest hub.</span>'+
+            '<div class="locpick" id="locpick" data-open="false">'+
+              '<div class="locpick__sec">'+
+                '<p class="locpick__label">Recent locations</p>'+
+                (recentLocs.length
+                  ? recentLocs.map(l=>
+                      '<button type="button" class="locpick__row" data-locpick="'+esc(l)+'">'+
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+
+                          '<path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z"/>'+
+                          '<circle cx="12" cy="9" r="2.5"/></svg>'+
+                        esc(l)+'</button>').join('')
+                  : '<p class="locpick__empty">No recently used locations.</p>')+
+              '</div>'+
+              '<div class="locpick__sec">'+
+                '<p class="locpick__label">Virtual options</p>'+
+                '<button type="button" class="locpick__row" data-locvirtual="Zoom">'+
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+
+                    '<rect x="2" y="6" width="14" height="12" rx="2"/>'+
+                    '<path d="M16 10l6-3v10l-6-3Z"/></svg>'+
+                  '<b>Create Zoom meeting</b></button>'+
+                '<button type="button" class="locpick__row" data-locvirtual="Google Meet">'+
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+
+                    '<rect x="2" y="6" width="14" height="12" rx="2"/>'+
+                    '<path d="M16 10l6-3v10l-6-3Z"/></svg>'+
+                  '<b>Create Google Meet</b></button>'+
+              '</div>'+
+              '<div class="locpick__hint">'+
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+
+                  '<circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>'+
+                '<span>If you have a virtual event link, you can enter or paste it above.</span>'+
+              '</div>'+
+            '</div>'+
           '</div>'+
           '<div class="two" style="margin-top:var(--s3)">'+
             '<div class="field"><label class="label" for="c-c">Category</label>'+
@@ -3525,7 +3582,8 @@ views.create = () => {
         '<div class="panel">'+
           '<div class="two">'+
             '<div class="field"><label class="label" for="c-p">Price (AED)</label>'+
-              '<input class="input" id="c-p" type="number" min="0" value="0"></div>'+
+              '<input class="input" id="c-p" type="number" min="0" value="0">'+
+              '<span class="hint">0 for free \u2014 or AED '+DB.cms.minPriceAed+'+ for paid.</span></div>'+
             '<div class="field"><label class="label" for="c-cap">Capacity</label>'+
               '<input class="input" id="c-cap" type="number" min="1" value="20"></div>'+
           '</div>'+
@@ -4851,6 +4909,7 @@ function detectHub(text){
 }
 function wireCreate(){
   const loc=document.getElementById('c-loc'), out=document.getElementById('hub-detect');
+  const pick=document.getElementById('locpick');
   if(!loc || !out) return;
   loc.addEventListener('input', ()=>{
     if(!loc.value.trim()){
@@ -4861,6 +4920,33 @@ function wireCreate(){
     out.textContent = hub
       ? 'Nearest hub: '+hub.label+' (estimated from what you typed, not GPS)'
       : 'No hub match yet \u2014 try adding an area or landmark name.';
+  });
+
+  if(!pick) return;
+  loc.addEventListener('focus', ()=>{ pick.dataset.open='true'; });
+  /* A plain blur would close the dropdown before a click on one of
+     its own rows finishes registering — the short delay lets that
+     click fire first, same trick every native combobox needs since
+     "click" and "blur" don't guarantee an order otherwise. */
+  loc.addEventListener('blur', ()=>{ setTimeout(()=>{ pick.dataset.open='false'; }, 150); });
+
+  pick.querySelectorAll('[data-locpick]').forEach(row=>{
+    row.addEventListener('mousedown', (e)=>{
+      e.preventDefault();
+      loc.value=row.dataset.locpick;
+      loc.dispatchEvent(new Event('input'));
+      pick.dataset.open='false';
+    });
+  });
+  pick.querySelectorAll('[data-locvirtual]').forEach(row=>{
+    row.addEventListener('mousedown', (e)=>{
+      e.preventDefault();
+      const kind=row.dataset.locvirtual;
+      loc.value = kind+' meeting link \u2014 generated on save';
+      out.textContent = 'Virtual event \u2014 no hub needed.';
+      pick.dataset.open='false';
+      toast(kind+' meeting created');
+    });
   });
 }
 
@@ -5245,6 +5331,18 @@ document.addEventListener('click',ev=>{
      once the checkbox is actually checked. */
   const tg=ev.target.closest('[data-termsgate]');
   if(tg){
+    /* Real validation, not just a hint under the field — a paid
+       event below the admin-set minimum is blocked here, before the
+       terms sheet even opens, rather than letting it through and
+       hoping the host reads the hint. Free events (0) always pass;
+       the minimum exists to keep paid tickets above what card
+       -processing fees would eat entirely, not to force a price. */
+    const price=+document.getElementById('c-p').value || 0;
+    if(price>0 && price<DB.cms.minPriceAed){
+      toast('Paid events need a price of at least AED '+DB.cms.minPriceAed+' \u2014 or set it to 0 for free');
+      document.getElementById('c-p').focus();
+      return;
+    }
     document.getElementById('terms-ok').checked=false;
     document.getElementById('terms-submit').disabled=true;
     document.getElementById('termssheet').dataset.open='true';
