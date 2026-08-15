@@ -878,17 +878,6 @@ textarea.input{min-height:96px;resize:vertical}
 .pick__tabs button[aria-pressed=true]{background:var(--brand);color:var(--on-brand);
   border:1px solid var(--brand-edge)}
 
-/* Profile settings sub-nav — sticky underline style rather than
-   the pill-tab treatment above, since this sits at the top of a
-   whole page of content rather than inside a small dropdown panel. */
-.ptabs{display:flex;gap:var(--s5);border-bottom:1px solid var(--line);
-  overflow-x:auto;margin-bottom:var(--s5)}
-.ptabs button{font-family:var(--m);font-size:var(--t-xs);text-transform:uppercase;
-  letter-spacing:.08em;color:var(--grey);padding:var(--s3) 0;white-space:nowrap;
-  border-bottom:2px solid transparent;cursor:pointer;flex:none}
-.ptabs button:hover{color:var(--ink)}
-.ptabs button[aria-pressed=true]{color:var(--ink);border-bottom-color:var(--brand-edge);font-weight:600}
-
 .pick__grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s3)}
 
 /* City card. The lime duotone comes from a multiply blend over a
@@ -2086,7 +2075,6 @@ const DB = {
   /* role drives what the nav exposes. guest -> attendee -> host */
   session: {authed:false, role:'guest', brand_id:null},
   me: {name:'Chesna Ahuja', initials:'CA', email:'chesna@example.com',
-       phone:'+971 50 123 4567', joined:'2026-03-14',
        credits: 4500, code:'CHESNA-KREO', invited: 3,
        interests:['workshops','art','food']},
   ledger: [
@@ -2516,14 +2504,6 @@ let HUB='all';
    not a navigation. Selecting it must never change HUB or move the
    site anywhere; it just shows a coming-soon line in the same panel. */
 let PICKCITY='dubai';
-/* Which section of the profile page is showing. Same in-page-tab
-   pattern as PICKCITY — one URL, several views, no extra routes
-   for what is really one settings screen. */
-let PROFILETAB='account';
-/* Whether the type-to-confirm delete panel is showing. Deliberately
-   not just a toast on click — an account deletion needs real
-   friction, not a single accidental click. */
-let DELETECONFIRM=false;
 
 function cityPicker(){
   const cur=DB.hubs.find(h=>h.slug===HUB)||DB.hubs[0];
@@ -2751,12 +2731,10 @@ const SQ = {q:'', hub:'', cats:[], from:'', to:'', min:0, max:0, sort:'trending'
 const PRICE_MAX = Math.ceil(Math.max(...DB.events.map(e=>e.price_cents))/100/50)*50;
 if(!SQ.max) SQ.max = PRICE_MAX;
 
-/* Shared by the full page render (views.search) and the surgical
-   refresh (refreshSearch, see wireSearch) — one source of truth for
-   which chips exist, so the two paths can never disagree about
-   active filters. */
-function buildChips(){
+views.search = () => {
   const cats=DB.categories.filter(c=>c.slug!=='all');
+  const hits=searchHits();
+
   const chips=[];
   if(SQ.q)    chips.push(['q','\u201C'+esc(SQ.q)+'\u201D']);
   if(SQ.hub)  chips.push(['hub',(DB.hubs.find(h=>h.slug===SQ.hub)||{}).label||SQ.hub]);
@@ -2764,20 +2742,6 @@ function buildChips(){
   if(SQ.from) chips.push(['from','From '+SQ.from]);
   if(SQ.to)   chips.push(['to','To '+SQ.to]);
   if(SQ.min>0 || SQ.max<PRICE_MAX) chips.push(['price','AED '+SQ.min+'\u2013'+SQ.max]);
-  return chips;
-}
-function chipsHTML(chips){
-  if(!chips.length) return '';
-  return '<div class="active">'+chips.map(c=>
-      '<span class="active__c">'+c[1]+
-      '<button data-unfilter="'+c[0]+'" aria-label="Remove filter">&times;</button></span>').join('')+
-    '<button class="btn" data-v="quiet" style="padding:4px 8px" data-clear>Clear all</button></div>';
-}
-
-views.search = () => {
-  const cats=DB.categories.filter(c=>c.slug!=='all');
-  const hits=searchHits();
-  const chips=buildChips();
 
   const rail =
     '<aside class="srch__rail">'+
@@ -2842,7 +2806,12 @@ views.search = () => {
       publicEvents().length+' events across Dubai.</p>'+
     '<div class="srch">'+rail+
       '<div class="srch__main">'+
-        '<div id="activechips">'+chipsHTML(chips)+'</div>'+
+        (chips.length
+          ? '<div class="active">'+chips.map(c=>
+              '<span class="active__c">'+c[1]+
+              '<button data-unfilter="'+c[0]+'" aria-label="Remove filter">&times;</button></span>').join('')+
+            '<button class="btn" data-v="quiet" style="padding:4px 8px" data-clear>Clear all</button></div>'
+          : '')+
         '<div class="srch__bar">'+
           '<p class="meta" id="rcount">'+hits.length+' event'+(hits.length===1?'':'s')+'</p>'+
           '<div style="display:flex;gap:var(--s2);align-items:center">'+
@@ -3563,96 +3532,15 @@ views.dashboard = () => {
 
 views.profile = () => {
   const me=DB.me;
-
-  const TABS=[['account','Account'],['saved','Saved & following'],
-    ['credits','Credits'],['prefs','Preferences'],['privacy','Privacy']];
-
-  return '<div class="wrap view"><div class="sec" style="padding-top:var(--s5);padding-bottom:var(--s4)">'+
-    '<div style="display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap">'+
-      '<span class="mark" style="position:relative">'+esc(me.initials)+
-        '<button data-toast="Photo picker opens here" aria-label="Change photo" '+
-          'style="position:absolute;bottom:-3px;right:-3px;width:16px;height:16px;'+
-          'border-radius:50%;background:var(--ink);color:var(--paper);font-size:8px;'+
-          'display:grid;place-items:center;border:2px solid var(--paper)">&#9998;</button></span>'+
-      '<div style="flex:1;min-width:180px"><p class="h3" style="margin:0">'+esc(me.name)+'</p>'+
-      '<p class="meta">Member since '+F.day(me.joined).long+'</p></div>'+
-      '<button class="btn" data-v="quiet" style="padding:6px 10px" data-logout>Sign out</button>'+
+  const bookings=DB.bookings.length;
+  return '<div class="wrap view"><div class="sec">'+
+    '<div style="display:flex;gap:var(--s4);align-items:center;flex-wrap:wrap">'+
+      '<span class="mark" data-size="lg">'+esc(me.initials)+'</span>'+
+      '<div style="flex:1;min-width:180px"><h1 class="h1">'+esc(me.name)+'</h1>'+
+      '<p class="meta">'+esc(me.email)+'</p></div>'+
     '</div>'+
 
-    '<div class="ptabs" style="margin-top:var(--s4)">'+
-      TABS.map(t=>'<button data-ptab="'+t[0]+'" aria-pressed="'+(PROFILETAB===t[0])+'">'+
-        t[1]+'</button>').join('')+
-    '</div>'+
-
-    profileTabBody(me)+
-
-    '<div style="height:var(--s5)"></div></div></div>';
-};
-
-function profileTabBody(me){
-  if(PROFILETAB==='saved')   return profileSaved();
-  if(PROFILETAB==='credits') return profileCredits(me);
-  if(PROFILETAB==='prefs')   return profilePrefs(me);
-  if(PROFILETAB==='privacy') return profilePrivacy();
-  return profileAccount(me);
-}
-
-/* ---------- Account: real, editable fields, genuinely saved back
-   into DB.me on submit — same principle as Manage Event and the
-   boost feature: a demo that actually mutates state is a far more
-   honest, convincing prototype than one that just shows a toast. */
-function profileAccount(me){
-  return '<div class="panel" style="max-width:480px">'+
-    '<div class="field"><label class="label" for="p-n">Full name</label>'+
-      '<input class="input" id="p-n" value="'+esc(me.name)+'"></div>'+
-    '<div class="field"><label class="label" for="p-e">Email</label>'+
-      '<input class="input" id="p-e" type="email" value="'+esc(me.email)+'"></div>'+
-    '<div class="field" style="margin-bottom:0"><label class="label" for="p-ph">Phone</label>'+
-      '<input class="input" id="p-ph" type="tel" value="'+esc(me.phone||'')+'"></div>'+
-    '<button class="btn" data-v="primary" style="margin-top:var(--s4)" '+
-      'data-profilesave>Save changes</button>'+
-  '</div>';
-}
-
-/* ---------- Saved & following: DB.saved and DB.follows were real
-   data with nowhere to actually review them from before this —
-   the heart/follow buttons scattered across the site had no single
-   place that showed everything you had collected. Reuses the exact
-   same [data-save]/[data-follow] handlers already wired globally,
-   rather than building parallel unsave/unfollow logic here. */
-function profileSaved(){
-  const savedEvents=[...DB.saved].map(id=>event_(id)).filter(Boolean);
-  const followedBrands=[...DB.follows].filter(id=>id!=='city')
-    .map(id=>DB.brands.find(b=>b.id===id)).filter(Boolean);
-
-  return '<div class="sec" style="padding-top:0">'+
-    '<div class="sec__h"><h2 class="h2">Saved events</h2>'+
-      '<span class="meta">'+savedEvents.length+' saved</span></div>'+
-    (savedEvents.length
-      ? '<div class="grid">'+
-          savedEvents.map(e=>card(e,'tile')).join('')+'</div>'
-      : emptyState('Nothing saved yet','Tap the heart on any event to keep it here.'))+
-  '</div>'+
-  '<div class="sec" style="padding-top:0">'+
-    '<div class="sec__h"><h2 class="h2">Following</h2>'+
-      '<span class="meta">'+followedBrands.length+' hosts</span></div>'+
-    (followedBrands.length
-      ? '<div class="stack">'+followedBrands.map(b=>
-          '<div class="panel" style="display:flex;align-items:center;gap:var(--s3)">'+
-            '<span class="mark">'+esc(b.initials)+'</span>'+
-            '<a href="#/brand/'+b.id+'" style="flex:1;font-weight:600;font-size:var(--t-sm)">'+
-              esc(b.name)+'</a>'+
-            '<button class="btn" data-v="quiet" data-follow="'+b.id+'">Following</button>'+
-          '</div>').join('')+'</div>'
-      : emptyState('Not following anyone yet','Follow a host to see their new events first.'))+
-  '</div>';
-}
-
-/* ---------- Credits: the page's original content, unchanged,
-   just relocated to its own tab instead of sharing one long
-   scroll with everything else. */
-function profileCredits(me){
-  return '<div class="credit">'+
+    '<div class="credit" style="margin-top:var(--s5)">'+
       '<span class="credit__l">KREO credits</span>'+
       '<span class="credit__n">'+(me.credits/100).toFixed(0)+'</span>'+
       '<span class="credit__l">AED '+(me.credits/100).toFixed(0)+' off your next booking</span>'+
@@ -3675,16 +3563,9 @@ function profileCredits(me){
           esc(l.t)+'</p><p class="meta">'+l.d+'</p></div>'+
           '<span class="ledger__v" data-dir="'+l.dir+'">'+
           (l.dir==='in'?'+':'')+(l.v?('AED '+(l.v/100).toFixed(0)):'\u2014')+'</span></div>').join('')+
-      '</div></div>';
-}
+      '</div></div>'+
 
-/* ---------- Preferences: interests + notification channels. The
-   newsletter toggle already existed; waitlist/booking-reminder
-   toggles are the same channels already described on the
-   Notifications page, given a place to actually control them from
-   rather than only being mentioned in copy there. */
-function profilePrefs(me){
-  return '<div class="sec" style="padding-top:0">'+
+    '<div class="sec" style="padding-top:0">'+
       '<div class="sec__h"><h2 class="h2">Your interests</h2>'+
         '<span class="meta">Shapes what you see first</span></div>'+
       '<div style="display:flex;gap:var(--s2);flex-wrap:wrap">'+
@@ -3694,91 +3575,17 @@ function profilePrefs(me){
       '</div></div>'+
 
     '<div class="sec" style="padding-top:0">'+
-      '<div class="sec__h"><h2 class="h2">Notifications</h2></div>'+
-      '<div class="panel" style="padding:0">'+
-        [['Weekly newsletter','What\u2019s new from hosts and communities you follow \u2014 Thursdays.',true],
-         ['Booking reminders','A nudge the day before something you booked.',true],
-         ['Waitlist alerts','The moment a seat opens on something you\u2019re waiting for.',true],
-         ['Price drops','When a saved event lowers its price.',false]
-        ].map((r,i)=>'<label class="toggle" style="padding:var(--s4)'+
-          (i<3?';border-bottom:1px solid var(--line)':'')+'">'+
-          '<div style="flex:1"><p class="h3" style="font-size:var(--t-sm)">'+r[0]+'</p>'+
-          '<p class="body" style="font-size:var(--t-sm);margin-top:2px">'+r[1]+'</p></div>'+
-          '<input type="checkbox"'+(r[2]?' checked':'')+'><span class="track"></span></label>').join('')+
-      '</div></div>';
-}
-
-/* ---------- Privacy: security + account-level controls. Password
-   change and connected accounts are demo fields, same convention
-   as the rest of this prototype \u2014 they show the shape of the
-   feature without a real backend behind them. Delete account is
-   real UI, deliberately not wired to anything destructive. */
-function profilePrivacy(){
-  /* Two columns instead of four stacked full-width panels — the
-     same page-fits-on-one-screen goal that shaped the sign-in and
-     signup pages applies here too, and this tab was the one most
-     likely to actually need scrolling. */
-  return '<div class="authcols">'+
-      '<div class="panel" style="padding:var(--s4)">'+
-        '<p class="h3" style="margin-bottom:var(--s3)">Password</p>'+
-        '<div class="field"><label class="label" for="p-cp">Current password</label>'+
-          '<input class="input" id="p-cp" type="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"></div>'+
-        '<div class="field" style="margin-bottom:0"><label class="label" for="p-np">New password</label>'+
-          '<input class="input" id="p-np" type="password" placeholder="At least 8 characters"></div>'+
-        '<button class="btn" data-v="outline" style="width:100%;margin-top:var(--s3)" '+
-          'data-toast="Password updated">Update password</button>'+
-      '</div>'+
-
-      '<div class="panel" style="padding:var(--s4)">'+
-        '<p class="h3" style="margin-bottom:var(--s3)">Connected accounts</p>'+
-        [['Google','Not connected'],['Apple','Not connected']].map(a=>
-          '<div style="display:flex;align-items:center;gap:var(--s2);padding:var(--s2) 0">'+
-            '<span style="flex:1;font-weight:600;font-size:var(--t-sm)">'+a[0]+'</span>'+
-            '<span class="meta">'+a[1]+'</span>'+
-            '<button class="btn" data-v="outline" style="padding:6px 10px" '+
-              'data-toast="'+a[0]+' connected">Connect</button>'+
-          '</div>').join('')+
-      '</div>'+
+      '<div class="panel" style="display:flex;gap:var(--s4);align-items:center;flex-wrap:wrap">'+
+        '<div style="flex:1;min-width:200px"><p class="h3">Weekly newsletter</p>'+
+        '<p class="body" style="font-size:var(--t-sm)">What\u2019s new from the hosts and '+
+          'communities you follow. One email, Thursdays.</p></div>'+
+        '<label class="toggle" style="border-bottom:0;padding:0">'+
+          '<input type="checkbox" checked><span class="track"></span></label></div>'+
     '</div>'+
-
-    '<div class="panel" style="margin-top:var(--s4);padding:var(--s4)">'+
-      (DELETECONFIRM ? deleteConfirmPanel() : deleteRevealPanel())+
-    '</div>';
-}
-
-const DELETE_PHRASE='delete my account';
-
-function deleteRevealPanel(){
-  return '<div style="display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap">'+
-    '<div style="flex:1;min-width:220px">'+
-      '<p class="body" style="font-size:var(--t-sm)">Export a copy of everything KREO has '+
-        'about you, or permanently delete your account.</p>'+
-    '</div>'+
-    '<button class="btn" data-v="outline" '+
-      'data-toast="Export started \u2014 we\u2019ll email a link">Export my data</button>'+
-    '<button class="btn" data-v="outline" style="border-color:var(--live);color:var(--live)" '+
-      'data-delete-reveal>Delete account</button>'+
-  '</div>';
-}
-
-/* Typing the exact phrase is the actual safeguard here — the
-   button being disabled is a convenience, not the real gate. See
-   the click handler for data-delete-confirm, which checks the
-   input's value again before doing anything, rather than trusting
-   that a disabled attribute was never bypassed. */
-function deleteConfirmPanel(){
-  return '<p class="h3" style="color:var(--live);margin-bottom:6px">Delete your account</p>'+
-    '<p class="body" style="font-size:var(--t-sm);margin-bottom:var(--s3)">This permanently '+
-      'deletes your profile, bookings and credits. It cannot be undone. Type '+
-      '<b>'+DELETE_PHRASE+'</b> to confirm.</p>'+
-    '<input class="input" id="del-confirm" autocomplete="off" spellcheck="false" '+
-      'placeholder="'+DELETE_PHRASE+'" style="margin-bottom:var(--s3)">'+
-    '<div class="btn-row">'+
-      '<button class="btn" data-v="quiet" style="flex:1" data-delete-cancel>Cancel</button>'+
-      '<button class="btn" style="flex:1;background:var(--live);color:#fff" '+
-        'id="delete-confirm-btn" data-delete-confirm disabled>Permanently delete account</button>'+
-    '</div>';
-}
+    '<div class="sec" style="padding-top:0">'+
+      '<button class="btn" data-v="outline" data-logout>Sign out</button></div>'+
+    '<div style="height:var(--s7)"></div></div></div>';
+};
 
 views.payouts = () => {
   const mine=DB.events.filter(e=>e.brand_id==='b4');
@@ -3837,23 +3644,12 @@ views.analytics = () => {
     '<div class="sec" style="padding-top:0">'+
       '<div class="sec__h"><h2 class="h2">By event</h2>'+
         '<span class="meta">Open Analytics on a single event for the full breakdown</span></div>'+
-      '<div class="stack">'+mine.map(e=>{
-        const fillPct=Math.round(e.booked_count/e.capacity*100);
-        const revenue=(e.booked_count*e.price_cents/100).toFixed(0);
-        const boost=DB.boosts[e.id];
-        return '<a class="panel" href="#/eventanalytics/'+e.id+'" '+
-          'style="display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap">'+
-          '<div style="flex:1;min-width:160px">'+
-            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
-              '<span style="font-weight:600;font-size:var(--t-sm)">'+esc(e.title)+'</span>'+
-              (boost?'<span class="boosted">Boosted \u00b7 '+boost.days+'d left</span>':'')+
-            '</div>'+
-            '<span class="meta">'+(e.views||0)+' views \u00b7 '+e.booked_count+'/'+e.capacity+
-              ' booked \u00b7 AED '+revenue+'</span>'+
-          '</div>'+
-          '<span style="font-weight:700;font-size:var(--t-sm);color:var(--brand-ink)">'+fillPct+'% full</span>'+
-        '</a>';
-      }).join('')+
+      '<div class="stack">'+mine.map(e=>
+        '<a class="panel" href="#/eventanalytics/'+e.id+'" '+
+          'style="display:flex;align-items:center;gap:var(--s3)">'+
+          '<span style="flex:1;font-weight:600;font-size:var(--t-sm)">'+esc(e.title)+'</span>'+
+          '<span class="meta">'+(e.views||0)+' views \u00b7 '+e.booked_count+'/'+e.capacity+' booked</span>'+
+        '</a>').join('')+
       '</div></div>'+
     '<div style="height:var(--s7)"></div></div>';
 };
@@ -4506,7 +4302,6 @@ function route(){
   RAIL.init();
   if(shown==='book') recalc();
   if(shown==='search') wireSearch();
-  if(shown==='profile') wireProfile();
   if(shown==='map') setTimeout(initMap,0);
   if(shown==='event') setTimeout(initEventMap,0);
 }
@@ -4603,12 +4398,6 @@ function runSearch(){
   out.className = hits.length ? 'results reveal' : '';
   out.innerHTML = hits.length ? hits.map(e=>card(e,'tile')).join('')
     : emptyState('No events match','Try removing a category or widening the price range.');
-  /* Chips were never refreshed here — meaning even the keyword
-     search's own "quoted" filter tag has been stale since this
-     function was written, not just the filters reported as
-     reloading the page. Same fix covers both. */
-  const cc=document.getElementById('activechips');
-  if(cc) cc.innerHTML = chipsHTML(buildChips());
 }
 
 /* The slider updates its fill and labels on every input event but
@@ -4628,29 +4417,16 @@ function paintRange(){
   if(bv) bv.textContent=b;
 }
 
-/* Only present when DELETECONFIRM is true and the Privacy tab is
-   open — the null-check on the element covers every other case,
-   same convention as wireSearch() checking each field exists
-   before binding. */
-function wireProfile(){
-  const inp=document.getElementById('del-confirm');
-  const btn=document.getElementById('delete-confirm-btn');
-  if(!inp || !btn) return;
-  inp.addEventListener('input', ()=>{
-    btn.disabled = inp.value.trim().toLowerCase() !== DELETE_PHRASE;
-  });
-}
-
 function wireSearch(){
   const bind=(id,ev,fn)=>{const el=document.getElementById(id); if(el) el.addEventListener(ev,fn);};
   bind('q','input',e=>{ SQ.q=e.target.value; runSearch(); });
-  bind('f-hub','change',e=>{ SQ.hub=e.target.value; runSearch(); });
-  bind('f-from','change',e=>{ SQ.from=e.target.value; runSearch(); });
-  bind('f-to','change',e=>{ SQ.to=e.target.value; runSearch(); });
+  bind('f-hub','change',e=>{ SQ.hub=e.target.value; route(); });
+  bind('f-from','change',e=>{ SQ.from=e.target.value; route(); });
+  bind('f-to','change',e=>{ SQ.to=e.target.value; route(); });
   bind('f-sort','change',e=>{ SQ.sort=e.target.value; runSearch(); });
   ['pmin','pmax'].forEach(id=>{
     bind(id,'input',paintRange);
-    bind(id,'change',()=>runSearch());
+    bind(id,'change',()=>route());
   });
   paintRange();
 }
@@ -4816,47 +4592,6 @@ document.addEventListener('click',ev=>{
     PICKCITY=pt.dataset.picktab;
     route(); setTimeout(()=>PICK.open(),0); return;
   }
-
-  const pft=ev.target.closest('[data-ptab]');
-  if(pft){ PROFILETAB=pft.dataset.ptab; route(); return; }
-
-  const pfs=ev.target.closest('[data-profilesave]');
-  if(pfs){
-    /* Genuinely writes back into DB.me — same principle as Manage
-       Event and the boost feature elsewhere in this prototype. */
-    const n=document.getElementById('p-n'), em=document.getElementById('p-e'),
-          ph=document.getElementById('p-ph');
-    if(n && n.value.trim()) DB.me.name = n.value.trim();
-    if(em && em.value.trim()) DB.me.email = em.value.trim();
-    DB.me.initials = DB.me.name.split(' ').filter(Boolean).slice(0,2)
-      .map(w=>w[0].toUpperCase()).join('') || DB.me.initials;
-    if(ph) DB.me.phone = ph.value.trim();
-    toast('Changes saved');
-    route();
-    return;
-  }
-
-  const dr=ev.target.closest('[data-delete-reveal]');
-  if(dr){ DELETECONFIRM=true; route(); return; }
-
-  const dc=ev.target.closest('[data-delete-cancel]');
-  if(dc){ DELETECONFIRM=false; route(); return; }
-
-  const df=ev.target.closest('[data-delete-confirm]');
-  if(df){
-    /* The disabled attribute is a convenience, not the real gate —
-       re-checking the actual typed value here means this still
-       cannot fire from a stray click or a disabled attribute that
-       was somehow bypassed. */
-    const inp=document.getElementById('del-confirm');
-    if(!inp || inp.value.trim().toLowerCase() !== DELETE_PHRASE) return;
-    DELETECONFIRM=false;
-    DB.session={authed:false, role:'guest', brand_id:null};
-    toast('Account deleted');
-    location.hash='#/home'; route();
-    return;
-  }
-
   const ct=ev.target.closest('[data-city]');
   if(ct){
     HUB=ct.dataset.city;
