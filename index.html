@@ -1713,7 +1713,6 @@ textarea.input{min-height:96px;resize:vertical}
   <p class="body" style="margin:0;font-size:var(--t-sm)">We use cookies to keep you signed in
     and remember your preferences. See our <a href="#/terms" style="text-decoration:underline">Terms</a>.</p>
   <div class="btn-row" style="flex:none">
-    <button class="btn" data-v="quiet" id="cookiedecline">Decline</button>
     <button class="btn" data-v="primary" id="cookieaccept">Accept</button>
   </div>
 </div>
@@ -5756,24 +5755,24 @@ const THEME = {
 };
 THEME.init();
 
-/* Cookie consent: shown once, remembered via localStorage same as
-   the theme choice. Decline still dismisses it — declining cookie
-   tracking is a real, valid choice, not something the UI should
-   make impossible to select. Neither button blocks using the site. */
+/* Cookie consent: only Accept dismisses it, and only an actual
+   "accepted" value ever suppresses it on a future visit — anything
+   else (never decided, or the localStorage read fails) means it
+   shows again. There is deliberately no Decline: the requirement
+   here is that this stays up until accepted, on every visit, not
+   that it offers an equally-weighted way out of seeing it. */
 (function initCookieBar(){
   const bar=document.getElementById('cookiebar');
   if(!bar) return;
-  let choice=null;
-  try{ choice=localStorage.getItem('kreo-cookies'); }catch(e){}
-  if(!choice) setTimeout(()=>{ bar.dataset.open='true'; }, 600);
+  let accepted=false;
+  try{ accepted = localStorage.getItem('kreo-cookies')==='accepted'; }catch(e){}
+  if(!accepted) bar.dataset.open='true';
 
-  function decide(v){
-    try{ localStorage.setItem('kreo-cookies', v); }catch(e){}
+  const a=document.getElementById('cookieaccept');
+  if(a) a.addEventListener('click', ()=>{
+    try{ localStorage.setItem('kreo-cookies','accepted'); }catch(e){}
     bar.dataset.open='false';
-  }
-  const a=document.getElementById('cookieaccept'), d=document.getElementById('cookiedecline');
-  if(a) a.addEventListener('click', ()=>decide('accepted'));
-  if(d) d.addEventListener('click', ()=>decide('declined'));
+  });
 })();
 
 /* #termssheet is static (outside #app), never destroyed by route()
