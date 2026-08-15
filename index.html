@@ -1706,14 +1706,17 @@ textarea.input{min-height:96px;resize:vertical}
     <span>&copy; 2026 KREO &middot; Dubai, UAE</span>
     <a href="#/home">Terms</a><a href="#/home">Privacy</a>
     <a href="#/home">Refunds</a><a href="#/home">Security</a>
+    <button type="button" id="cookiefooterlink" style="all:inherit;cursor:pointer">Cookie preferences</button>
   </div>
 </footer>
 
 <div id="cookiebar" class="cookiebar" data-open="false">
-  <p class="body" style="margin:0;font-size:var(--t-sm)">We use cookies to keep you signed in
-    and remember your preferences. See our <a href="#/terms" style="text-decoration:underline">Terms</a>.</p>
+  <p class="body" style="margin:0;font-size:var(--t-sm)">We use cookies. Necessary ones keep
+    you signed in and the site secure and can\u2019t be turned off; the rest are your choice.
+    See our <a href="#/terms" style="text-decoration:underline">Terms</a>.</p>
   <div class="btn-row" style="flex:none">
-    <button class="btn" data-v="primary" id="cookieaccept">Accept</button>
+    <button class="btn" data-v="outline" id="cookiemanage">Manage preferences</button>
+    <button class="btn" data-v="primary" id="cookieacceptall">Accept all</button>
   </div>
 </div>
 
@@ -1735,6 +1738,73 @@ textarea.input{min-height:96px;resize:vertical}
       <input id="sheet-url" readonly value="https://kreo.ae/e/">
       <button class="btn" data-v="outline" data-share="copy">Copy</button>
     </div>
+  </div>
+</div>
+
+<div class="sheet" id="cookieprefs" role="dialog" aria-modal="true" aria-labelledby="cookieprefs-t">
+  <div class="sheet__c" style="max-height:86vh;overflow-y:auto">
+    <div class="modal__head" style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s2)">
+      <h2 class="h3" id="cookieprefs-t" style="flex:1">Cookie preferences</h2>
+      <button class="btn" data-v="quiet" id="cookieprefsclose" aria-label="Close">&times;</button>
+    </div>
+    <p class="body" style="margin-bottom:var(--s4)">Choose what KREO can use beyond what the
+      site needs to function. You can change this any time from the footer.</p>
+
+    <label class="toggle" style="align-items:flex-start">
+      <div style="flex:1"><p class="h3" style="font-size:var(--t-sm)">Necessary</p>
+        <p class="body" style="font-size:var(--t-sm);margin-top:2px">Keeps you signed in, remembers
+          items in a booking in progress, and protects the site from abuse. Always on \u2014 the
+          site can\u2019t function securely without these.</p></div>
+      <input type="checkbox" checked disabled aria-label="Necessary cookies, always on">
+      <span class="track" style="opacity:.5"></span>
+    </label>
+
+    <label class="toggle">
+      <div style="flex:1"><p class="h3" style="font-size:var(--t-sm)">Functional</p>
+        <p class="body" style="font-size:var(--t-sm);margin-top:2px">Remembers things like dark
+          mode and your last search filters, so you don\u2019t reset them every visit.</p></div>
+      <input type="checkbox" id="cookie-functional" aria-label="Functional cookies">
+      <span class="track"></span>
+    </label>
+
+    <label class="toggle">
+      <div style="flex:1"><p class="h3" style="font-size:var(--t-sm)">Analytics</p>
+        <p class="body" style="font-size:var(--t-sm);margin-top:2px">Helps us see which events and
+          pages people actually use, so we can fix what\u2019s broken and stop building what isn\u2019t
+          working. No data is sold.</p></div>
+      <input type="checkbox" id="cookie-analytics" aria-label="Analytics cookies">
+      <span class="track"></span>
+    </label>
+
+    <label class="toggle" style="border-bottom:0">
+      <div style="flex:1"><p class="h3" style="font-size:var(--t-sm)">Marketing</p>
+        <p class="body" style="font-size:var(--t-sm);margin-top:2px">Lets us show you KREO
+          elsewhere and measure whether it worked. Off means you\u2019ll still see ads generally \u2014
+          just not ones aimed at you specifically.</p></div>
+      <input type="checkbox" id="cookie-marketing" aria-label="Marketing cookies">
+      <span class="track"></span>
+    </label>
+
+    <div class="btn-row" style="margin-top:var(--s4)">
+      <button class="btn" data-v="outline" style="flex:1" id="cookiesaveprefs">Save preferences</button>
+      <button class="btn" data-v="primary" style="flex:1" id="cookieacceptall2">Accept all</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="manageReasonSheet" role="dialog" aria-modal="true" aria-labelledby="mreason-t">
+  <div class="sheet__c">
+    <div class="modal__head" style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s2)">
+      <h2 class="h3" id="mreason-t" style="flex:1">Why are you updating this?</h2>
+      <button class="btn" data-v="quiet" data-mreasonclose aria-label="Close">&times;</button>
+    </div>
+    <p class="body" style="margin-bottom:var(--s3)">This event is already live \u2014 people have
+      booked it as it is. A short reason is kept with the update so there\u2019s a record of
+      what changed and why.</p>
+    <textarea class="input" id="mreason-text" rows="3"
+      placeholder="e.g. Fixed a typo in the description, corrected the venue address\u2026"></textarea>
+    <button class="btn" data-v="primary" data-size="lg" style="width:100%;margin-top:var(--s3)"
+      id="mreason-submit" data-mreasonconfirm disabled>Save with this reason</button>
   </div>
 </div>
 
@@ -2603,6 +2673,9 @@ let PICKCITY='dubai';
    pattern as PICKCITY — one URL, several views, no extra routes
    for what is really one settings screen. */
 let PROFILETAB='account';
+/* Which event id the manage-reason sheet is currently open for —
+   the sheet is static/shared, so the id has to live outside it. */
+let MANAGE_SAVING_ID=null;
 /* Whether the type-to-confirm delete panel is showing. Deliberately
    not just a toast on click — an account deletion needs real
    friction, not a single accidental click. */
@@ -3489,7 +3562,7 @@ views.manage = (id) => {
     '<div class="sec__h" style="margin-bottom:var(--s3)">'+
       '<div><p class="eyebrow">Manage event</p>'+
       '<h1 class="h2" style="margin-top:2px">'+esc(e.title)+'</h1></div>'+
-      '<button class="btn" data-v="primary" data-managesave="'+e.id+'">Save changes</button>'+
+      '<button class="btn" data-v="primary" data-mreasonopen="'+e.id+'">Save changes</button>'+
     '</div>'+
 
     '<div class="cx">'+
@@ -5186,15 +5259,30 @@ document.addEventListener('click',ev=>{
   const bg2=ev.target.closest('[data-boostgo]');
   if(bg2){ ev.preventDefault(); BOOST.open(bg2.dataset.boostgo, {skipIntro:true}); return; }
 
-  const ms=ev.target.closest('[data-managesave]');
-  if(ms){
+  const mro=ev.target.closest('[data-mreasonopen]');
+  if(mro){
+    MANAGE_SAVING_ID=mro.dataset.mreasonopen;
+    document.getElementById('mreason-text').value='';
+    document.getElementById('mreason-submit').disabled=true;
+    document.getElementById('manageReasonSheet').dataset.open='true';
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const mrc=ev.target.closest('[data-mreasonclose]');
+  if(mrc || ev.target.id==='manageReasonSheet'){
+    document.getElementById('manageReasonSheet').dataset.open='false';
+    document.body.style.overflow='';
+    return;
+  }
+  const mrf=ev.target.closest('[data-mreasonconfirm]');
+  if(mrf && !mrf.disabled){
     /* Genuinely writes back into the event object — same principle
        as the boost feature: a demo that actually mutates state reads
        far more convincingly than one that just shows a toast. Price,
        capacity and cancel_policy are never touched here; the inputs
        for those three are disabled in the markup, so there is nothing
        to even read back for them. */
-    const e=event_(ms.dataset.managesave);
+    const e=event_(MANAGE_SAVING_ID);
     if(e){
       e.title = document.getElementById('m-t').value.trim() || e.title;
       e.about = document.getElementById('m-d').value;
@@ -5206,6 +5294,9 @@ document.addEventListener('click',ev=>{
       e.age_min = +document.getElementById('m-a').value || 0;
       const dateVal=document.getElementById('m-date').value, timeVal=document.getElementById('m-time').value;
       if(dateVal && timeVal) e.start_at = dateVal+'T'+timeVal+':00+04:00';
+      e.updateReason = document.getElementById('mreason-text').value.trim();
+      document.getElementById('manageReasonSheet').dataset.open='false';
+      document.body.style.overflow='';
       toast('Changes saved');
       route();
     }
@@ -5461,6 +5552,14 @@ document.addEventListener('keydown',e=>{
   const ts=document.getElementById('termssheet');
   if(ts && ts.dataset.open==='true'){
     ts.dataset.open='false'; document.body.style.overflow=''; return;
+  }
+  const mrs=document.getElementById('manageReasonSheet');
+  if(mrs && mrs.dataset.open==='true'){
+    mrs.dataset.open='false'; document.body.style.overflow=''; return;
+  }
+  const cps=document.getElementById('cookieprefs');
+  if(cps && cps.dataset.open==='true'){
+    cps.dataset.open='false'; document.body.style.overflow=''; return;
   }
   const pnl=document.getElementById('pickpanel');
   if(pnl && pnl.dataset.open==='true') PICK.close();
@@ -5755,24 +5854,113 @@ const THEME = {
 };
 THEME.init();
 
-/* Cookie consent: only Accept dismisses it, and only an actual
-   "accepted" value ever suppresses it on a future visit — anything
-   else (never decided, or the localStorage read fails) means it
-   shows again. There is deliberately no Decline: the requirement
-   here is that this stays up until accepted, on every visit, not
-   that it offers an equally-weighted way out of seeing it. */
-(function initCookieBar(){
-  const bar=document.getElementById('cookiebar');
-  if(!bar) return;
-  let accepted=false;
-  try{ accepted = localStorage.getItem('kreo-cookies')==='accepted'; }catch(e){}
-  if(!accepted) bar.dataset.open='true';
+/* Cookie consent, architected as a real granular system rather than
+   a single accept/reject flag:
 
-  const a=document.getElementById('cookieaccept');
-  if(a) a.addEventListener('click', ()=>{
-    try{ localStorage.setItem('kreo-cookies','accepted'); }catch(e){}
+   - Necessary is not offered as a choice at all — it's rendered as
+     an always-on, disabled toggle. Session and sign-in state can't
+     be optional without breaking the site's own security model, and
+     GDPR itself exempts strictly-necessary cookies from requiring
+     consent in the first place.
+   - Functional / Analytics / Marketing default to OFF. This is
+     opt-in, not opt-out — a pre-ticked box someone has to notice
+     and uncheck is not real consent under GDPR, it just looks like
+     one.
+   - Both "Accept all" and "Save preferences" count as a real,
+     deliberate decision and stop the banner reappearing — including
+     a Save where every optional category was left off. Only ignoring
+     the banner entirely does not count, which is why there is still
+     no Decline/dismiss button: that would be a low-friction way to
+     leave without actually deciding anything.
+   - Every stored decision carries a timestamp. A static prototype
+     has nowhere to send this server-side, but in a real system,
+     consent has to be demonstrable on request — GDPR Article 7 puts
+     that burden on the site, not the visitor, so "we don't know when
+     they agreed" is not a defensible position to be in later. */
+const COOKIE_DEFAULTS = {necessary:true, functional:false, analytics:false, marketing:false};
+
+function loadCookiePrefs(){
+  try{
+    const raw=localStorage.getItem('kreo-cookie-prefs');
+    if(!raw) return null;
+    const p=JSON.parse(raw);
+    return (p && typeof p==='object' && p.decidedAt) ? p : null;
+  }catch(e){ return null; }
+}
+function saveCookiePrefs(choice){
+  const full={...COOKIE_DEFAULTS, ...choice, necessary:true, decidedAt:new Date().toISOString()};
+  try{ localStorage.setItem('kreo-cookie-prefs', JSON.stringify(full)); }catch(e){}
+  return full;
+}
+
+(function initCookieConsent(){
+  const bar=document.getElementById('cookiebar');
+  const sheet=document.getElementById('cookieprefs');
+  if(!bar) return;
+
+  if(!loadCookiePrefs()) bar.dataset.open='true';
+
+  function decided(choice){
+    saveCookiePrefs(choice);
     bar.dataset.open='false';
+    if(sheet) sheet.dataset.open='false';
+    document.body.style.overflow='';
+  }
+
+  const acceptAll=document.getElementById('cookieacceptall');
+  if(acceptAll) acceptAll.addEventListener('click', ()=>
+    decided({functional:true, analytics:true, marketing:true}));
+
+  function openPrefsSheet(){
+    if(!sheet) return;
+    /* Re-opening (from the footer, after already deciding) should
+       show what is actually set right now, not reset every toggle
+       back to its default — that would misrepresent the visitor's
+       own stored choice back to them. */
+    const current = loadCookiePrefs() || COOKIE_DEFAULTS;
+    const f=document.getElementById('cookie-functional');
+    const a=document.getElementById('cookie-analytics');
+    const m=document.getElementById('cookie-marketing');
+    if(f) f.checked=!!current.functional;
+    if(a) a.checked=!!current.analytics;
+    if(m) m.checked=!!current.marketing;
+    sheet.dataset.open='true';
+    document.body.style.overflow='hidden';
+  }
+
+  const manage=document.getElementById('cookiemanage');
+  if(manage) manage.addEventListener('click', openPrefsSheet);
+
+  const footerLink=document.getElementById('cookiefooterlink');
+  if(footerLink) footerLink.addEventListener('click', openPrefsSheet);
+
+  /* Closing the preferences sheet without saving is not a decision
+     — it just hides the sheet and leaves the bar exactly as it was,
+     still waiting for Accept all or Save. */
+  const closeSheet=document.getElementById('cookieprefsclose');
+  if(closeSheet) closeSheet.addEventListener('click', ()=>{
+    if(sheet) sheet.dataset.open='false';
+    document.body.style.overflow='';
   });
+  if(sheet) sheet.addEventListener('click', (ev)=>{
+    if(ev.target===sheet){ sheet.dataset.open='false'; document.body.style.overflow=''; }
+  });
+
+  const save=document.getElementById('cookiesaveprefs');
+  if(save) save.addEventListener('click', ()=>{
+    const f=document.getElementById('cookie-functional');
+    const a=document.getElementById('cookie-analytics');
+    const m=document.getElementById('cookie-marketing');
+    decided({
+      functional: !!(f && f.checked),
+      analytics:  !!(a && a.checked),
+      marketing:  !!(m && m.checked)
+    });
+  });
+
+  const acceptAll2=document.getElementById('cookieacceptall2');
+  if(acceptAll2) acceptAll2.addEventListener('click', ()=>
+    decided({functional:true, analytics:true, marketing:true}));
 })();
 
 /* #termssheet is static (outside #app), never destroyed by route()
@@ -5783,6 +5971,14 @@ THEME.init();
   const chk=document.getElementById('terms-ok'), btn=document.getElementById('terms-submit');
   if(!chk || !btn) return;
   chk.addEventListener('change', ()=>{ btn.disabled = !chk.checked; });
+})();
+
+/* Same reasoning as initTermsGate — #manageReasonSheet is static,
+   bind once, never needs re-wiring after a route() re-render. */
+(function initManageReason(){
+  const box=document.getElementById('mreason-text'), btn=document.getElementById('mreason-submit');
+  if(!box || !btn) return;
+  box.addEventListener('input', ()=>{ btn.disabled = !box.value.trim(); });
 })();
 
 window.addEventListener('hashchange',route);
