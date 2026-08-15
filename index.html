@@ -3773,25 +3773,93 @@ views.eventAnalytics = (eid) => {
     '</div>'+
 
     '<div class="panel" style="margin-top:var(--s4)">'+
-      (boost
-        ? '<p class="h3" style="margin-bottom:6px">Boosted</p>'+
-          '<p class="meta">Goal: '+BOOST_GOALS.find(g=>g.id===boost.goal).label+
-          ' \u00b7 '+boost.days+' days from launch.</p>'+
-          '<button class="btn" data-v="outline" style="margin-top:var(--s3)" '+
-            'data-boostgo="'+e.id+'">Adjust boost</button>'
-        : '<p class="h3" style="margin-bottom:6px">Not boosted</p>'+
-          '<p class="meta" style="margin-bottom:var(--s3)">Give this listing a push if views or '+
-          'bookings are lower than you\u2019d like.</p>'+
-          '<button class="btn" data-v="primary" data-boostgo="'+e.id+'">Boost this event</button>')+
+      (boost ? boostedPanel(e, boost) : notBoostedPanel(e))+
     '</div>'+
     '<div style="height:var(--s7)"></div></div>';
 };
+
+/* Not boosted: show what a boost could plausibly do, not just ask
+   for the click. Numbers are a stated range grounded in the actual
+   boost mechanic (RANK.personal() adds a flat +30 for a boosted
+   event, roughly half the weight of "matches your interests"), not
+   invented. Bookings get a smaller range than views deliberately —
+   more people seeing a listing does not convert 1:1 into more
+   people booking it, and pretending otherwise would be exactly the
+   "guaranteed placement" framing the boost feature explicitly
+   avoids elsewhere. */
+function notBoostedPanel(e){
+  const viewsLo=Math.round((e.views||0)*1.3), viewsHi=Math.round((e.views||0)*1.5);
+  const bookLo=Math.round(e.booked_count*1.15), bookHi=Math.round(e.booked_count*1.3);
+  return '<p class="h3" style="margin-bottom:6px">Not boosted</p>'+
+    '<p class="meta" style="margin-bottom:var(--s4)">Give this listing a push if views or '+
+      'bookings are lower than you\u2019d like.</p>'+
+    '<p class="label" style="margin-bottom:var(--s2)">If you boosted this event</p>'+
+    '<div class="two">'+
+      '<div class="panel" style="padding:var(--s3);background:var(--brand-soft);border:0">'+
+        '<p class="meta">Views</p>'+
+        '<p style="margin:2px 0 0;font-weight:700">'+(e.views||0)+' <span class="meta" '+
+          'style="font-weight:400">now</span></p>'+
+        '<p style="margin:0;color:var(--brand-ink);font-weight:700">'+viewsLo+'\u2013'+viewsHi+
+          ' <span class="meta" style="font-weight:400;color:var(--brand-ink)">typical range</span></p>'+
+      '</div>'+
+      '<div class="panel" style="padding:var(--s3);background:var(--brand-soft);border:0">'+
+        '<p class="meta">Bookings</p>'+
+        '<p style="margin:2px 0 0;font-weight:700">'+e.booked_count+' <span class="meta" '+
+          'style="font-weight:400">now</span></p>'+
+        '<p style="margin:0;color:var(--brand-ink);font-weight:700">'+bookLo+'\u2013'+bookHi+
+          ' <span class="meta" style="font-weight:400;color:var(--brand-ink)">typical range</span></p>'+
+      '</div>'+
+    '</div>'+
+    '<p class="hint" style="margin-top:var(--s3)">Estimate based on typical results for boosted '+
+      'listings, not a guarantee \u2014 you are paying for more distribution, not a promised outcome.</p>'+
+    '<button class="btn" data-v="primary" style="margin-top:var(--s4)" '+
+      'data-boostgo="'+e.id+'">Boost this event</button>';
+}
+
+/* Boosted: reframe the SAME real numbers through whatever goal the
+   host actually picked, rather than repeat the generic stats block
+   a second time. Bookings-goal cares about fill rate; visibility
+   cares about views; followers-goal has no honest event-level
+   follower delta to show (nothing here tracks "gained from this
+   event"), so it shows the brand's real total instead of inventing
+   one that does not exist. */
+function boostedPanel(e, boost){
+  const brand=DB.brands.find(b=>b.id===e.brand_id);
+  const goal=BOOST_GOALS.find(g=>g.id===boost.goal);
+  const fillPct=Math.round(e.booked_count/e.capacity*100);
+
+  const goalBlock = boost.goal==='bookings'
+    ? '<p class="meta">Toward more bookings</p>'+
+      '<p style="margin:2px 0 0;font-weight:700;font-size:var(--t-lg)">'+fillPct+'% full</p>'+
+      '<p class="meta">'+e.booked_count+' of '+e.capacity+' seats \u2014 '+
+        (e.capacity-e.booked_count)+' left to sell</p>'
+    : boost.goal==='visibility'
+    ? '<p class="meta">Toward more visibility</p>'+
+      '<p style="margin:2px 0 0;font-weight:700;font-size:var(--t-lg)">'+(e.views||0)+' views</p>'+
+      '<p class="meta">Boosted events surface in more personalised \u201cFor you\u201d feeds.</p>'
+    : '<p class="meta">Toward more followers</p>'+
+      '<p style="margin:2px 0 0;font-weight:700;font-size:var(--t-lg)">'+
+        (brand?brand.followers:0)+' followers</p>'+
+      '<p class="meta">'+esc(brand?brand.name:'Your brand')+'\u2019s current total \u2014 this boost '+
+        'weights toward people who don\u2019t follow you yet.</p>';
+
+  return '<p class="h3" style="margin-bottom:6px">Boosted</p>'+
+    '<p class="meta" style="margin-bottom:var(--s4)">Goal: '+goal.label+' \u00b7 '+
+      boost.days+' days from launch.</p>'+
+    '<div class="panel" style="padding:var(--s3);background:var(--brand-soft);border:0">'+
+      goalBlock+
+    '</div>'+
+    '<button class="btn" data-v="outline" style="margin-top:var(--s4)" '+
+      'data-boostgo="'+e.id+'">Adjust boost</button>';
+}
 
 views.login = () => {
   return '<div class="wrap view" style="max-width:840px">'+
     '<div class="sec" style="padding-top:var(--s6);padding-bottom:var(--s5)">'+
       '<p class="eyebrow" style="text-align:center">Welcome to KREO</p>'+
       '<h1 class="d2" style="margin-top:2px;text-align:center">Sign in</h1>'+
+      '<p class="body" style="font-size:var(--t-sm);color:var(--grey);text-align:center;'+
+        'margin-top:var(--s2)">Please sign in or sign up to start your journey</p>'+
 
       '<div class="authcols" style="margin-top:var(--s5)">'+
 
