@@ -111,17 +111,24 @@ body{
   -webkit-font-smoothing:antialiased;
   padding-bottom:env(safe-area-inset-bottom);
 }
-/* Soft brand-colour wash behind the header, fading to nothing —
-   fixed to the viewport (not the page) so it's consistently there
-   at the top on every screen regardless of how long that page's
-   content is, the same way it sits behind the header on every
-   screen in the reference. Uses --brand-soft, which already has a
-   correct value for both themes, rather than a hardcoded colour
-   that would look wrong in dark mode. -1 keeps it behind literally
-   everything else without needing every other element to care. */
+/* Soft brand-colour wash behind the header — same structural effect
+   as the reference (an atmospheric glow behind the nav, not a flat
+   band), built from a radial glow layered over the existing linear
+   fade for depth, rather than a single straight top-to-bottom tint.
+   Still uses only --brand-soft, the same token as before — nothing
+   about our colours, text or nav options changes here, only how
+   the gradient itself is shaped. Fixed to the viewport (not the
+   page) so it's consistently there at the top on every screen
+   regardless of how long that page's content is. Uses --brand-soft,
+   which already has a correct value for both themes, rather than a
+   hardcoded colour that would look wrong in dark mode. -1 keeps it
+   behind literally everything else without needing every other
+   element to care. */
 body::before{
-  content:'';position:fixed;top:0;left:0;right:0;height:420px;
-  background:linear-gradient(to bottom, var(--brand-soft) 0%, transparent 100%);
+  content:'';position:fixed;top:0;left:0;right:0;height:480px;
+  background:
+    radial-gradient(ellipse 900px 480px at 18% -8%, var(--brand-soft) 0%, transparent 62%),
+    linear-gradient(to bottom, var(--brand-soft) 0%, transparent 100%);
   pointer-events:none;z-index:-1;
 }
 img{display:block;max-width:100%}
@@ -1038,7 +1045,9 @@ textarea.input{min-height:96px;resize:vertical}
 .foot__soc a:hover{border-color:var(--ink);color:var(--ink)}
 .foot__legal{max-width:940px;margin:var(--s5) auto 0;display:flex;gap:var(--s4);
   flex-wrap:wrap;padding-top:var(--s4);border-top:1px solid var(--line)}
-.foot__legal a,.foot__legal span{font-family:var(--f);font-size:var(--t-2xs);color:var(--grey-2)}
+.foot__legal a,.foot__legal span,.foot__legal button{font-family:var(--f);font-size:var(--t-2xs);
+  color:var(--grey-2);background:none;border:0;padding:0;cursor:pointer}
+.foot__legal button:hover{color:var(--ink)}
 .foot__legal a:hover{color:var(--ink)}
 
 .cookiebar{position:fixed;left:var(--s4);right:var(--s4);bottom:var(--s4);z-index:60;
@@ -1706,7 +1715,7 @@ textarea.input{min-height:96px;resize:vertical}
     <span>&copy; 2026 KREO &middot; Dubai, UAE</span>
     <a href="#/home">Terms</a><a href="#/home">Privacy</a>
     <a href="#/home">Refunds</a><a href="#/home">Security</a>
-    <button type="button" id="cookiefooterlink" style="all:inherit;cursor:pointer">Cookie preferences</button>
+    <button type="button" id="cookiefooterlink">Cookie preferences</button>
   </div>
 </footer>
 
