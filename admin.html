@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KREO Admin</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#FAF8F4">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
    Orange is a signal colour: graphics and large type only.
    ============================================================ */
 :root{
-  --ink:#0F0E0C; --ink-2:#2A2723; --paper:#FAF8F4; --surface:#FFF;
+  --ink:#0F0E0C; --ink-2:#2A2723; --paper:#FFFFFF; --surface:#FFF;
   --line:#E4DFD5; --grey:#6B665E; --grey-2:#8E8880;
   /* Signal lime. Luminance .78 — it is a FILL, never text on light.
      --on-brand is the label colour that sits on a lime fill;
@@ -33,8 +33,8 @@
   --close-end:#D9F58C; --close-sub:#3F5F45;
   --trail-c:#6E9314;
 
-  --f-display:'Heading Now','Archivo',system-ui,sans-serif;
-  --f:'TT Norms Pro','Manrope','Inter',system-ui,-apple-system,sans-serif;
+  --f-display:'Archivo',system-ui,sans-serif;
+  --f:'Archivo',system-ui,-apple-system,sans-serif;
   --m:'IBM Plex Mono',ui-monospace,monospace;
 
   --t-2xs:11px; --t-xs:12px; --t-sm:14px; --t-base:16px;
@@ -51,7 +51,7 @@
   --btn-sh-h:0 2px 4px rgba(15,14,12,.10),0 8px 18px -4px rgba(15,14,12,.22);
   --btn-sh-a:0 1px 1px rgba(15,14,12,.14);
   --btn-sh-soft:0 1px 2px rgba(15,14,12,.06);
-  --scrim:rgba(250,248,244,.88);   /* sticky bars */
+  --scrim:rgba(255,255,255,.88);   /* sticky bars */
   --scrim-2:rgba(255,255,255,.94);
   --on-media:#FAF8F4;              /* text over photos — never flips */
   --ok-bg:#F2FAF6;
@@ -116,7 +116,7 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* --- buttons -------------------------------------------------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
-  padding:11px var(--s4);border:1px solid transparent;border-radius:var(--r1);
+  padding:11px var(--s4);border:1px solid transparent;border-radius:var(--pill);
   font-size:var(--t-sm);font-weight:600;cursor:pointer;
   transition:transform .12s var(--ez),background-color .15s var(--ez),
              color .15s var(--ez),box-shadow .15s var(--ez)}
@@ -837,15 +837,18 @@ const Store = {
 const CMS = Object.assign(structuredClone(DEFAULT_CMS), Store.read(LS.cms,{}));
 const IMG='https://images.unsplash.com/';
 
-/* Typeface presets, identical to the public site. Heading Now
-   (Fontfabric) and TT Norms Pro (TypeType) are commercial: they are
-   named first in the stack so licensed files take over on drop-in,
-   and the free stand-ins render until then. */
 const FONTSETS = {
-  brand:   {label:'Heading Now + TT Norms', note:'Brand default \u2014 needs licence files',
-            display:"'Heading Now','Archivo',system-ui,sans-serif",
-            body:"'TT Norms Pro','Manrope','Inter',system-ui,sans-serif"},
-  archivo: {label:'Archivo + Manrope', note:'Closest free stand-in',
+  /* 'brand' is also the fallback key (see setFonts below) — it has
+     to resolve to genuinely-loaded, genuinely-free fonts, not a
+     licence that was never purchased. It used to name Heading Now
+     and TT Norms Pro, which never actually loaded; every page load
+     was silently overwriting the site's real default with the same
+     placeholder names via this fallback, which is the reason this
+     needed fixing here, not just in the base tokens. */
+  brand:   {label:'Archivo (default)', note:'Free, loaded on every page',
+            display:"'Archivo',system-ui,sans-serif",
+            body:"'Archivo',system-ui,sans-serif"},
+  archivo: {label:'Archivo + Manrope', note:'A softer body face alongside the same display',
             display:"'Archivo',system-ui,sans-serif",
             body:"'Manrope','Inter',system-ui,sans-serif"},
   inter:   {label:'Archivo + Inter', note:'Tighter, more neutral',
@@ -865,7 +868,8 @@ function setFonts(key){
 }
 
 const HUBS=[['downtown','Downtown'],['silicon','Silicon Oasis'],['alquoz','Al Quoz'],
-  ['barsha','Barsha'],['alnahda','Al Nahda'],['ranches','Arabian Ranches']];
+  ['barsha','Barsha'],['alnahda','Al Nahda'],['ranches','Arabian Ranches'],
+  ['difc','DIFC'],['d3','Dubai Design District']];
 const CATS=['Workshops','Art','Cooking','Tech','Fitness','Business','Music','Kids & family'];
 
 const HOSTS=[
@@ -2239,9 +2243,9 @@ V.appearance=()=>{
       '<span class="btn" data-v="primary" style="pointer-events:none">Discover More</span>'+
     '</div>',
     {sub:'Live preview',
-     foot:'<span class="meta">Heading Now and TT Norms Pro are commercial faces. '+
-          'They are first in the stack, so once you buy a web licence and drop the '+
-          '.woff2 files into /fonts they replace the stand-ins with no code change.</span>'});
+     foot:'<span class="meta">Archivo is free (SIL Open Font Licence, via Google Fonts) and used '+
+          'as the default everywhere. The other options are also free \u2014 this picker is about '+
+          'pairing, not licensing.</span>'});
   return fontCard + card('Brand colour',
       '<div class="swatch">'+
         '<input type="color" id="cm-color" value="'+CMS.brandColor+'">'+
@@ -2951,7 +2955,7 @@ const THEME={
     if(b){ b.innerHTML = v==='dark'?'&#9788;':'&#9789;';
       b.setAttribute('aria-pressed',String(v==='dark')); }
     const m=document.querySelector('meta[name=theme-color]');
-    if(m) m.setAttribute('content', v==='dark'?'#0D0C0B':'#FAF8F4');
+    if(m) m.setAttribute('content', v==='dark'?'#0D0C0B':'#FFFFFF');
   },
   init(){
     this.apply(this.read() || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));

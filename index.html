@@ -377,6 +377,20 @@ textarea.input{min-height:96px;resize:vertical}
 .toggle input:checked+.track::after{transform:translateX(18px)}
 .toggle input:focus-visible+.track{outline:2px solid var(--brand-ink);outline-offset:2px}
 
+/* Real checkbox — a tick in a box, not a sliding switch. The
+   toggle above is for on/off settings; terms agreement is something
+   you literally "check", so it needs to look like one, not like a
+   settings switch reused for the wrong job. */
+.chk{display:flex;align-items:flex-start;gap:var(--s2);cursor:pointer}
+.chk input{position:absolute;opacity:0;width:0;height:0}
+.chk__box{width:18px;height:18px;border:1.5px solid var(--line);border-radius:4px;
+  flex:none;margin-top:1px;position:relative;transition:background-color .15s var(--ez),border-color .15s var(--ez)}
+.chk__box::after{content:'';position:absolute;left:5px;top:1px;width:5px;height:9px;
+  border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);opacity:0;transition:opacity .1s var(--ez)}
+.chk input:checked+.chk__box{background:var(--brand-edge);border-color:var(--brand-edge)}
+.chk input:checked+.chk__box::after{opacity:1}
+.chk input:focus-visible+.chk__box{outline:2px solid var(--brand-ink);outline-offset:2px}
+
 .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:var(--r1)}
 .stepper button{width:46px;height:46px;font-size:19px;cursor:pointer}
 .stepper button:hover{background:var(--brand-soft)}
@@ -1026,6 +1040,14 @@ textarea.input{min-height:96px;resize:vertical}
   flex-wrap:wrap;padding-top:var(--s4);border-top:1px solid var(--line)}
 .foot__legal a,.foot__legal span{font-family:var(--f);font-size:var(--t-2xs);color:var(--grey-2)}
 .foot__legal a:hover{color:var(--ink)}
+
+.cookiebar{position:fixed;left:var(--s4);right:var(--s4);bottom:var(--s4);z-index:60;
+  max-width:640px;margin:0 auto;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r2);box-shadow:var(--sh);padding:var(--s4);
+  display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap;
+  transform:translateY(120%);transition:transform .25s var(--ez);opacity:0;pointer-events:none}
+.cookiebar[data-open=true]{transform:translateY(0);opacity:1;pointer-events:auto}
+@media(max-width:520px){.cookiebar{flex-direction:column;align-items:stretch}}
 @media(max-width:720px){
   .foot__in{flex-direction:column;align-items:center;text-align:center}
   .foot__nav{justify-content:center}
@@ -1663,6 +1685,39 @@ textarea.input{min-height:96px;resize:vertical}
 
 <main id="app" aria-live="polite"></main>
 
+<footer class="foot">
+  <div class="foot__in">
+    <a class="foot__b" href="#/home">KREO</a>
+    <nav class="foot__nav">
+      <a href="#/discover">Discover</a>
+      <a href="#/search">Search</a>
+      <a href="#/pricing">Pricing</a>
+      <a href="#/faq">FAQ</a>
+      <a href="#/gate">Host</a>
+      <a href="#/login">Sign in</a>
+    </nav>
+    <div class="foot__soc">
+      <a href="#/home" aria-label="Instagram">IG</a>
+      <a href="#/home" aria-label="X">X</a>
+      <a href="#/home" aria-label="Email">@</a>
+    </div>
+  </div>
+  <div class="foot__legal">
+    <span>&copy; 2026 KREO &middot; Dubai, UAE</span>
+    <a href="#/home">Terms</a><a href="#/home">Privacy</a>
+    <a href="#/home">Refunds</a><a href="#/home">Security</a>
+  </div>
+</footer>
+
+<div id="cookiebar" class="cookiebar" data-open="false">
+  <p class="body" style="margin:0;font-size:var(--t-sm)">We use cookies to keep you signed in
+    and remember your preferences. See our <a href="#/terms" style="text-decoration:underline">Terms</a>.</p>
+  <div class="btn-row" style="flex:none">
+    <button class="btn" data-v="quiet" id="cookiedecline">Decline</button>
+    <button class="btn" data-v="primary" id="cookieaccept">Accept</button>
+  </div>
+</div>
+
 
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t">
   <div class="sheet__c">
@@ -1681,6 +1736,35 @@ textarea.input{min-height:96px;resize:vertical}
       <input id="sheet-url" readonly value="https://kreo.ae/e/">
       <button class="btn" data-v="outline" data-share="copy">Copy</button>
     </div>
+  </div>
+</div>
+
+<div class="sheet" id="termssheet" role="dialog" aria-modal="true" aria-labelledby="terms-t">
+  <div class="sheet__c" style="max-height:86vh;overflow-y:auto">
+    <div class="modal__head" style="display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s2)">
+      <h2 class="h3" id="terms-t" style="flex:1">Before you submit</h2>
+      <button class="btn" data-v="quiet" data-termsclose aria-label="Close">&times;</button>
+    </div>
+    <div class="panel" style="max-height:220px;overflow-y:auto;margin-bottom:var(--s4)">
+      <p class="body">Your access to and use of the Service is conditioned on your acceptance
+        of and compliance with these Terms. These Terms apply to all visitors, users and
+        others who access or use the Service.</p>
+      <p class="body" style="margin-top:var(--s3)">By accessing or using the Service, you
+        agree to be bound by these Terms. If you disagree with any part of the Terms, you
+        may not access the Service.</p>
+      <p class="body" style="margin-top:var(--s3)">Applicable platform and additional fees
+        are non-refundable from KREO. If you choose to give a refund beyond your stated
+        cancellation policy, you cover the remaining platform and card-processing fees on
+        that booking &mdash; the platform is not liable for the difference.</p>
+    </div>
+    <label class="chk" style="margin-bottom:var(--s4)">
+      <input type="checkbox" id="terms-ok"><span class="chk__box"></span>
+      <span style="flex:1;font-size:var(--t-sm)">I have read and agree to the
+        <a href="#/terms" style="text-decoration:underline;color:var(--brand-ink)">Terms of use</a>
+        for this listing.</span>
+    </label>
+    <button class="btn" data-v="primary" data-size="lg" style="width:100%"
+      id="terms-submit" data-termsconfirm disabled>Agree &amp; submit</button>
   </div>
 </div>
 
@@ -1788,7 +1872,9 @@ const DB = {
     {slug:'alquoz',    label:'Al Quoz',         lat:25.1421, lng:55.2274},
     {slug:'barsha',    label:'Barsha',          lat:25.1107, lng:55.2007},
     {slug:'alnahda',   label:'Al Nahda',        lat:25.2897, lng:55.3653},
-    {slug:'ranches',   label:'Arabian Ranches', lat:25.0518, lng:55.2699}
+    {slug:'ranches',   label:'Arabian Ranches', lat:25.0518, lng:55.2699},
+    {slug:'difc',      label:'DIFC',            lat:25.2138, lng:55.2822},
+    {slug:'d3',        label:'Dubai Design District', lat:25.1868, lng:55.3151}
   ],
 
 
@@ -2502,8 +2588,6 @@ views.home = () => {
         '</div>'+
       '</div>'+
     '</section>'+
-
-    footer()+
   '</div>';
 };
 
@@ -2584,33 +2668,6 @@ function majorSection(){
         '<span class="major__b"><b>'+esc(m.title)+'</b>'+
         '<span>'+fmt(m.from)+' \u2013 '+fmt(m.to)+' \u00b7 '+esc(m.city)+'</span></span>'+
       '</a>').join('')+'</div></div>';
-}
-
-/* Footer lives on the landing page only — inside the app the tab
-   bar already carries navigation. */
-function footer(){
-  return '<footer class="foot">'+
-    '<div class="foot__in">'+
-      '<a class="foot__b" href="#/home">KREO</a>'+
-      '<nav class="foot__nav">'+
-        '<a href="#/discover">Discover</a>'+
-        '<a href="#/search">Search</a>'+
-        '<a href="#/pricing">Pricing</a>'+
-        '<a href="#/faq">FAQ</a>'+
-        '<a href="#/gate">Host</a>'+
-        '<a href="#/login">Sign in</a>'+
-      '</nav>'+
-      '<div class="foot__soc">'+
-        '<a href="#/home" aria-label="Instagram">IG</a>'+
-        '<a href="#/home" aria-label="X">X</a>'+
-        '<a href="#/home" aria-label="Email">@</a>'+
-      '</div>'+
-    '</div>'+
-    '<div class="foot__legal">'+
-      '<span>&copy; 2026 KREO &middot; Dubai, UAE</span>'+
-      '<a href="#/home">Terms</a><a href="#/home">Privacy</a>'+
-      '<a href="#/home">Refunds</a><a href="#/home">Security</a>'+
-    '</div></footer>';
 }
 
 /* A rail is only worth its vertical space if it says why it
@@ -3318,9 +3375,7 @@ views.create = () => {
     '<div class="sec__h" style="margin-bottom:var(--s3)">'+
       '<div><p class="eyebrow">Host</p>'+
       '<h1 class="h2" style="margin-top:2px">Create event</h1></div>'+
-      '<button class="btn" data-v="primary" '+
-        'data-toast="Submitted \u2014 moderation usually takes under 24 hrs" '+
-        'data-boost="e1">Submit for review</button>'+
+      '<button class="btn" data-v="primary" data-termsgate>Submit for review</button>'+
     '</div>'+
 
     /* Set the expectation before they publish, not after — this is
@@ -3344,14 +3399,11 @@ views.create = () => {
           '<div class="field" style="margin-top:var(--s3)">'+
             '<label class="label" for="c-d">Description</label>'+
             '<textarea class="input" id="c-d" placeholder="What happens, what to bring, who it\u2019s for."></textarea></div>'+
-          '<div class="two" style="margin-top:var(--s3)">'+
-            '<div class="field"><label class="label" for="c-v">Venue</label>'+
-              '<input class="input" id="c-v" placeholder="Warehouse 12"></div>'+
-            '<div class="field"><label class="label" for="c-hub">Area</label>'+
-              '<select class="input" id="c-hub">'+
-                DB.hubs.filter(h=>h.slug!=='all')
-                  .map(h=>'<option>'+esc(h.label)+'</option>').join('')+
-              '</select></div>'+
+          '<div class="field" style="margin-top:var(--s3)">'+
+            '<label class="label" for="c-loc">Location</label>'+
+            '<input class="input" id="c-loc" placeholder="Warehouse 12, Al Quoz \u2014 or a building name">'+
+            '<span class="hint" id="hub-detect">Type an address or building \u2014 we\u2019ll match it to '+
+              'the nearest hub.</span>'+
           '</div>'+
           '<div class="two" style="margin-top:var(--s3)">'+
             '<div class="field"><label class="label" for="c-c">Category</label>'+
@@ -3402,7 +3454,9 @@ views.create = () => {
               '<option>Flexible \u2014 full refund up to 24 hrs before</option>'+
               '<option>Moderate \u2014 full refund up to 5 days before</option>'+
               '<option>Strict \u2014 50% refund up to 7 days before</option>'+
-            '</select></div>'+
+            '</select>'+
+            '<span class="hint">Applicable platform and additional fees are non-refundable from Kreo.</span>'+
+          '</div>'+
           '<label class="toggle"><input type="checkbox" checked><span class="track"></span>'+
             '<span class="h3">Waitlist when full</span></label>'+
           '<label class="toggle"><input type="checkbox"><span class="track"></span>'+
@@ -4134,9 +4188,20 @@ views.signup = () => {
           '<div class="field"><label class="label" for="s-p2">Confirm</label>'+
             '<input class="input" id="s-p2" type="password" autocomplete="new-password"></div>'+
         '</div>'+
-        '<label class="toggle" style="border-bottom:0;padding:0;margin:2px 0 0">'+
-          '<input type="checkbox" checked><span class="track"></span>'+
-          '<span style="flex:1;font-size:var(--t-sm)">I agree to the Terms and Privacy Policy</span></label>'+
+        '<div class="field" style="margin-bottom:var(--s3)">'+
+          '<label class="label">Two-factor authentication</label>'+
+          '<div class="btn-row">'+
+            '<button type="button" class="btn" data-v="primary" style="flex:1" '+
+              'data-mfa="phone" aria-pressed="true">Phone</button>'+
+            '<button type="button" class="btn" data-v="outline" style="flex:1" '+
+              'data-mfa="app" aria-pressed="false">Authenticator app</button>'+
+          '</div>'+
+        '</div>'+
+        '<label class="chk" style="margin:2px 0 0">'+
+          '<input type="checkbox" checked><span class="chk__box"></span>'+
+          '<span style="flex:1;font-size:var(--t-sm)">I agree to the '+
+            '<a href="#/terms" style="text-decoration:underline;color:var(--brand-ink)">Terms of use</a>'+
+            ' and Privacy Policy</span></label>'+
         '<button class="btn" data-v="primary" data-size="lg" style="width:100%;margin-top:var(--s4)" '+
           'data-login="attendee">Create account</button>'+
       '</div>'+
@@ -4176,9 +4241,20 @@ views.hostsignup = () => {
           '<div class="field"><label class="label" for="h-lic">Trade licence no.</label>'+
             '<input class="input" id="h-lic" placeholder="DED-XXXXXX"></div>'+
         '</div>'+
-        '<label class="toggle" style="border-bottom:0;padding:0;margin:2px 0 0">'+
-          '<input type="checkbox" checked><span class="track"></span>'+
-          '<span style="flex:1;font-size:var(--t-sm)">I agree to the Terms and Host Agreement</span></label>'+
+        '<div class="field" style="margin-bottom:var(--s3)">'+
+          '<label class="label">Two-factor authentication</label>'+
+          '<div class="btn-row">'+
+            '<button type="button" class="btn" data-v="primary" style="flex:1" '+
+              'data-mfa="phone" aria-pressed="true">Phone</button>'+
+            '<button type="button" class="btn" data-v="outline" style="flex:1" '+
+              'data-mfa="app" aria-pressed="false">Authenticator app</button>'+
+          '</div>'+
+        '</div>'+
+        '<label class="chk" style="margin:2px 0 0">'+
+          '<input type="checkbox" checked><span class="chk__box"></span>'+
+          '<span style="flex:1;font-size:var(--t-sm)">I agree to the '+
+            '<a href="#/terms" style="text-decoration:underline;color:var(--brand-ink)">Terms of use</a>'+
+            ' and Host Agreement</span></label>'+
         '<button class="btn" data-v="primary" data-size="lg" style="width:100%;margin-top:var(--s4)" '+
           'data-hostapply>Submit application</button>'+
         /* Not data-login=host: an application is not the same thing
@@ -4433,6 +4509,37 @@ views.faq = () => {
     '<div style="height:var(--s7)"></div></div></div>';
 };
 
+views.terms = () => {
+  return '<div class="wrap view" style="max-width:640px"><div class="sec">'+
+    '<button class="back" data-back>&larr; Back</button>'+
+    '<p class="eyebrow">Legal</p>'+
+    '<h1 class="d2" style="margin-top:2px">Terms of use</h1>'+
+
+    '<div class="panel" style="margin-top:var(--s5)">'+
+      '<p class="body">Your access to and use of the Service is conditioned on your '+
+        'acceptance of and compliance with these Terms. These Terms apply to all visitors, '+
+        'users and others who access or use the Service.</p>'+
+      '<p class="body" style="margin-top:var(--s3)">By accessing or using the Service, you '+
+        'agree to be bound by these Terms. If you disagree with any part of the Terms, you '+
+        'may not access the Service.</p>'+
+    '</div>'+
+
+    '<div class="sec" style="padding-top:0">'+
+      '<div class="sec__h"><h2 class="h2">Refunds and fees</h2></div>'+
+      '<div class="panel">'+
+        '<p class="body">Applicable platform and additional fees are non-refundable from '+
+          'KREO.</p>'+
+        '<p class="body" style="margin-top:var(--s3)">If a host chooses to give a full refund '+
+          'beyond what their stated cancellation policy requires, the host \u2014 not KREO \u2014 '+
+          'covers the remaining platform and card-processing fees on that booking. The '+
+          'platform is not liable for the difference.</p>'+
+        '<p class="body" style="margin-top:var(--s3)">KREO\u2019s commission is up to 10% '+
+          '<span class="meta">(subject to change)</span>.</p>'+
+      '</div>'+
+    '</div>'+
+    '<div style="height:var(--s7)"></div></div></div>';
+};
+
 views.pricing = () => {
   return '<div class="wrap view"><div class="sec">'+
     '<h1 class="d2">Pricing</h1>'+
@@ -4507,6 +4614,7 @@ function route(){
   if(shown==='book') recalc();
   if(shown==='search') wireSearch();
   if(shown==='profile') wireProfile();
+  if(shown==='create') wireCreate();
   if(shown==='map') setTimeout(initMap,0);
   if(shown==='event') setTimeout(initEventMap,0);
 }
@@ -4632,6 +4740,49 @@ function paintRange(){
    open — the null-check on the element covers every other case,
    same convention as wireSearch() checking each field exists
    before binding. */
+/* Simulated hub detection: keyword-matching a typed address against
+   hub names and a handful of known landmarks, not real geocoding.
+   Real location-to-hub detection needs an actual geocoding service
+   (Google Places, Mapbox) with an API key and a backend to call it
+   from — neither exists in this static prototype. This is a
+   convincing demo of the INTERACTION, not the real capability;
+   said plainly rather than pretending a keyword match is geocoding. */
+const HUB_LANDMARKS = {
+  difc:['difc','gate building','financial centre','financial center'],
+  d3:['d3','design district','dubai design district'],
+  downtown:['downtown','burj khalifa','dubai mall','boulevard'],
+  silicon:['silicon oasis','dsoa'],
+  alquoz:['al quoz','alquoz','warehouse'],
+  barsha:['barsha','mall of the emirates','moe'],
+  alnahda:['al nahda','alnahda'],
+  ranches:['arabian ranches','ranches']
+};
+function detectHub(text){
+  const t=text.toLowerCase();
+  for(const h of DB.hubs){
+    if(h.slug==='all') continue;
+    if(t.includes(h.label.toLowerCase())) return h;
+  }
+  for(const [slug,words] of Object.entries(HUB_LANDMARKS)){
+    if(words.some(w=>t.includes(w))) return DB.hubs.find(h=>h.slug===slug);
+  }
+  return null;
+}
+function wireCreate(){
+  const loc=document.getElementById('c-loc'), out=document.getElementById('hub-detect');
+  if(!loc || !out) return;
+  loc.addEventListener('input', ()=>{
+    if(!loc.value.trim()){
+      out.textContent='Type an address or building \u2014 we\u2019ll match it to the nearest hub.';
+      return;
+    }
+    const hub=detectHub(loc.value);
+    out.textContent = hub
+      ? 'Nearest hub: '+hub.label+' (estimated from what you typed, not GPS)'
+      : 'No hub match yet \u2014 try adding an area or landmark name.';
+  });
+}
+
 function wireProfile(){
   const inp=document.getElementById('del-confirm');
   const btn=document.getElementById('delete-confirm-btn');
@@ -4872,6 +5023,15 @@ document.addEventListener('click',ev=>{
   if(sl){ CART.sess=+sl.dataset.sess; CART.qty=1; route(); return; }
   const tr=ev.target.closest('[data-tier]');
   if(tr){ CART.tier=+tr.dataset.tier; route(); return; }
+  const mf=ev.target.closest('[data-mfa]');
+  if(mf){
+    document.querySelectorAll('[data-mfa]').forEach(x=>{
+      const on=x===mf;
+      x.setAttribute('aria-pressed',String(on));
+      x.dataset.v = on ? 'primary' : 'outline';
+    });
+    return;
+  }
   const pm=ev.target.closest('[data-pay]');
   if(pm){
     CART.pay=pm.dataset.pay;
@@ -4998,20 +5158,30 @@ document.addEventListener('click',ev=>{
   const sb=ev.target.closest('[data-share]');
   if(sb){ SHEET.send(sb.dataset.share); return; }
 
-  /* boost sheet — two entry points, deliberately different:
-     data-boost opens on the intro ("want more people to discover
-     this?") screen, used right after Submit; data-boostgo skips
-     straight to the goal/budget picker, used by the dashboard's
-     per-event Boost button where re-selling the idea is just
-     friction. The Submit button also carries data-toast, and this
-     branch's early return would otherwise skip that handler
-     entirely, silently dropping the "Submitted" confirmation the
-     moment the boost prompt was added. */
-  const bo=ev.target.closest('[data-boost]');
-  if(bo){
-    ev.preventDefault();
-    if(bo.dataset.toast) toast(bo.dataset.toast);
-    BOOST.open(bo.dataset.boost, {skipIntro:false});
+  /* Submit now opens the terms sheet first (data-termsgate); the
+     actual toast + boost-open sequence that used to fire directly
+     off the Submit button now only fires from data-termsconfirm,
+     once the checkbox is actually checked. */
+  const tg=ev.target.closest('[data-termsgate]');
+  if(tg){
+    document.getElementById('terms-ok').checked=false;
+    document.getElementById('terms-submit').disabled=true;
+    document.getElementById('termssheet').dataset.open='true';
+    document.body.style.overflow='hidden';
+    return;
+  }
+  const tc=ev.target.closest('[data-termsclose]');
+  if(tc || ev.target.id==='termssheet'){
+    document.getElementById('termssheet').dataset.open='false';
+    document.body.style.overflow='';
+    return;
+  }
+  const tf=ev.target.closest('[data-termsconfirm]');
+  if(tf && !tf.disabled){
+    document.getElementById('termssheet').dataset.open='false';
+    document.body.style.overflow='';
+    toast('Submitted \u2014 moderation usually takes under 24 hrs');
+    BOOST.open('e1', {skipIntro:false});
     return;
   }
   const bg2=ev.target.closest('[data-boostgo]');
@@ -5289,6 +5459,10 @@ document.addEventListener('keydown',e=>{
   if(sh && sh.dataset.open==='true'){ SHEET.close(); return; }
   const bs=document.getElementById('boostsheet');
   if(bs && bs.dataset.open==='true'){ BOOST.close(); return; }
+  const ts=document.getElementById('termssheet');
+  if(ts && ts.dataset.open==='true'){
+    ts.dataset.open='false'; document.body.style.overflow=''; return;
+  }
   const pnl=document.getElementById('pickpanel');
   if(pnl && pnl.dataset.open==='true') PICK.close();
 });
@@ -5581,6 +5755,36 @@ const THEME = {
   }
 };
 THEME.init();
+
+/* Cookie consent: shown once, remembered via localStorage same as
+   the theme choice. Decline still dismisses it — declining cookie
+   tracking is a real, valid choice, not something the UI should
+   make impossible to select. Neither button blocks using the site. */
+(function initCookieBar(){
+  const bar=document.getElementById('cookiebar');
+  if(!bar) return;
+  let choice=null;
+  try{ choice=localStorage.getItem('kreo-cookies'); }catch(e){}
+  if(!choice) setTimeout(()=>{ bar.dataset.open='true'; }, 600);
+
+  function decide(v){
+    try{ localStorage.setItem('kreo-cookies', v); }catch(e){}
+    bar.dataset.open='false';
+  }
+  const a=document.getElementById('cookieaccept'), d=document.getElementById('cookiedecline');
+  if(a) a.addEventListener('click', ()=>decide('accepted'));
+  if(d) d.addEventListener('click', ()=>decide('declined'));
+})();
+
+/* #termssheet is static (outside #app), never destroyed by route()
+   re-renders, so this only needs binding once — unlike the delete
+   -confirm input on the profile page, which lives inside a view
+   and needs re-wiring after every render. */
+(function initTermsGate(){
+  const chk=document.getElementById('terms-ok'), btn=document.getElementById('terms-submit');
+  if(!chk || !btn) return;
+  chk.addEventListener('change', ()=>{ btn.disabled = !chk.checked; });
+})();
 
 window.addEventListener('hashchange',route);
 route();
